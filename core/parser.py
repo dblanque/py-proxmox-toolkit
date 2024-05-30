@@ -3,7 +3,7 @@ if __name__ == "__main__":
 	raise Exception("This module cannot be executed as a script")
 
 # Source for ColoredArgParser: https://stackoverflow.com/questions/47155189/how-to-output-color-using-argparse-in-python-if-any-errors-happen
-from py_pve_toolkit.format.colors import bcolors
+from core.format.colors import bcolors
 import argparse
 import sys
 from gettext import gettext

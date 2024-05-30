@@ -39,7 +39,7 @@ import logging, sys, os, argparse, socket, signal, subprocess, re
 from pve_guest import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
 from pve_storage import get_storage_cfg
 from pve_constants import DISK_TYPES, PVE_CFG_REPLICATION
-from py_pve_toolkit.classes.ColoredFormatter import set_logger
+from core.classes.ColoredFormatter import set_logger
 
 # SCRIPT
 logger = logging.getLogger()

@@ -9,5 +9,5 @@ lib64
 **/pyvenv.cfg
 **/__pycache__
 **/.log
-py_pve_toolkit/proxmox/vmid_change.py.log
-py_pve_toolkit/local_config.py
+core/proxmox/vmid_change.py.log
+core/local_config.py

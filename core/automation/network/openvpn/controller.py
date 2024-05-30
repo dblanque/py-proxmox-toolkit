@@ -1,8 +1,8 @@
 if __name__ == "__main__":
 	raise Exception("This module cannot be executed as a script")
 
-from py_pve_toolkit.classes.AttrDict import NamedDict
-from py_pve_toolkit.format.colors import print_c, bcolors
+from core.classes.AttrDict import NamedDict
+from core.format.colors import print_c, bcolors
 import subprocess
 
 class VPNController():

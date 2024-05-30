@@ -12,9 +12,9 @@ sys.path.append(VENV_DIR)
 
 # Imports
 import subprocess
-from py_pve_toolkit.parser import ColoredArgParser
-from py_pve_toolkit.format.colors import print_c, bcolors
-from py_pve_toolkit.network.ping import ping
+from core.parser import ColoredArgParser
+from core.format.colors import print_c, bcolors
+from core.network.ping import ping
 from controller import VPNController
 from time import sleep
 

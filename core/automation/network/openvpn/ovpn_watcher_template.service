@@ -13,7 +13,7 @@ Environment="VIRTUAL_ENV=/opt/py-pve-toolkit"
 Environment="PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 Environment=IP=""
 Environment=CONNAME=""
-ExecStart=/opt/py-pve-toolkit/bin/python3 ${VIRTUAL_ENV}/py_pve_toolkit/automation/network/openvpn/watcher.py -g ${IP} -c "${CONNAME}" -n -s "/opt/watcher_post.sh"
+ExecStart=/opt/py-pve-toolkit/bin/python3 ${VIRTUAL_ENV}/core/automation/network/openvpn/watcher.py -g ${IP} -c "${CONNAME}" -n -s "/opt/watcher_post.sh"
 
 [Install]
 WantedBy=multi-user.target

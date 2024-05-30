@@ -10,7 +10,7 @@ if not VENV_DIR:
 	raise Exception('Could not append VENV_DIR to PATH')
 sys.path.append(VENV_DIR)
 
-from py_pve_toolkit.format.colors import bcolors, print_c
+from core.format.colors import bcolors, print_c
 
 def main():
 	command = ['dpkg', '-l', 'ntp']

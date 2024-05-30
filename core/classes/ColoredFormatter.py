@@ -1,5 +1,5 @@
 import logging, sys, os
-from py_pve_toolkit.format.colors import bcolors
+from core.format.colors import bcolors
 
 DEFAULT_LOG_FILE_LN_LIMIT=1000
 LOG_FMT_THREAD = "%(asctime)s %(threadName)18s %(levelname)12s | %(message)s"
