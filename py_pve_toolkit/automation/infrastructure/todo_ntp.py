@@ -1,7 +1,8 @@
 #!/usr/env/python3
 # TODO - Finish this script
+# Installs and configures Chrony
 import subprocess, os, sys
-prog_name = "Python NTP Installer"
+prog_name = "Python Chrony NTP Installer"
 
 VENV_DIR = os.path.abspath(os.environ['VIRTUAL_ENV']) or None
 if not VENV_DIR:
@@ -18,7 +19,7 @@ def main():
 	if not ntp_installed:
 		command = ['sudo','apt', 'update']
 		subprocess.check_call(command, stdout=open(os.devnull, 'wb'), stderr=subprocess.STDOUT)
-		command = ['sudo','apt', 'install', 'ntp', '-y']
+		command = ['sudo','apt', 'install', 'chrony', '-y']
 		ntp_install_result = subprocess.call(command) == 0
 
 	ntp_servers = []
