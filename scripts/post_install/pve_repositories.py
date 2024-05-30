@@ -1,4 +1,4 @@
-#!/usr/env/python3
+#!/usr/bin/env python3
 if __name__ != "__main__":
 	raise ImportError("This python script cannot be imported.")
 
@@ -10,6 +10,11 @@ if not VENV_DIR:
 	raise Exception('Could not append VENV_DIR to PATH')
 sys.path.append(VENV_DIR)
 sys.path.append(SCRIPT_DIR)
+
+def sigint_handler(sig, frame):
+	print('\nCtrl+C Received, cancelling script.')
+	sys.exit(0)
+signal.signal(signal.SIGINT, sigint_handler)
 
 MIN_VERSION = "8.0.0"
 from core.debian import os_release
@@ -24,11 +29,6 @@ SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"
 SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
-
-def sigint_handler(sig, frame):
-	print('\nCtrl+C Received, cancelling script.')
-	sys.exit(0)
-signal.signal(signal.SIGINT, sigint_handler)
 
 def main():
 	# Check if proxmox version valid (>8.0)

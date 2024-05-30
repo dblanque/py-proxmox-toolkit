@@ -1,4 +1,4 @@
-#!/usr/env/python3
+#!/usr/bin/env python3
 # TODO - Finish this script
 # Installs and configures Chrony
 import subprocess, os, sys

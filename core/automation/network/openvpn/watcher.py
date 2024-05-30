@@ -1,4 +1,4 @@
-#!/usr/env/python3
+#!/usr/bin/env python3
 if __name__ != "__main__":
 	raise ImportError("This python script cannot be imported.")
 
