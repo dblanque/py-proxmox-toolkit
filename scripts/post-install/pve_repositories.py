@@ -63,10 +63,20 @@ def main():
 		input_default=True
 	)
 	# Disabling HA (Default NO)
-	disable_ha = yes_no_input(
+	if yes_no_input(
 		msg="Do you wish to disable High-Availability Services?",
 		input_default=False
-	)
+	): 
+		cmds = [
+			"systemctl disable --now pve-ha-lrm",
+			"systemctl disable --now pve-ha-crm",
+			"systemctl disable --now corosync",
+		]
+		print("Running commands:")
+		for c in cmds:
+			print(c)
+			try: subprocess.call(c.split())
+			except: raise
 	######################################################################################
 
 	# Debian SRCs
