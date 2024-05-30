@@ -22,7 +22,6 @@ from sources.pve import (
 	SRC_PVE_NO_SUBSCRIPTION
 )
 from sources.debian import SRC_DEB_BOOKWORM_SYNTAX
-from packaging.version import Version
 import os
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
@@ -36,7 +35,12 @@ def main():
 	if release_info["id"] != "debian": raise UnsupportedRelease()
 	debian_distribution = release_info["version_codename"]
 	if not pve_version_exists: raise DependencyMissing()
-	if Version(get_pve_version()) < Version(MIN_VERSION): raise UnsupportedRelease()
+	pve_version = get_pve_version().split(".")
+	min_pve_version = MIN_VERSION.split(".")
+	if (
+		int(pve_version[0]) < int(min_pve_version[0]) or
+		int(pve_version[1]) < int(min_pve_version[1])
+	): raise UnsupportedRelease()
 
 	###################################### CHOICES #######################################
 	# Setting debian sources
