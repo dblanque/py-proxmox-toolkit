@@ -11,7 +11,7 @@ def yes_no_input(
 	):
 	choices_str = '|'.join(input_choices)
 	choices_str = f"({choices_str})"
-	if input_default:
+	if input_default != None:
 		default_str = f" [{input_choices['yes'][0].upper()}]"
 	else: default_str = ""
 	while True:
