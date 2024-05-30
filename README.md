@@ -1,4 +1,4 @@
-# Proxmox VE Python Toolkit
+# Proxmox Python Toolkit
 
 ## Installation
 
