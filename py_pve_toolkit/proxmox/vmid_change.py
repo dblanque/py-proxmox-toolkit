@@ -71,7 +71,7 @@ signal.signal(signal.SIGINT, sigint_handler)
 log_level = "INFO"
 if argv_a.debug: log_level = "DEBUG"
 debug_verbose = (argv_a.debug and argv_a.verbose)
-logfile = f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
+log_file = f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
 
 try:
 	if os.getpgrp() == os.tcgetpgrp(sys.stdout.fileno()):
@@ -86,7 +86,7 @@ except:
 logger = set_logger(
 	logger, 
 	log_console=(not running_in_background),
-	log_file=logfile,
+	log_file=log_file,
 	level=log_level,
 	format="%(levelname)s %(message)s"
 )
