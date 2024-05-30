@@ -2,7 +2,7 @@
 if __name__ != "__main__":
 	raise ImportError("This python script cannot be imported.")
 
-import os, sys, subprocess
+import os, sys, subprocess, signal
 VENV_DIR = os.path.abspath(os.environ['VIRTUAL_ENV']) or None
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 if not VENV_DIR:
@@ -24,6 +24,11 @@ SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"
 SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
+
+def sigint_handler(sig, frame):
+	print('Ctrl+C Received, cancelling script.')
+	sys.exit(0)
+signal.signal(signal.SIGINT, sigint_handler)
 
 def main():
 	# Check if proxmox version valid (>8.0)
