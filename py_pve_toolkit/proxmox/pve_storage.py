@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 logger = logging.getLogger()
 
-PIPE="|"
+BASH_PIPE="|"
 PATH_ASSOC = {
 	"lvm":"vgname",
 	"lvmthin":"vgname",
