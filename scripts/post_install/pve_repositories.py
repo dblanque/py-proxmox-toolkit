@@ -76,13 +76,15 @@ def main():
 		msg="Do you wish to disable High-Availability Services?",
 		input_default=False
 	): 
-		ha_cmds = [
-			"systemctl disable --now pve-ha-lrm",
-			"systemctl disable --now pve-ha-crm",
-			"systemctl disable --now corosync",
+		ha_services = [
+			"pve-ha-lrm",
+			"pve-ha-crm",
+			"corosync",
 		]
 		print("Running commands:")
-		for c in ha_cmds:
+		for c in ha_services:
+			print(f"Disabling {c}.service")
+			c = f"systemctl disable --now {c}"
 			print(c)
 			try: subprocess.call(c.split())
 			except: raise
