@@ -132,10 +132,12 @@ def main():
 			"apt-get dist-upgrade --fix-missing --fix-broken".split(), 
 			stdout=subprocess.PIPE
 		)
+		while proc.poll() is None:
+			l = proc.stdout.readline() # This blocks until it receives a newline.
+			print(l)
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
-		print(proc_o.decode('utf-8').strip())
+			raise Exception(f"Bad command return code ({proc.returncode}).", proc_e.decode())
 
 	# Offer Reboot
 	if yes_no_input(
