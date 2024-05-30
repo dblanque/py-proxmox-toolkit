@@ -16,12 +16,7 @@ from py_pve_toolkit.debian import os_release
 from py_pve_toolkit.proxmox.pve_manager import pve_version_exists, get_pve_version
 from py_pve_toolkit.exceptions.base import UnsupportedRelease, DependencyMissing
 from py_pve_toolkit.utils.yes_no_input import yes_no_input
-from sources.ceph import (
-	SRC_CEPH_QUINCY_ENTERPRISE,
-	SRC_CEPH_QUINCY_NO_SUBSCRIPTION,
-	SRC_CEPH_REEF_ENTERPRISE,
-	SRC_CEPH_REEF_NO_SUBSCRIPTION
-)
+from sources.ceph import CEPH_SOURCES
 from sources.pve import (
 	SRC_PVE_ENTERPRISE,
 	SRC_PVE_NO_SUBSCRIPTION
@@ -98,14 +93,14 @@ def main():
 		with open(SOURCES_LIST_CEPH, "w") as ceph_apt_lists:
 			if ceph_reef: # REEF
 				if ceph_src_no_subscription:
-					ceph_list_data = SRC_CEPH_REEF_NO_SUBSCRIPTION
+					ceph_list_data = CEPH_SOURCES["REEF"]["NO_SUBSCRIPTION"]
 				else:
-					ceph_list_data = SRC_CEPH_REEF_ENTERPRISE
+					ceph_list_data = CEPH_SOURCES["REEF"]["ENTERPRISE"]
 			else: # QUINCY
 				if ceph_src_no_subscription:
-					ceph_list_data = SRC_CEPH_QUINCY_NO_SUBSCRIPTION
+					ceph_list_data = CEPH_SOURCES["QUINCY"]["NO_SUBSCRIPTION"]
 				else:
-					ceph_list_data = SRC_CEPH_QUINCY_ENTERPRISE
+					ceph_list_data = CEPH_SOURCES["QUINCY"]["ENTERPRISE"]
 			ceph_apt_lists.write(ceph_list_data)
 	else: os.remove(SOURCES_LIST_CEPH)
 
