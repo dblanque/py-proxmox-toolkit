@@ -1,14 +1,14 @@
 
 SRC_DEB_BOOKWORM_SYNTAX = """# Debian Repository Sources
-deb http://deb.debian.org/debian {debian_distribution} main
-deb-src http://deb.debian.org/debian {debian_distribution} main
+deb http://deb.debian.org/debian {0} main
+deb-src http://deb.debian.org/debian {0} main
 
-deb http://deb.debian.org/debian-security/ {debian_distribution}-security main
-deb-src http://deb.debian.org/debian-security/ {debian_distribution}-security main
+deb http://deb.debian.org/debian-security/ {0}-security main
+deb-src http://deb.debian.org/debian-security/ {0}-security main
 
-deb http://deb.debian.org/debian {debian_distribution}-updates main
-deb-src http://deb.debian.org/debian {debian_distribution}-updates main
+deb http://deb.debian.org/debian {0}-updates main
+deb-src http://deb.debian.org/debian {0}-updates main
 
-deb http://ftp.us.debian.org/debian/ {debian_distribution} main contrib non-free non-free-firmware
-deb http://security.debian.org/ {debian_distribution}-security main contrib non-free non-free-firmware
+deb http://ftp.us.debian.org/debian/ {0} main contrib non-free non-free-firmware
+deb http://security.debian.org/ {0}-security main contrib non-free non-free-firmware
 """
