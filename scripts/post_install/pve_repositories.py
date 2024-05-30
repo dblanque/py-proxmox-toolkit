@@ -12,10 +12,10 @@ sys.path.append(VENV_DIR)
 sys.path.append(SCRIPT_DIR)
 
 MIN_VERSION = "8.0.0"
-from py_pve_toolkit.debian import os_release
-from py_pve_toolkit.proxmox.pve_manager import pve_version_exists, get_pve_version
-from py_pve_toolkit.exceptions.base import DependencyMissing
-from py_pve_toolkit.utils.yes_no_input import yes_no_input
+from core.debian import os_release
+from core.proxmox.pve_manager import pve_version_exists, get_pve_version
+from core.exceptions.base import DependencyMissing
+from core.utils.yes_no_input import yes_no_input
 from apt_sources.ceph import CEPH_SOURCES
 from apt_sources.pve import SRC_PVE_ENTERPRISE,	SRC_PVE_NO_SUBSCRIPTION
 from apt_sources.debian import SRC_DEB_BOOKWORM_SYNTAX
