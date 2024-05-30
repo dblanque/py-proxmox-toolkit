@@ -26,7 +26,7 @@ SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
 
 def sigint_handler(sig, frame):
-	print('Ctrl+C Received, cancelling script.')
+	print('\nCtrl+C Received, cancelling script.')
 	sys.exit(0)
 signal.signal(signal.SIGINT, sigint_handler)
 
