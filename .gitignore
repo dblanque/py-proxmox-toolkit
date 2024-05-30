@@ -1,0 +1,13 @@
+# created by virtualenv automatically
+bin/
+lib/
+lib64/
+lib64
+**/bin/
+**/lib/
+**/lib64/
+**/pyvenv.cfg
+**/__pycache__
+**/.log
+py_pve_toolkit/proxmox/vmid_change.py.log
+py_pve_toolkit/local_config.py

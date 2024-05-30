@@ -1,0 +1,19 @@
+[Unit]
+Description=OpenVPN Watcher Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+WorkingDirectory=/opt/py-pve-toolkit
+Environment="VIRTUAL_ENV=/opt/py-pve-toolkit"
+Environment="PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+Environment=IP=""
+Environment=CONNAME=""
+ExecStart=/opt/py-pve-toolkit/bin/python3 ${VIRTUAL_ENV}/py_pve_toolkit/automation/network/openvpn/watcher.py -g ${IP} -c "${CONNAME}" -n -s "/opt/watcher_post.sh"
+
+[Install]
+WantedBy=multi-user.target
