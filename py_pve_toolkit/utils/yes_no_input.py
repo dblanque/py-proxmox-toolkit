@@ -29,4 +29,4 @@ def yes_no_input(
 			if no_msg: print(no_msg)
 			return False
 		else:
-			print(f"Please enter a valid choice ({choices_str}).")
+			print(f"Please enter a valid choice {choices_str}.")
