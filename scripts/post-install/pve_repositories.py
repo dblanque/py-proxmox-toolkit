@@ -2,27 +2,23 @@
 if __name__ != "__main__":
 	raise ImportError("This python script cannot be imported.")
 
-import os
-import sys
+import os, sys, subprocess
 VENV_DIR = os.path.abspath(os.environ['VIRTUAL_ENV']) or None
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 if not VENV_DIR:
 	print(VENV_DIR)
 	raise Exception('Could not append VENV_DIR to PATH')
 sys.path.append(VENV_DIR)
+sys.path.append(SCRIPT_DIR)
 
 MIN_VERSION = "8.0.0"
-import subprocess
 from py_pve_toolkit.debian import os_release
 from py_pve_toolkit.proxmox.pve_manager import pve_version_exists, get_pve_version
 from py_pve_toolkit.exceptions.base import UnsupportedRelease, DependencyMissing
 from py_pve_toolkit.utils.yes_no_input import yes_no_input
-from sources.ceph import CEPH_SOURCES
-from sources.pve import (
-	SRC_PVE_ENTERPRISE,
-	SRC_PVE_NO_SUBSCRIPTION
-)
-from sources.debian import SRC_DEB_BOOKWORM_SYNTAX
-import os
+from apt_sources.ceph import CEPH_SOURCES
+from apt_sources.pve import SRC_PVE_ENTERPRISE,	SRC_PVE_NO_SUBSCRIPTION
+from apt_sources.debian import SRC_DEB_BOOKWORM_SYNTAX
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"
@@ -32,7 +28,9 @@ SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
 def main():
 	# Check if proxmox version valid (>8.0)
 	release_info = os_release.get_data()
-	if release_info["id"] != "debian": raise UnsupportedRelease()
+	if release_info["id"] != "debian":
+		print(f'Unsupported OS Distribution ({release_info["id"].capitalize()}).')
+		sys.exit(1)
 	debian_distribution = release_info["version_codename"]
 	if not pve_version_exists: raise DependencyMissing()
 	pve_version = get_pve_version().split(".")
@@ -40,8 +38,9 @@ def main():
 	if (
 		int(pve_version[0]) < int(min_pve_version[0]) or
 		int(pve_version[1]) < int(min_pve_version[1])
-	): raise UnsupportedRelease()
-
+	):
+		print(f'Unsupported Proxmox VE Version ({".".join(pve_version)}).')
+		sys.exit(1)
 	###################################### CHOICES #######################################
 	# Setting debian sources
 	reset_debian_sources = yes_no_input(
