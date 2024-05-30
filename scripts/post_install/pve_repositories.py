@@ -62,14 +62,15 @@ def main():
 		msg="Do you wish to add the CEPH Repositories?",
 		input_default=False
 	)
-	ceph_reef = yes_no_input(
-		msg="Do you wish to use CEPH REEF instead of CEPH QUINCY?",
-		input_default=True
-	)
-	ceph_src_no_subscription = yes_no_input(
-		msg="Do you wish to use the CEPH No-Subscription Repositories?",
-		input_default=True
-	)
+	if use_ceph:
+		ceph_reef = yes_no_input(
+			msg="Do you wish to use CEPH REEF instead of CEPH QUINCY?",
+			input_default=True
+		)
+		ceph_src_no_subscription = yes_no_input(
+			msg="Do you wish to use the CEPH No-Subscription Repositories?",
+			input_default=True
+		)
 	# Disabling HA (Default NO)
 	if yes_no_input(
 		msg="Do you wish to disable High-Availability Services?",
