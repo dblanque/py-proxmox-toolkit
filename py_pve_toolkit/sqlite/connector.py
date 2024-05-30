@@ -101,7 +101,7 @@ class SQLite():
 			logger.error(f"Could not upsert values {values} onto table {table}")
 			raise
 
-	def select(self, table: str, values: list or str=None, where: dict={}):
+	def select(self, table: str, values: None, where: dict={}):
 		if not values: 
 			values = "*"
 
