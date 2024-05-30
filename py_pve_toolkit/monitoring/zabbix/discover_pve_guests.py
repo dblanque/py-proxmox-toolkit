@@ -7,7 +7,7 @@ GUEST_NOT_ON_HOST=2
 GUEST_CONFIG_MISSING=3
 
 parser = argparse.ArgumentParser(
-	prog='pve_guests.py',
+	prog='discover_pve_guests.py',
 	description='This script allows for local automatic guest discovery by Zabbix'
 	)
 parser.add_argument('-s', '--status', required=False, nargs=2, help="Returns Guest Status [GUEST_ID] [GUEST_TYPE]")
