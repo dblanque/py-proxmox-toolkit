@@ -105,7 +105,7 @@ def main():
 	
 	with open(pve_list_file, "w") as pve_apt_lists:
 		pve_apt_lists.write(pve_list_data.format(debian_distribution))
-	os.remove(pve_list_delete)
+	if os.path.exists(pve_list_delete): os.remove(pve_list_delete)
 
 	# CEPH SRCs
 	if use_ceph:
@@ -121,7 +121,8 @@ def main():
 				else:
 					ceph_list_data = CEPH_SOURCES["QUINCY"]["ENTERPRISE"]
 			ceph_apt_lists.write(ceph_list_data)
-	else: os.remove(SOURCES_LIST_CEPH)
+	else:
+		if os.path.exists(SOURCES_LIST_CEPH): os.remove(SOURCES_LIST_CEPH)
 
 	# Update Proxmox
 	if yes_no_input(
