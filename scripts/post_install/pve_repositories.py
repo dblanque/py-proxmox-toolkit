@@ -76,13 +76,13 @@ def main():
 		msg="Do you wish to disable High-Availability Services?",
 		input_default=False
 	): 
-		cmds = [
+		ha_cmds = [
 			"systemctl disable --now pve-ha-lrm",
 			"systemctl disable --now pve-ha-crm",
 			"systemctl disable --now corosync",
 		]
 		print("Running commands:")
-		for c in cmds:
+		for c in ha_cmds:
 			print(c)
 			try: subprocess.call(c.split())
 			except: raise
@@ -128,16 +128,21 @@ def main():
 		msg="Do you wish to perform an update?",
 		input_default=True
 	):
-		proc = subprocess.Popen(
-			"apt-get dist-upgrade --fix-missing --fix-broken".split(), 
-			stdout=subprocess.PIPE
-		)
-		while proc.poll() is None:
-			l = proc.stdout.readline() # This blocks until it receives a newline.
-			print(l)
-		proc_o, proc_e = proc.communicate()
-		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).", proc_e.decode())
+		update_cmds = [
+			"apt-get update -y",
+			"apt-get dist-upgrade --fix-missing --fix-broken -y"
+		]
+		for c in update_cmds:
+			proc = subprocess.Popen(
+				c.split(), 
+				stdout=subprocess.PIPE
+			)
+			while proc.poll() is None:
+				l = proc.stdout.readline() # This blocks until it receives a newline.
+				print(l)
+			proc_o, proc_e = proc.communicate()
+			if proc.returncode != 0:
+				raise Exception(f"Bad command return code ({proc.returncode}).", proc_e.decode())
 
 	# Offer Reboot
 	if yes_no_input(
