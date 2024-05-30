@@ -4,3 +4,6 @@ class ImproperlyConfigured(Exception):
 
 class DependencyMissing(Exception):
 	pass
+
+class UnsupportedRelease(Exception):
+	pass
