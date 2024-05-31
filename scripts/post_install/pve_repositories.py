@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
-if __name__ != "__main__":
-	raise ImportError("This python script cannot be imported.")
+if __name__ == "__main__":
+	raise Exception("This python script cannot be executed individually, please use main.py")
 
 import os, sys, subprocess, signal
-VENV_DIR = os.path.abspath(os.environ['VIRTUAL_ENV']) or None
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-if not VENV_DIR:
-	print(VENV_DIR)
-	raise Exception('Could not append VENV_DIR to PATH')
-sys.path.append(VENV_DIR)
-sys.path.append(SCRIPT_DIR)
-
 def sigint_handler(sig, frame):
 	print('\nCtrl+C Received, cancelling script.')
 	sys.exit(0)
@@ -21,9 +13,9 @@ from core.debian import os_release
 from core.proxmox.pve_manager import pve_version_exists, get_pve_version
 from core.exceptions.base import DependencyMissing
 from core.utils.yes_no_input import yes_no_input
-from apt_sources.ceph import CEPH_SOURCES
-from apt_sources.pve import SRC_PVE_ENTERPRISE,	SRC_PVE_NO_SUBSCRIPTION
-from apt_sources.debian import SRC_DEB_BOOKWORM_SYNTAX
+from .apt_sources.ceph import CEPH_SOURCES
+from .apt_sources.pve import SRC_PVE_ENTERPRISE,	SRC_PVE_NO_SUBSCRIPTION
+from .apt_sources.debian import SRC_DEB_BOOKWORM_SYNTAX
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"
@@ -144,5 +136,3 @@ def main():
 		msg="Do you wish to reboot now?",
 		input_default=False
 	): os.system("reboot")
-
-if __name__ == "__main__": main()
