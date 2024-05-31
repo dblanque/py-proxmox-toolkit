@@ -11,6 +11,7 @@ from core.debian import os_release
 from core.proxmox.pve_manager import pve_version_exists, get_pve_version
 from core.exceptions.base import DependencyMissing
 from core.utils.yes_no_input import yes_no_input
+from core.format.colors import bcolors, print_c
 from .apt_sources.ceph import CEPH_SOURCES
 from .apt_sources.pve import SRC_PVE_ENTERPRISE,	SRC_PVE_NO_SUBSCRIPTION
 from .apt_sources.debian import SRC_DEB_BOOKWORM_SYNTAX
@@ -24,7 +25,7 @@ def main():
 	# Check if proxmox version valid (>8.0)
 	release_info = os_release.get_data()
 	if release_info["id"] != "debian":
-		print(f'Unsupported OS Distribution ({release_info["id"].capitalize()}).')
+		print_c(bcolors.L_RED, f'Unsupported OS Distribution ({release_info["id"].capitalize()}).')
 		sys.exit(1)
 	debian_distribution = release_info["version_codename"]
 	if not pve_version_exists: raise DependencyMissing()
@@ -34,7 +35,7 @@ def main():
 		int(pve_version[0]) < int(min_pve_version[0]) or
 		int(pve_version[1]) < int(min_pve_version[1])
 	):
-		print(f'Unsupported Proxmox VE Version ({".".join(pve_version)}).')
+		print_c(bcolors.L_RED, f'Unsupported Proxmox VE Version ({".".join(pve_version)}).')
 		sys.exit(1)
 	###################################### CHOICES #######################################
 	# Setting debian sources
@@ -71,19 +72,21 @@ def main():
 			"pve-ha-crm",
 			"corosync",
 		]
-		print("Running commands:")
+		print_c(bcolors.L_YELLOW, "Running commands:")
 		for c in ha_services:
 			print(f"Disabling {c}.service")
 			c = f"systemctl disable --now {c}"
 			print(c)
 			try: subprocess.call(c.split())
 			except: raise
+		print_c(bcolors.BLUE, "HA Services disabled.")
 	######################################################################################
 
 	# Debian SRCs
 	if reset_debian_sources:
 		with open("/etc/apt/sources.list", "w") as debian_apt_lists:
 			debian_apt_lists.write(SRC_DEB_BOOKWORM_SYNTAX.format(debian_distribution))
+	print_c(bcolors.BLUE, "Debian Sources Set.")
 
 	# PVE SRCs
 	if pve_src_no_subscription:
@@ -98,6 +101,7 @@ def main():
 	with open(pve_list_file, "w") as pve_apt_lists:
 		pve_apt_lists.write(pve_list_data.format(debian_distribution))
 	if os.path.exists(pve_list_delete): os.remove(pve_list_delete)
+	print_c(bcolors.BLUE, "Proxmox VE Sources Set.")
 
 	# CEPH SRCs
 	if use_ceph:
@@ -113,6 +117,7 @@ def main():
 				else:
 					ceph_list_data = CEPH_SOURCES["QUINCY"]["ENTERPRISE"]
 			ceph_apt_lists.write(ceph_list_data)
+		print_c(bcolors.BLUE, "CEPH Sources Set.")
 	else:
 		if os.path.exists(SOURCES_LIST_CEPH): os.remove(SOURCES_LIST_CEPH)
 
@@ -128,9 +133,12 @@ def main():
 		for c in update_cmds:
 			try: subprocess.call(c.split())
 			except: raise
+	print_c(bcolors.L_GREEN, "Update Complete.")
 
 	# Offer Reboot
 	if yes_no_input(
 		msg="Do you wish to reboot now?",
 		input_default=False
-	): os.system("reboot")
+	):
+		print_c(bcolors.L_YELLOW, "Rebooting System.")
+		os.system("reboot")
