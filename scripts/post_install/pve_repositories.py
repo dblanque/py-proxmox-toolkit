@@ -3,10 +3,8 @@ if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
 import os, sys, subprocess, signal
-def sigint_handler(sig, frame):
-	print('\nCtrl+C Received, cancelling script.')
-	sys.exit(0)
-signal.signal(signal.SIGINT, sigint_handler)
+from core.signal_handlers.sigint import graceful_exit
+signal.signal(signal.SIGINT, graceful_exit)
 
 MIN_VERSION = "8.0.0"
 from core.debian import os_release

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # Author: Dylan Blanqué
 # Date:
 # Description: Script for changing VM/CT ID in Proxmox VE
@@ -17,61 +17,36 @@
 # * Change Backup Tasks
 # * Change Backup Names
 
-import os
-import sys
+import os, sys, signal
 script_path = os.path.realpath(__file__)
 script_dir = os.path.dirname(script_path)
-root_path = os.path.join(script_dir, os.path.pardir, os.path.pardir)
-try:
-	if not "VIRTUAL_ENV" in os.environ: raise Exception()
-	VENV_DIR = os.path.abspath(os.environ['VIRTUAL_ENV']) or None
-	if not VENV_DIR:
-		print(VENV_DIR)
-		raise Exception("No VENV_DIR variable available")
-except Exception as e:
-	print("Please Activate VIRTUAL ENVIRONMENT by executing:")
-	print(f"source {os.path.realpath(root_path)}/bin/activate")
-	sys.exit(1)
-sys.path.append(VENV_DIR)
+if __name__ == "__main__":
+	raise Exception("This python script cannot be executed individually, please use main.py")
+
+from core.signal_handlers.sigint import graceful_exit
+signal.signal(signal.SIGINT, graceful_exit)
 
 # IMPORTS
 import logging, sys, os, argparse, socket, signal, subprocess, re
-from pve_guest import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
-from pve_storage import get_storage_cfg
-from pve_constants import DISK_TYPES, PVE_CFG_REPLICATION
+from .pve_guest import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
+from .pve_storage import get_storage_cfg
+from .pve_constants import DISK_TYPES, PVE_CFG_REPLICATION
 from core.classes.ColoredFormatter import set_logger
+from core.signal_handlers.sigint import graceful_exit
 
-# SCRIPT
-logger = logging.getLogger()
-
-if __name__ != "__main__":
-	logger.info("This is a script and may not be imported.")
-	sys.exit()
-
-parser = argparse.ArgumentParser(
-	prog='Batch PVE Guest Network Modifier',
-	description='This program is used for scripted network modifications that might imply a network cutout or require an automatic rollback.',
-)
-parser.add_argument('-l', '--remote-user', default="root")  # Bool
-parser.add_argument('-i', '--origin-id', default=None)  # Bool
-parser.add_argument('-t', '--target-id', default=None)  # Bool
-parser.add_argument('-d', '--dry-run', action='store_true', default=False)  # Bool
-parser.add_argument('--debug', action='store_true', default=False)  # Bool
-parser.add_argument('-v', '--verbose', action='store_true', default=False)  # Bool
-argv_a = parser.parse_args()
+def argparser(parser: argparse.ArgumentParser):
+	parser.prog = 'Batch PVE Guest Network Modifier'
+	parser.description = 'This program is used for scripted network modifications that might imply a network cutout or require an automatic rollback.'
+	parser.add_argument('-l', '--remote-user', default="root")  # Bool
+	parser.add_argument('-i', '--origin-id', default=None)  # Bool
+	parser.add_argument('-t', '--target-id', default=None)  # Bool
+	parser.add_argument('-d', '--dry-run', action='store_true', default=False)  # Bool
+	parser.add_argument('--debug', action='store_true', default=False)  # Bool
+	parser.add_argument('-v', '--verbose', action='store_true', default=False)  # Bool
+	return parser
 hostname = socket.gethostname()
 running_in_background = True
-
-def sigint_handler(sig, frame):
-	print('\nCtrl+C pressed, hard-quitting script.')
-	sys.exit(0)
-signal.signal(signal.SIGINT, sigint_handler)
-
-# Logging
-log_level = "INFO"
-if argv_a.debug: log_level = "DEBUG"
-debug_verbose = (argv_a.debug and argv_a.verbose)
-log_file = f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
+signal.signal(signal.SIGINT, graceful_exit)
 
 try:
 	if os.getpgrp() == os.tcgetpgrp(sys.stdout.fileno()):
@@ -83,13 +58,6 @@ try:
 except:
 	pass
 
-logger = set_logger(
-	logger, 
-	log_console=(not running_in_background),
-	log_file=log_file,
-	level=log_level,
-	format="%(levelname)s %(message)s"
-)
 ## ERRORS
 ERR_GUEST_EXISTS=1
 ERR_GUEST_NOT_EXISTS=2
@@ -114,6 +82,7 @@ def vmid_prompt(target=False):
 			sys.stdout.write(f"Please enter a valid VM/CT ID {hint}:")
 
 def confirm_prompt(id_origin, id_target):
+	logger = logging.getLogger()
 	hint = "(Y|N) [N]"
 	question = f"Are you sure you wish to change Guest {id_origin}'s ID to {id_target}? {hint}: "
 	logger.info("This might break Replication and Backup Configurations.")
@@ -139,6 +108,7 @@ def valid_pve_disk_type(label: str, disk_data: str, exclude_media=True) -> bool:
 	return True
 
 def rename_guest_replication(old_id: int, new_id: int) -> None:
+	logger = logging.getLogger()
 	# Rename disk in Guest Configuration
 	logger.info(f"Changing replication jobs for Guest {old_id} to {new_id} in {PVE_CFG_REPLICATION}")
 	rpl_cmd_args = [
@@ -154,7 +124,21 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 		raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 	return
 
-def main():
+def main(argv_a):
+	# Logging
+	logger = logging.getLogger()
+	log_level = "INFO"
+	if argv_a.debug: log_level = "DEBUG"
+	debug_verbose = (argv_a.debug and argv_a.verbose)
+	log_file = f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
+	logger = set_logger(
+		logger, 
+		log_console=(not running_in_background),
+		log_file=log_file,
+		level=log_level,
+		format="%(levelname)s %(message)s"
+	)
+
 	id_origin = argv_a.origin_id
 	id_target = argv_a.target_id
 	remote_user = argv_a.remote_user
@@ -261,8 +245,3 @@ def main():
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
 	# pvesh get /cluster/backup --output-format json-pretty
 	# pvesh usage /cluster/backup --verbose
-
-if __name__ == "__main__":
-	main()
-
-sys.exit(0)

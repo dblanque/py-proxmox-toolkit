@@ -7,6 +7,12 @@ parser = argparse.ArgumentParser(
 parser.add_argument('filename')
 args, unknown_args = parser.parse_known_args()
 script_func = getattr(__import__(args.filename, fromlist=["main"]), "main")
-try: script_func()
+script_parser = getattr(__import__(args.filename, fromlist=["argparser"]), "argparser") or None
+try:
+	if script_parser:
+		new_parser: argparse.ArgumentParser = script_parser(parser)
+		args = new_parser.parse_args()
+		script_func(args)
+	else: script_func()
 except: raise
 sys.exit(0)
