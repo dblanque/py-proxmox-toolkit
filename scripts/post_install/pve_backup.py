@@ -34,7 +34,7 @@ def main(argv_a):
 		tar_dirs.append(d)
 	try:
 		timer_s = perf_counter()
-		cmd: list = f"tar -czvf '{argv_a.output_path}/pve-bkp-{backup_date_fmted}.tar.gz' --absolute-names".split() + tar_dirs
+		cmd: list = f"tar -czvf {argv_a.output_path}/pve-bkp-{backup_date_fmted}.tar.gz --absolute-names".split() + tar_dirs
 		print_c(bcolors.L_YELLOW, f"Executing command: {' '.join(cmd)}")
 		subprocess.call(cmd)
 		timer_e = perf_counter()
