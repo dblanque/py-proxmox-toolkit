@@ -13,8 +13,8 @@ if hasattr(__import__(args.filename, fromlist=["argparser"]), "argparser"):
 	script_parser = getattr(__import__(args.filename, fromlist=["argparser"]), "argparser")
 try:
 	if script_parser:
-		new_parser: argparse.ArgumentParser = script_parser(parser)
-		new_parser.add_help = True
+		new_parser: argparse.ArgumentParser = script_parser()
+		new_parser.add_argument('filename')
 		args = new_parser.parse_args()
 		script_func(args)
 	else: script_func()

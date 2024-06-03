@@ -34,9 +34,11 @@ from .pve_constants import DISK_TYPES, PVE_CFG_REPLICATION
 from core.classes.ColoredFormatter import set_logger
 from core.signal_handlers.sigint import graceful_exit
 
-def argparser(parser: argparse.ArgumentParser):
-	parser.prog = 'Batch PVE Guest Network Modifier'
-	parser.description = 'This program is used for scripted network modifications that might imply a network cutout or require an automatic rollback.'
+def argparser():
+	parser = argparse.ArgumentParser(
+		prog="Batch PVE Guest Network Modifier",
+		description="This program is used for scripted network modifications that might imply a network cutout or require an automatic rollback."
+	)
 	parser.add_argument('-l', '--remote-user', default="root")  # Bool
 	parser.add_argument('-i', '--origin-id', default=None)  # Bool
 	parser.add_argument('-t', '--target-id', default=None)  # Bool
