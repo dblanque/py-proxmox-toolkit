@@ -12,7 +12,7 @@ signal.signal(signal.SIGINT, graceful_exit)
 BKP_DIRS = [
 	"/etc/pve"
 ]
-DATE_FMT = "%Y-%m-%d_%H-%M-%S%z"
+DATE_FMT = "%Y-%m-%d_%H-%M-%S"
 
 def argparser(parser: argparse.ArgumentParser):
 	parser.prog = 'Proxmox VE Metadata Backup Script'
