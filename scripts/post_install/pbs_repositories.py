@@ -7,7 +7,6 @@ from core.signal_handlers.sigint import graceful_exit
 signal.signal(signal.SIGINT, graceful_exit)
 
 from core.debian import os_release
-from core.exceptions.base import DependencyMissing
 from core.utils.yes_no_input import yes_no_input
 from core.format.colors import bcolors, print_c
 from .apt_sources.pbs import SRC_PBS_ENTERPRISE, SRC_PBS_NO_SUBSCRIPTION
