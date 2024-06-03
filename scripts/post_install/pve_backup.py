@@ -38,7 +38,7 @@ def main(argv_a):
 		print_c(bcolors.L_YELLOW, f"Executing command: {' '.join(cmd)}")
 		subprocess.call(cmd)
 		timer_e = perf_counter()
-		print_c(bcolors.L_GREEN, f"Backup Completed in {timer_e-timer_s}")
+		print_c(bcolors.L_GREEN, f"Backup Completed in {round(timer_e-timer_s, 3)} seconds")
 	except:
 		print_c(bcolors.L_RED, "Could not complete backup.")
 		raise
