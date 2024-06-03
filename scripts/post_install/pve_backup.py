@@ -17,7 +17,7 @@ DATE_FMT = "%Y-%m-%dT%H:%M:%S%z"
 def argparser(parser: argparse.ArgumentParser):
 	parser.prog = 'Proxmox VE Metadata Backup Script'
 	parser.description = 'This program is used to backup relevant Proxmox VE Host and Guest Configuration Metadata.'
-	parser.add_argument('-p', '--output-path', default="/opt", required=True)
+	parser.add_argument('-p', '--output-path', default="/opt")
 	return parser
 
 def main(argv_a):
