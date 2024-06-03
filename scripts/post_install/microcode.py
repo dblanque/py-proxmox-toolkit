@@ -14,7 +14,8 @@ SUPPORTED_CPU_VENDORS = {
 	},
 	"genuineintel":{
 		"label":"Intel",
-		"deb":"intel-microcode"
+		"deb":"intel-microcode",
+		"supplementary_packages":["iucode-tool"]
 	}
 }
 
@@ -36,12 +37,6 @@ def get_cpu_vendor_json():
 		v = d["data"]
 		if "vendor" in f: return v
 
-def get_vendor_label(vendor: str) -> str:
-	return SUPPORTED_CPU_VENDORS[vendor.lower()]["label"]
-
-def get_vendor_microcode_name(vendor: str) -> str:
-	return SUPPORTED_CPU_VENDORS[vendor.lower()]["deb"]
-
 def main():
 	cpu_vendor = get_cpu_vendor()
 	if not cpu_vendor:
@@ -50,19 +45,22 @@ def main():
 	if not cpu_vendor.lower() in SUPPORTED_CPU_VENDORS:
 		print_c(bcolors.L_YELLOW, f"CPU Vendor is not supported ({cpu_vendor}).")
 		sys.exit(1)
-	cpu_microcode_deb = get_vendor_microcode_name(cpu_vendor)
+
+	cpu_vendor_data = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]
+	cpu_microcode_deb = cpu_vendor_data["deb"]
 	if not cpu_microcode_deb: 
 		print_c(bcolors.L_RED, "Could not get Microcode Package Name.")
-	print_c(bcolors.L_BLUE, f"Downloading and Installing {get_vendor_label(cpu_vendor)} Processor Microcode.")
-	apt_search = subprocess.check_output(
-		f"apt-cache search ^{cpu_microcode_deb}$".split()
-	)
+
+	print_c(bcolors.L_BLUE, f"Downloading and Installing {cpu_vendor_data['label']} Processor Microcode.")
+	apt_search = subprocess.check_output(f"apt-cache search ^{cpu_microcode_deb}$".split())
 	if not apt_search.decode().strip().split(" - ")[0] == cpu_microcode_deb:
 		print_c(bcolors.L_RED, "Package not found, please add non-free-firmware APT Debian Repository.")
 		sys.exit(1)
 	try:
-		deb_available = subprocess.call(f"apt-cache search ^{cpu_microcode_deb}$")
-		subprocess.call("apt-get install -y".split()+[cpu_microcode_deb])
+		deb_to_install = [ cpu_microcode_deb ]
+		if "supplementary_packages" in cpu_vendor_data:
+			deb_to_install = deb_to_install + cpu_vendor_data["supplementary_packages"]
+		subprocess.call("apt-get install -y".split() + deb_to_install)
 	except:
 		raise
 	print_c(bcolors.L_GREEN, "Microcode Installed.")
