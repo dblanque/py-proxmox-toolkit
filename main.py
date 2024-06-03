@@ -2,7 +2,8 @@
 import argparse, sys
 parser = argparse.ArgumentParser(
 	prog='Main Program file for Python Proxmox Toolkit Execution',
-	description='Use this program to execute sub-scripts from the toolkit'
+	description='Use this program to execute sub-scripts from the toolkit',
+	add_help=False
 )
 parser.add_argument('filename')
 args, unknown_args = parser.parse_known_args()
