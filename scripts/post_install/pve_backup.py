@@ -17,7 +17,7 @@ DATE_FMT = "%Y-%m-%dT%H:%M:%S%z"
 def argparser(parser: argparse.ArgumentParser):
 	parser.prog = 'Proxmox VE Metadata Backup Script'
 	parser.description = 'This program is used to backup relevant Proxmox VE Host and Guest Configuration Metadata.'
-	parser.add_argument('-p', '--output-path', default="/opt")
+	parser.add_argument('-p', '--output-path', default="/opt", help="Backup Tar output path, use without trailing slash.")
 	return parser
 
 def main(argv_a):
@@ -35,7 +35,7 @@ def main(argv_a):
 	try:
 		timer_s = perf_counter()
 		subprocess.call(
-			f"tar -czvf '{d}-{backup_date_fmted}.tar.gz' --absolute-names".split() + tar_dirs
+			f"tar -czvf '{argv_a.output_path}/pve-bkp-{backup_date_fmted}.tar.gz' --absolute-names".split() + tar_dirs
 		)
 		timer_e = perf_counter()
 		print_c(bcolors.L_GREEN, f"Backup Completed in {timer_e-timer_s}")
