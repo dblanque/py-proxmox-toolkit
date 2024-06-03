@@ -131,12 +131,13 @@ class PVEStorage:
 
 		# ! Change LV Tags
 		if lv_tags:
+			suffix = "-cloudinit" if new_disk_name.endswith("-cloudinit") else "-disk-"
 			lvtag_cmd_args = [
 				"/usr/sbin/lvchange",
 				"--deltag",
 				disk_name,
 				"--add-tag",
-				f"{self.name}-{new_disk_name.split('-disk-')[0]}",
+				f"{self.name}-{new_disk_name.split(suffix)[0]}",
 				f"{self.name}/{new_disk_name}"
 			]
 			if remote_args:
