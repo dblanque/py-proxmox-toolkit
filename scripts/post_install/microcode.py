@@ -54,6 +54,7 @@ def main():
 		stderr=subprocess.STDOUT
 	) == 0:
 		print_c(bcolors.L_GREEN, f"{cpu_vendor_data['label']} Microcode is already installed.")
+		sys.exit(0)
 
 	print_c(bcolors.L_BLUE, f"Downloading and Installing {cpu_vendor_data['label']} Processor Microcode.")
 	apt_search = subprocess.check_output(f"apt-cache search ^{cpu_microcode_deb}$".split())
