@@ -13,7 +13,7 @@ from core.exceptions.base import DependencyMissing
 from core.utils.yes_no_input import yes_no_input
 from core.format.colors import bcolors, print_c
 from .apt_sources.ceph import CEPH_SOURCES
-from .apt_sources.pve import SRC_PVE_ENTERPRISE,	SRC_PVE_NO_SUBSCRIPTION
+from .apt_sources.pve import SRC_PVE_ENTERPRISE, SRC_PVE_NO_SUBSCRIPTION
 from .apt_sources.debian import SRC_DEB_BOOKWORM_SYNTAX
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
@@ -22,12 +22,13 @@ SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
 
 def main():
-	# Check if proxmox version valid (>8.0)
 	release_info = os_release.get_data()
-	if release_info["id"] != "debian":
+	if not os_release.is_valid_version(release_info):
 		print_c(bcolors.L_RED, f'Unsupported OS Distribution ({release_info["id"].capitalize()}).')
 		sys.exit(1)
 	debian_distribution = release_info["version_codename"]
+
+	# Check if proxmox version valid (>8.0)
 	if not pve_version_exists: raise DependencyMissing()
 	pve_version = get_pve_version().split(".")
 	min_pve_version = MIN_VERSION.split(".")
@@ -37,10 +38,11 @@ def main():
 	):
 		print_c(bcolors.L_RED, f'Unsupported Proxmox VE Version ({".".join(pve_version)}).')
 		sys.exit(1)
+
 	###################################### CHOICES #######################################
 	# Setting debian sources
 	reset_debian_sources = yes_no_input(
-		msg="Do you wish check the Debian Sources?",
+		msg="Do you wish to check the Debian Sources?",
 		input_default=True
 	)
 	# Setting PVE No-Subscription or Enterprise Sources
