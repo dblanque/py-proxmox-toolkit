@@ -105,7 +105,9 @@ def confirm_prompt(id_origin, id_target):
 def valid_pve_disk_type(label: str, disk_data: str, exclude_media=True) -> bool:
 	if not re.sub(r"[0-9]+", "", label) in DISK_TYPES:
 		return False
-	is_cloudinit = "cloudinit" in " ".join(disk_data["raw_values"])
+	if "raw_values" in disk_data:
+		is_cloudinit = "cloudinit" in " ".join(disk_data["raw_values"])
+	else: is_cloudinit = False
 	if exclude_media and "media" in disk_data and not is_cloudinit:
 		return False
 	return True
