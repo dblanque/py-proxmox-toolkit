@@ -39,7 +39,7 @@ def main():
 	if reset_debian_sources:
 		with open("/etc/apt/sources.list", "w") as debian_apt_lists:
 			debian_apt_lists.write(SRC_DEB_BOOKWORM_SYNTAX.format(debian_distribution))
-	print_c(bcolors.BLUE, "Debian Sources Set.")
+		print_c(bcolors.BLUE, "Debian Sources Set.")
 
 	# PBS SRCs
 	if pbs_src_no_subscription:
