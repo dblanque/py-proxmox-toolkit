@@ -48,11 +48,15 @@ def main():
 
 	cpu_vendor_data = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]
 	cpu_microcode_deb = cpu_vendor_data["deb"]
-	if subprocess.check_call(
-		["dpkg", "-l", cpu_microcode_deb],
-		stdout=subprocess.DEVNULL,
-		stderr=subprocess.STDOUT
-	) == 0:
+	ec: int
+	try:
+		ec = subprocess.check_call(
+			["dpkg", "-l", cpu_microcode_deb],
+			stdout=subprocess.DEVNULL,
+			stderr=subprocess.STDOUT
+		)
+	except: pass
+	if ec == 0:
 		print_c(bcolors.L_GREEN, f"{cpu_vendor_data['label']} Microcode is already installed.")
 		sys.exit(0)
 
