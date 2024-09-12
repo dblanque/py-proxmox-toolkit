@@ -51,8 +51,9 @@ def main(argv_a):
 			)
 			if ec == 0:
 				print_c(bcolors.L_GREEN, f"{pkg} is already installed.")
+				tools.remove(pkg)
 		except: pass
 
-		try:
-			subprocess.call(f"apt-get install {pkg} -y".split())
-		except: raise
+	try:
+		subprocess.call(f"apt-get install".split() + tools)
+	except: raise
