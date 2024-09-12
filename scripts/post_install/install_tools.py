@@ -39,17 +39,16 @@ def main(argv_a):
 			"arping",
 			"sysstat",
 		]
-		
+
 	try: 
 		ec = subprocess.check_call(
 				"apt-get update -y".split(),
 				stdout=open(os.devnull, 'wb'),
 				stderr=subprocess.STDOUT
 			)
-	except:
-		if ec != 0:
-			print_c(bcolors.L_RED, f"Could not do apt update (exited with error code {ec}).")
-			sys.exit(0)
+	except subprocess.CalledProcessError as e:
+		print_c(bcolors.L_RED, f"Could not do apt update (non-zero exit status {e.returncode}).")
+		sys.exit(0)
 
 	for pkg in tools:
 		try:
