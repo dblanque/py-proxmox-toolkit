@@ -4,17 +4,22 @@ if __name__ == "__main__":
 
 import os, sys, subprocess, signal
 from core.signal_handlers.sigint import graceful_exit
+from core.format.colors import print_c, bcolors
 signal.signal(signal.SIGINT, graceful_exit)
 
 def main():
-	chrony_installed = subprocess.check_call(
-		"dpkg -l chrony".split(),
-		stdout=open(os.devnull, 'wb'),
-		stderr=subprocess.STDOUT
-	) == 0
+	try:
+		ec = subprocess.check_call(
+			"dpkg -l chrony".split(),
+			stdout=open(os.devnull, 'wb'),
+			stderr=subprocess.STDOUT
+		)
+		if ec == 0:
+			print_c(bcolors.L_GREEN, f"Chrony is already installed.")
+			sys.exit(0)
+	except: pass
 
-	if not chrony_installed:
-		try:
-			subprocess.call("apt-get update -y".split())
-			subprocess.call("apt-get install chrony -y".split())
-		except: raise
+	try:
+		subprocess.call("apt-get update -y".split())
+		subprocess.call("apt-get install chrony -y".split())
+	except: raise
