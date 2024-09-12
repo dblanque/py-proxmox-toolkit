@@ -40,8 +40,18 @@ def main(argv_a):
 			"sysstat",
 		]
 		
-	try: subprocess.call("apt-get update -y".split())
-	except: raise
+	try: 
+		ec = subprocess.check_call(
+				"apt-get update -y".split(),
+				stdout=open(os.devnull, 'wb'),
+				stderr=subprocess.STDOUT
+			)
+		if ec != 0:
+			print_c(bcolors.L_RED, f"Could not do apt update (exited with error code {ec}).")
+			sys.exit(0)
+	except:
+		raise
+
 	for pkg in tools:
 		try:
 			ec = subprocess.check_call(
