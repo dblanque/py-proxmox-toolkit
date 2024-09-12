@@ -46,6 +46,7 @@ def main(argv_a):
 				stdout=open(os.devnull, 'wb'),
 				stderr=subprocess.STDOUT
 			)
+		print(ec)
 		if ec != 0:
 			print_c(bcolors.L_RED, f"Could not do apt update (exited with error code {ec}).")
 			sys.exit(0)
