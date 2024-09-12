@@ -7,7 +7,11 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('filename')
 args, unknown_args = parser.parse_known_args()
-try: parsed_filename = str(args.filename).replace("/",".")
+try:
+	parsed_filename = str(args.filename)
+	if parsed_filename.endswith(".py"):
+		parsed_filename = parsed_filename.split(".py")[0]
+		parsed_filename = parsed_filename.replace("/",".")
 except: raise
 script_func = getattr(__import__(parsed_filename, fromlist=["main"]), "main")
 script_parser = None
