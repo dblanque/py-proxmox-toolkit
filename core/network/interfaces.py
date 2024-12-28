@@ -31,8 +31,9 @@ def get_physical_interfaces(interface_patterns=None, override_patterns=False, ve
 		skip = False
 		match = False
 
-		for regex in exclude_patterns:
-			if re.match(regex, iface): skip = True
+		if exclude_patterns:
+			for regex in exclude_patterns:
+				if re.match(regex, iface): skip = True
 		if skip == True: continue
 
 		for regex in check_patterns:
