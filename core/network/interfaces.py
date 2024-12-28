@@ -13,13 +13,15 @@ def get_physical_interfaces(interface_patterns=None, override_patterns=False):
 	Fetches physical interface names and returns them as a list.
 	If override_patterns is set to True then only the patterns passed will be matched.
 	"""
+	if not interface_patterns and not override_patterns:
+		print("interface_patterns should contain at least one Regex Pattern if override_patterns is used.")
+
 	physical_interfaces=list()
 	network_interfaces=os.listdir('/sys/class/net/')
 	check_patterns: list
-	if not interface_patterns and not override_patterns:
-		print("interface_patterns should contain at least one Regex Pattern if override_patterns is used.")
-	if not override_patterns:
-		check_patterns = PHYSICAL_INTERFACE_PATTERNS
+	if not override_patterns: check_patterns = PHYSICAL_INTERFACE_PATTERNS
+	else: check_patterns = list()
+
 	if interface_patterns:
 		for extra_iface in interface_patterns:
 			if re.compile(extra_iface): check_patterns.append(extra_iface)
