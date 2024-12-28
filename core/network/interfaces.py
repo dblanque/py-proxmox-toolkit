@@ -14,7 +14,7 @@ def get_physical_interfaces(interface_patterns=None, override_patterns=False, ve
 	Fetches physical interface names and returns them as a list.
 	If override_patterns is set to True then only the patterns passed will be matched.
 	"""
-	if not interface_patterns and not override_patterns:
+	if not interface_patterns and override_patterns:
 		print("interface_patterns should contain at least one Regex Pattern if override_patterns is used.")
 
 	physical_interfaces=list()
