@@ -9,7 +9,7 @@ PHYSICAL_INTERFACE_PATTERNS=[
 	r"^ens[0-9].*$",
 ]
 
-def get_physical_interfaces(interface_patterns=None, override_patterns=False, verbose=False):
+def get_physical_interfaces(interface_patterns=None, override_patterns=False, verbose=False, exclude_patterns=None):
 	"""
 	Fetches physical interface names and returns them as a list.
 	If override_patterns is set to True then only the patterns passed will be matched.
@@ -27,11 +27,18 @@ def get_physical_interfaces(interface_patterns=None, override_patterns=False, ve
 		for extra_iface in interface_patterns:
 			if re.compile(extra_iface): check_patterns.append(extra_iface)
 	for iface in network_interfaces:
-		match = False
 		iface = iface.strip()
+		skip = False
+		match = False
+
+		for regex in exclude_patterns:
+			if re.match(regex, iface): skip = True
+		if skip == True: continue
+
 		for regex in check_patterns:
 			if re.match(regex, iface):
 				physical_interfaces.append(iface)
 				match = True
+
 		if not match and verbose: print_c(bcolors.L_BLUE, f"[DEBUG] - {iface} is not a physical interface, skipping.")
 	return physical_interfaces
