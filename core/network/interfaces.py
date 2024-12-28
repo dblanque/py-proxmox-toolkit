@@ -1,4 +1,5 @@
 import os, re
+from core.format.colors import print_c, bcolors
 
 PHYSICAL_INTERFACE_PATTERNS=[
 	r"^eth[0-9].*$",
@@ -8,7 +9,7 @@ PHYSICAL_INTERFACE_PATTERNS=[
 	r"^ens[0-9].*$",
 ]
 
-def get_physical_interfaces(interface_patterns=None, override_patterns=False):
+def get_physical_interfaces(interface_patterns=None, override_patterns=False, verbose=False):
 	"""
 	Fetches physical interface names and returns them as a list.
 	If override_patterns is set to True then only the patterns passed will be matched.
@@ -32,5 +33,5 @@ def get_physical_interfaces(interface_patterns=None, override_patterns=False):
 			if re.match(regex, iface):
 				physical_interfaces.append(iface)
 				match = True
-		if not match: print(f"{iface} is not a physical interface, skipping.")
+		if not match and verbose: print_c(bcolors.L_BLUE, f"[DEBUG] - {iface} is not a physical interface, skipping.")
 	return physical_interfaces

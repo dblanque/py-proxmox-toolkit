@@ -10,7 +10,8 @@ def argparser():
 		description="This program is used to generate a Network Interfaces file with new VMBRs."
 	)
 	parser.add_argument('-e', '--extra-iface', help="Extra interface regexes to select as physical interfaces.", nargs="+")
+	parser.add_argument('-v', '--verbose', action='store_true', default=False)
 	return parser
 
 def main(argv_a):
-	print(get_physical_interfaces())
+	print(get_physical_interfaces(verbose=argv_a.verbose))
