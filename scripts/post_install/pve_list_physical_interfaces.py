@@ -26,6 +26,6 @@ def main(argv_a):
 	if len(interfaces) > 0:
 		print_c(bcolors.L_BLUE, "Discovered Network interfaces:")
 		for iface in interfaces:
-			print(iface)
+			print(f"\t -> {iface}")
 	else:
 		print("No network interfaces detected.")
