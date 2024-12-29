@@ -58,5 +58,6 @@ def main(argv_a):
 			print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {e.returncode}).")
 			sys.exit(e.returncode)
 		except Exception as e:
-			print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (unhandled exception {e}).")
+			print_c(bcolors.L_RED, f"Unhandled Exception.")
+			print(e)
 			sys.exit(1)
