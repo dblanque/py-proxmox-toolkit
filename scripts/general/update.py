@@ -22,7 +22,9 @@ def main(argv_a):
 		print_c(bcolors.L_YELLOW, "Script must be executed as root.")
 		exit()
 	line_ending="\n"
-	if argv_a.windows_newline: line_ending="\r\n"
+	if argv_a.windows_newline:
+		print_c(bcolors.L_YELLOW, f"[WARNING]{bcolors.NC} - Using CRLF for line-endings.")
+		line_ending="\r\n"
 
 	commands = [
 		"apt update",
