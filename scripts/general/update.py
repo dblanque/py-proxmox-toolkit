@@ -49,6 +49,8 @@ def main(argv_a):
 					if len(l) < 1: continue
 					if l.startswith("E:"):
 						print_c(bcolors.L_RED, l, end=line_ending)
+					if l.startswith("N:"):
+						print_c(bcolors.L_BLUE, l, end=line_ending)
 					else:
 						print_c(bcolors.L_YELLOW, l, end=line_ending)
 				if sp.returncode and sp.returncode != 0:
