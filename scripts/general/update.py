@@ -47,7 +47,10 @@ def main(argv_a):
 				for l_err in sp.stderr:
 					l = l_err.decode("utf-8").strip()
 					if len(l) < 1: continue
-					print_c(bcolors.L_RED, l, end=line_ending)
+					if l.startswith("E:"):
+						print_c(bcolors.L_RED, l, end=line_ending)
+					else:
+						print_c(bcolors.L_YELLOW, l, end=line_ending)
 				if sp.returncode and sp.returncode != 0:
 					print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {sp.returncode}).")
 					sys.exit(sp.returncode)
