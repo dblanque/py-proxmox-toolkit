@@ -25,11 +25,11 @@ class bcolors(Enum):
 	UNDERLINE = '\033[4m'
 	BLINK = '\033[5m'
 
-def print_c(color: bcolors, message: str):
+def print_c(color: bcolors, message: str, **kwargs):
 	"""
 	Concatenates and prints {color}{message}{nc}
 	"""
-	return print( f"{color}{message}{bcolors.NC}")
+	return print( f"{color}{message}{bcolors.NC}", **kwargs)
 
 def main():
 	for color in bcolors:
