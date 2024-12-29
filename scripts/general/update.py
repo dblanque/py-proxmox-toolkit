@@ -36,10 +36,10 @@ def main(argv_a):
 		try:
 			with subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sp:
 				for l_out in sp.stdout:
-					l = l_out.decode('utf-8').strip().strip("\t")
+					l = l_out.decode('utf-8').strip().strip("\t").strip("\n")
 					if len(l) > 0: print(f"{l}")
 				for l_err in sp.stderr:
-					l = l_err.decode('utf-8').strip().strip("\t")
+					l = l_err.decode('utf-8').strip().strip("\t").strip("\n")
 					if len(l) > 0: print_c(bcolors.L_RED, f"{l}")
 		except subprocess.CalledProcessError as e:
 			print_c(bcolors.L_RED, f"Could not do {cmd} (non-zero exit status {e.returncode}).")
