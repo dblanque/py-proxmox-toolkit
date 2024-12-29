@@ -38,15 +38,14 @@ def main(argv_a):
 		print_c(bcolors.L_BLUE, f"{cmd}")
 		try:
 			with subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sp:
-				with open("/home/dblanque/git/py-proxmox-toolkit/scripts/general/update.debug.log", "a") as f:
-					for l_out in sp.stdout:
-						l = l_out.decode("utf-8").strip()
-						if len(l) < 1: continue
-						print(l, end=line_ending)
-					for l_err in sp.stderr:
-						l = l_err.decode("utf-8").strip()
-						if len(l) < 1: continue
-						print_c(bcolors.L_RED, l, end=line_ending)
+				for l_out in sp.stdout:
+					l = l_out.decode("utf-8").strip()
+					if len(l) < 1: continue
+					print(l, end=line_ending)
+				for l_err in sp.stderr:
+					l = l_err.decode("utf-8").strip()
+					if len(l) < 1: continue
+					print_c(bcolors.L_RED, l, end=line_ending)
 		except subprocess.CalledProcessError as e:
 			print_c(bcolors.L_RED, f"Could not do {cmd} (non-zero exit status {e.returncode}).")
 			sys.exit(0)
