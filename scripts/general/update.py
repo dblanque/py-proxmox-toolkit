@@ -14,22 +14,21 @@ def argparser():
 	)
 	parser.add_argument('-q', '--quiet', help="Make apt commands quiet.", action="store_true")
 	parser.add_argument('-p', '--show-prompts', help="Show prompts from apt commands, might not function properly.", action="store_true")
+	parser.add_argument('-w', '--windows-newline', help="Prints line endings with CRLF instead of LF.", action="store_true")
 	return parser
 
 def main(argv_a):
 	if os.geteuid() != 0:
 		print_c(bcolors.L_YELLOW, "Script must be executed as root.")
 		exit()
+	line_ending="\n"
+	if argv_a.windows_newline: line_ending="\r\n"
 
 	commands = [
 		"apt update",
 		"apt dist-upgrade --fix-broken --fix-missing",
 		"apt autoclean",
 		"apt autoremove"
-	]
-	STRIP_CHARS = [
-		"\t",
-		"\r\n",
 	]
 	for cmd in commands:
 		if not argv_a.quiet:
@@ -39,14 +38,15 @@ def main(argv_a):
 		print_c(bcolors.L_BLUE, f"{cmd}")
 		try:
 			with subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sp:
-				for l_out in sp.stdout:
-					l = l_out.decode('utf-8').strip()
-					for c in STRIP_CHARS: l = l.strip(c)
-					if len(l) > 0: print(f"{l}")
-				for l_err in sp.stderr:
-					l = l_err.decode('utf-8').strip()
-					for c in STRIP_CHARS: l = l.strip(c)
-					if len(l) > 0: print_c(bcolors.L_RED, f"{l}")
+				with open("/home/dblanque/git/py-proxmox-toolkit/scripts/general/update.debug.log", "a") as f:
+					for l_out in sp.stdout:
+						l = l_out.decode("utf-8").strip()
+						if len(l) < 1: continue
+						print(l, end=line_ending)
+					for l_err in sp.stderr:
+						l = l_err.decode("utf-8").strip()
+						if len(l) < 1: continue
+						print_c(bcolors.L_RED, l, end=line_ending)
 		except subprocess.CalledProcessError as e:
 			print_c(bcolors.L_RED, f"Could not do {cmd} (non-zero exit status {e.returncode}).")
 			sys.exit(0)
