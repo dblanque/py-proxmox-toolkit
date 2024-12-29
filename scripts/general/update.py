@@ -27,6 +27,10 @@ def main(argv_a):
 		"apt autoclean",
 		"apt autoremove"
 	]
+	STRIP_CHARS = [
+		"\t",
+		"\r\n",
+	]
 	for cmd in commands:
 		if not argv_a.quiet:
 			cmd = f"{cmd} --quiet=0"
@@ -36,10 +40,12 @@ def main(argv_a):
 		try:
 			with subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sp:
 				for l_out in sp.stdout:
-					l = l_out.decode('utf-8').strip().strip("\t").strip("\n")
+					l = l_out.decode('utf-8').strip()
+					for c in STRIP_CHARS: l = l.strip(c)
 					if len(l) > 0: print(f"{l}")
 				for l_err in sp.stderr:
-					l = l_err.decode('utf-8').strip().strip("\t").strip("\n")
+					l = l_err.decode('utf-8').strip()
+					for c in STRIP_CHARS: l = l.strip(c)
 					if len(l) > 0: print_c(bcolors.L_RED, f"{l}")
 		except subprocess.CalledProcessError as e:
 			print_c(bcolors.L_RED, f"Could not do {cmd} (non-zero exit status {e.returncode}).")
