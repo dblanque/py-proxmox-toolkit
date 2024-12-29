@@ -12,6 +12,8 @@ def argparser():
 		prog="OS Update Script",
 		description="This program is used to update system packages with APT."
 	)
+	parser.add_argument('-d', '--download-only', help="Execute package download only.", action="store_true")
+	parser.add_argument('-df', '--download-first', help="Execute package download only first, then update.", action="store_true")
 	parser.add_argument('-q', '--quiet', help="Make apt commands quiet.", action="store_true")
 	parser.add_argument('-p', '--show-prompts', help="Show prompts from apt commands, might not function properly.", action="store_true")
 	parser.add_argument('-w', '--windows-newline', help="Prints line endings with CRLF instead of LF.", action="store_true")
@@ -26,12 +28,25 @@ def main(argv_a):
 		print_c(bcolors.L_YELLOW, f"[WARNING]{bcolors.NC} - Using CRLF for line-endings.")
 		line_ending="\r\n"
 
-	commands = [
-		"apt update",
-		"apt dist-upgrade --fix-broken --fix-missing",
+	commands = [ "apt update" ]
+	if argv_a.download_only:
+		commands = [ *commands,
+			"apt dist-upgrade --fix-broken --fix-missing -d"
+		]
+	elif argv_a.download_first:
+		commands = [ *commands,
+			"apt dist-upgrade --fix-broken --fix-missing -d",
+			"apt dist-upgrade --fix-broken --fix-missing"
+		]
+	else:
+		commands = [ *commands,
+			"apt dist-upgrade --fix-broken --fix-missing"
+		]
+	commands = [ *commands,
 		"apt autoclean",
 		"apt autoremove"
 	]
+
 	for cmd in commands:
 		if not argv_a.quiet:
 			cmd = f"{cmd} --quiet=0"
