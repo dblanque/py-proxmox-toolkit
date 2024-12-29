@@ -13,7 +13,7 @@ def argparser():
 		description="This program is used to update system packages with APT."
 	)
 	parser.add_argument('-q', '--quiet', help="Make apt commands quiet.", action="store_true")
-	parser.add_argument('-y', '--yes', help="Force yes on apt commands.", action="store_true")
+	parser.add_argument('-p', '--show-prompts', help="Show prompts from apt commands, might not function properly.", action="store_true")
 	return parser
 
 def main(argv_a):
@@ -30,7 +30,7 @@ def main(argv_a):
 	for cmd in commands:
 		if not argv_a.quiet:
 			cmd = f"{cmd} --quiet=0"
-		if argv_a.yes:
+		if not argv_a.show_prompts:
 			cmd = f"{cmd} -y"
 		print_c(bcolors.L_BLUE, f"{cmd}")
 		try:
