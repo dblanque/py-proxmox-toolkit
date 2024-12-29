@@ -48,4 +48,7 @@ def main(argv_a):
 					print_c(bcolors.L_RED, l, end=line_ending)
 		except subprocess.CalledProcessError as e:
 			print_c(bcolors.L_RED, f"Could not do {cmd} (non-zero exit status {e.returncode}).")
-			sys.exit(0)
+			sys.exit(e.returncode)
+		except Exception as e:
+			print_c(bcolors.L_RED, f"Could not do {cmd} (unhandled exception {e}).")
+			sys.exit(1)
