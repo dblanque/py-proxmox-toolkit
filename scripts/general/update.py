@@ -43,6 +43,7 @@ def main(argv_a):
 			"apt dist-upgrade --fix-broken --fix-missing"
 		]
 	commands = [ *commands,
+		"apt install firefox",
 		"apt autoclean",
 		"apt autoremove"
 	]
@@ -54,20 +55,24 @@ def main(argv_a):
 			cmd = f"{cmd} -y"
 		print_c(bcolors.L_BLUE, f"{cmd}")
 		try:
-			with subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sp:
-				for l_out in sp.stdout:
-					l = l_out.decode("utf-8").strip()
-					if len(l) < 1: continue
-					print(l, end=line_ending)
-				for l_err in sp.stderr:
-					l = l_err.decode("utf-8").strip()
-					if len(l) < 1: continue
-					if l.startswith("E:"):
-						print_c(bcolors.L_RED, l, end=line_ending)
-					if l.startswith("N:"):
-						print_c(bcolors.L_BLUE, l, end=line_ending)
-					else:
-						print_c(bcolors.L_YELLOW, l, end=line_ending)
+			with subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as sp:
+				while sp.poll() is None:
+					sys.stdout.write(sp.stdout.read(1).decode(sys.stdout.encoding))
+					sys.stdout.flush()
+				# ! Old Method, didn't capture prompt
+				# for l_out in sp.stdout:
+				# 	l = l_out.decode("utf-8").strip()
+				# 	if len(l) < 1: continue
+				# 	print(l, end=line_ending)
+				# for l_err in sp.stderr:
+				# 	l = l_err.decode("utf-8").strip()
+				# 	if len(l) < 1: continue
+				# 	if l.startswith("E:"):
+				# 		print_c(bcolors.L_RED, l, end=line_ending)
+				# 	if l.startswith("N:"):
+				# 		print_c(bcolors.L_BLUE, l, end=line_ending)
+				# 	else:
+				# 		print_c(bcolors.L_YELLOW, l, end=line_ending)
 				if sp.returncode and sp.returncode != 0:
 					print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {sp.returncode}).")
 					sys.exit(sp.returncode)
