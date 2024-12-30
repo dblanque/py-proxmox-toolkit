@@ -43,7 +43,6 @@ def main(argv_a):
 			"apt dist-upgrade --fix-broken --fix-missing"
 		]
 	commands = [ *commands,
-		"apt install firefox",
 		"apt autoclean",
 		"apt autoremove"
 	]
