@@ -15,7 +15,7 @@ def argparser():
 	parser.add_argument('-d', '--download-only', help="Execute package download only.", action="store_true")
 	parser.add_argument('-df', '--download-first', help="Execute package download only first, then update.", action="store_true")
 	parser.add_argument('-q', '--quiet', help="Make apt commands quiet.", action="store_true")
-	parser.add_argument('-p', '--show-prompts', help="Show prompts from apt commands, might not function properly.", action="store_true")
+	parser.add_argument('-p', '--show-prompts', help="Show prompts from apt commands, default is auto-yes.", action="store_true")
 	parser.add_argument('-w', '--windows-newline', help="Prints line endings with CRLF instead of LF.", action="store_true")
 	return parser
 
