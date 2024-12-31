@@ -2,7 +2,7 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import os, sys, subprocess, signal, argparse
+import os, sys, subprocess, signal, argparse, time
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
 signal.signal(signal.SIGINT, graceful_exit)
@@ -55,23 +55,12 @@ def main(argv_a):
 		print_c(bcolors.L_BLUE, f"{cmd}")
 		try:
 			with subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as sp:
+				# src: https://stackoverflow.com/questions/63129698/python-subprocess-stdout-doesnt-capture-input-prompt
 				while sp.poll() is None:
-					sys.stdout.write(sp.stdout.read(1).decode(sys.stdout.encoding))
+					out_bytes = sp.stdout.read(1).decode(sys.stdout.encoding)
+					sys.stdout.write(out_bytes)
 					sys.stdout.flush()
-				# ! Old Method, didn't capture prompt
-				# for l_out in sp.stdout:
-				# 	l = l_out.decode("utf-8").strip()
-				# 	if len(l) < 1: continue
-				# 	print(l, end=line_ending)
-				# for l_err in sp.stderr:
-				# 	l = l_err.decode("utf-8").strip()
-				# 	if len(l) < 1: continue
-				# 	if l.startswith("E:"):
-				# 		print_c(bcolors.L_RED, l, end=line_ending)
-				# 	if l.startswith("N:"):
-				# 		print_c(bcolors.L_BLUE, l, end=line_ending)
-				# 	else:
-				# 		print_c(bcolors.L_YELLOW, l, end=line_ending)
+
 				if sp.returncode and sp.returncode != 0:
 					print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {sp.returncode}).")
 					sys.exit(sp.returncode)
