@@ -10,6 +10,7 @@ PHYSICAL_INTERFACE_PATTERNS=[
 ]
 
 VIRTUAL_INTERFACE_PATTERNS=[
+	r"^vmbr[0-9].*$",
 	r"^veth[0-9].*$",
 	r"^fwbr[0-9].*$",
 	r"^fwln[0-9].*$",
