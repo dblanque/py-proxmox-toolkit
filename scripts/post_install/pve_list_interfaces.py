@@ -10,8 +10,8 @@ def argparser():
 		prog="Proxmox VE Network Interface Listing Script",
 		description="This program is used to list network interfaces."
 	)
-	parser.add_argument("-p", "--physical", help="Physical Interface Filtering.", action="store_true")
-	parser.add_argument("-v", "--virtual", help="Virtual Interface Filtering.", action="store_true")
+	parser.add_argument("-p", "--physical", help="Physical Interface Filtering ONLY.", action="store_true")
+	parser.add_argument("-v", "--virtual", help="Virtual Interface Filtering ONLY.", action="store_true")
 	parser.add_argument("-e", "--exclude", help="Regexes to exclude from physical interface discovery.", nargs="+", default=None)
 	parser.add_argument("-r", "--regex", help="Regexes to select in physical interfaces discovery.", nargs="+", default=None)
 	parser.add_argument("-o", "--only-regex", help="Use only specified regexes to detect network interfaces.", action="store_true")
@@ -37,7 +37,7 @@ def main(argv_a):
 
 	interfaces = get_interfaces(
 		interface_patterns=regex_list,
-		override_patterns=argv_a.only_regex,
+		override_patterns=any([argv_a.only_regex, argv_a.physical, argv_a.virtual]),
 		verbose=argv_a.verbose
 	)
 	if len(interfaces) > 0:
