@@ -15,6 +15,7 @@ def argparser():
 	parser.add_argument("-e", "--exclude", help="Regexes to exclude from physical interface discovery.", nargs="+", default=None)
 	parser.add_argument("-r", "--regex", help="Regexes to select in physical interfaces discovery.", nargs="+", default=None)
 	parser.add_argument("-o", "--only-regex", help="Use only specified regexes to detect network interfaces.", action="store_true")
+	parser.add_argument("-s", "--sort", help="Sort network interfaces output.", action="store_true")
 	parser.add_argument("-d", "--verbose", action="store_true")
 	return parser
 
@@ -42,6 +43,8 @@ def main(argv_a):
 	)
 	if len(interfaces) > 0:
 		print_c(bcolors.L_BLUE, "Discovered Network interfaces:")
+		if argv_a.sort:
+			interfaces = sorted(interfaces)
 		for iface in interfaces:
 			print(f"\t -> {iface}")
 	else:
