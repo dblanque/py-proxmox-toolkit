@@ -15,7 +15,7 @@ def argparser():
 	parser.add_argument("-e", "--exclude", help="Regexes to exclude from physical interface discovery.", nargs="+", default=None)
 	parser.add_argument("-r", "--regex", help="Regexes to select in physical interfaces discovery.", nargs="+", default=None)
 	parser.add_argument("-o", "--only-regex", help="Use only specified regexes to detect network interfaces.", action="store_true")
-	parser.add_argument("-v", "--verbose", action="store_true")
+	parser.add_argument("-d", "--verbose", action="store_true")
 	return parser
 
 def main(argv_a):
