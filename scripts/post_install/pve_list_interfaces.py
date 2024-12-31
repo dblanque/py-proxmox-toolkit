@@ -20,7 +20,7 @@ def argparser():
 	return parser
 
 def main(argv_a):
-	print_c(bcolors.L_YELLOW, "Scanning Physical Network Interfaces.")
+	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	regex_list = list()
 	if not argv_a.physical and not argv_a.virtual and not argv_a.regex:
 		regex_list = [ r"^.*$" ]
