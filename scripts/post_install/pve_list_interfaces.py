@@ -31,6 +31,10 @@ def main(argv_a):
 	if argv_a.regex and len(argv_a.regex) > 0:
 		regex_list = regex_list + argv_a.regex
 
+	if argv_a.verbose:
+		print_c(bcolors.L_BLUE, "Using the following regex patterns:")
+		print(regex_list)
+
 	interfaces = get_interfaces(
 		interface_patterns=regex_list,
 		override_patterns=argv_a.only_regex,
