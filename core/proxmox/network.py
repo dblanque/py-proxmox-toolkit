@@ -95,4 +95,4 @@ def stringify_interfaces(network_interfaces_dict: dict) -> str:
 				output = f"{output}\n#{v}"
 			else:
 				output = f"{output}\n\t{k} {' '.join(v)}"
-	return output
+	return f"{output}\n"

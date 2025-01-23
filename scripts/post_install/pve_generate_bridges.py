@@ -53,6 +53,7 @@ def main(argv_a: argparse.ArgumentParser):
 					while f"vmbr{vmbr_index}" in bridges:
 						vmbr_index += 1
 					current_bridge = f"vmbr{vmbr_index}"
+					print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
 					configured_ifaces[current_bridge] = {
 						"name": current_bridge,
 						"auto": True,
@@ -61,6 +62,7 @@ def main(argv_a: argparse.ArgumentParser):
 						"bridge-fd": 0
 					}
 					
+					print_c(bcolors.L_BLUE, f"Parsing NIC {nic}")
 					configured_ifaces[nic] = {
 						"name": nic,
 						"type": "manual",
