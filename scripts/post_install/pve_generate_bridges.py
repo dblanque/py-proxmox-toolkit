@@ -66,10 +66,11 @@ def main(argv_a: argparse.ArgumentParser):
 					print_c(bcolors.L_YELLOW, f"{nic} is already configured, skipping.")
 					continue
 				else:
+					current_bridge = f"vmbr{vmbr_index}"
 					if not nic in argv_a.map.values() and not current_bridge in configured_ifaces:
 						while f"vmbr{vmbr_index}" in configured_ifaces:
 							vmbr_index += 1
-						current_bridge = f"vmbr{vmbr_index}"
+							current_bridge = f"vmbr{vmbr_index}"
 						print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
 						configured_ifaces[current_bridge] = {
 							"name": current_bridge,
