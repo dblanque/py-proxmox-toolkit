@@ -45,7 +45,7 @@ def main(argv_a: argparse.ArgumentParser):
 	with open(NEW_INTERFACES_FILE, "w") as f:
 		f.write(DEFAULT_PVE_HEADER)
 		for nic in ifaces:
-			if argv_a.linux_bridge:
+			if not argv_a.ovs_bridge:
 				if nic in configured_ifaces:
 					print_c(bcolors.L_YELLOW, f"{nic} is already configured, skipping.")
 					continue
@@ -66,6 +66,6 @@ def main(argv_a: argparse.ArgumentParser):
 						"type": "manual",
 						"post-up": "/sbin/ethtool -offload eno1 tx off rx off; /sbin/ethtool -K eno1 gso off; /sbin/ethtool -K eno1 tso off;".split()
 					}
-			elif argv_a.ovs_bridge:
+			else:
 				raise Exception("OVS Bridges are currently Unsupported.")
 		f.write(stringify_interfaces(configured_ifaces))
