@@ -67,7 +67,7 @@ def main(argv_a: argparse.ArgumentParser):
 					continue
 				else:
 					current_bridge = f"vmbr{vmbr_index}"
-					if not nic in argv_a.map.values() and not current_bridge in configured_ifaces:
+					if not nic in argv_a.map and not current_bridge in configured_ifaces:
 						while f"vmbr{vmbr_index}" in configured_ifaces:
 							vmbr_index += 1
 							current_bridge = f"vmbr{vmbr_index}"
