@@ -23,13 +23,6 @@ def argparser() -> argparse.ArgumentParser:
 def main(argv_a: argparse.ArgumentParser):
 	iface_data = dict()
 	vmbr_index = 0
-	vmbr_map = dict()
-	port_map_list: dict[str] = argv_a.port_map
-	if port_map_list:
-		for i in port_map_list:
-			i: str = i.split(":")
-			vmbr_map[i[0]] = i[1]
-			if len(i) != 2: raise Exception(f"Invalid map element (Length must be 2) {i}.")
 	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"
 
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
@@ -41,6 +34,14 @@ def main(argv_a: argparse.ArgumentParser):
 		for b in bridges:
 			if b in configured_ifaces:
 				del configured_ifaces[b]
+
+	vmbr_map = dict()
+	port_map_list: dict[str] = argv_a.port_map
+	if port_map_list:
+		for i in port_map_list:
+			i: str = i.split(":")
+			vmbr_map[i[0]] = i[1]
+			if len(i) != 2: raise Exception(f"Invalid map element (Length must be 2) {i}.")
 
 	for p, b in vmbr_map.items():
 		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list (Port Mapping).")
@@ -70,9 +71,10 @@ def main(argv_a: argparse.ArgumentParser):
 				else:
 					current_bridge = f"vmbr{vmbr_index}"
 					# Increase bridge index if NIC is not mapped
-					while f"vmbr{vmbr_index}" in configured_ifaces and not nic in vmbr_map:
-						vmbr_index += 1
-						current_bridge = f"vmbr{vmbr_index}"
+					if not nic in vmbr_map:
+						while f"vmbr{vmbr_index}" in configured_ifaces:
+							vmbr_index += 1
+							current_bridge = f"vmbr{vmbr_index}"
 					
 					# Generate VMBR if non-existent
 					if not current_bridge in configured_ifaces:
