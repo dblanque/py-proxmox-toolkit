@@ -19,13 +19,14 @@ def argparser() -> argparse.ArgumentParser:
 	return parser
 
 def main(argv_a: argparse.ArgumentParser):
+	iface_data = dict()
+	vmbr_index = 0
+	NEW_INTERFACES_FILE = f"{FILE_NETWORK_INTERFACES}.auto"
+
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
-	configured_ifaces = parse_interfaces()
 	ifaces = get_interfaces(interface_patterns=PHYSICAL_INTERFACE_PATTERNS)
 	bridges = get_interfaces(interface_patterns=VIRTUAL_BRIDGE_PATTERNS)
-	vmbr_index = 0
-	iface_data = dict()
-	NEW_INTERFACES_FILE = f"{FILE_NETWORK_INTERFACES}.auto"
+	configured_ifaces = parse_interfaces()
 
 	# Check if ethtool is installed when requiring offload disabled
 	if not argv_a.keep_offloading:
