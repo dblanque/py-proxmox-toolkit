@@ -14,6 +14,7 @@ def argparser() -> argparse.ArgumentParser:
 		description="This program is used to generate Proxmox VE network bridges."
 	)
 	parser.add_argument("-o", "--ovs-bridge", help="Generate OVS Bridges instead of Linux Bridges.", action="store_true")
+	parser.add_argument("-r", "--reconfigure-all", help="Ignores existing configuration and regenerates all NIC and Bridge assignments.", action="store_true")
 	parser.add_argument("-x", "--keep-offloading", help="Do not disable offloading with ethtool.", action="store_true")
 	parser.add_argument("-m", "--map", help="Map port to a specific bridge.", nargs="*", default=None)
 	return parser
@@ -46,7 +47,7 @@ def main(argv_a: argparse.ArgumentParser):
 		f.write(DEFAULT_PVE_HEADER)
 		for nic in ifaces:
 			if not argv_a.ovs_bridge:
-				if nic in configured_ifaces:
+				if nic in configured_ifaces and not argv_a.reconfigure_all:
 					print_c(bcolors.L_YELLOW, f"{nic} is already configured, skipping.")
 					continue
 				else:
