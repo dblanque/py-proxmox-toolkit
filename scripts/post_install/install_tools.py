@@ -28,7 +28,7 @@ def main(argv_a):
 		"lshw",
 		"git",
 	]
-	if argv_a.light:
+	if not argv_a.light:
 		tools = tools + [
 			"cifs-utils",
 			"bmon",
