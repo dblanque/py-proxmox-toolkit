@@ -46,7 +46,8 @@ def main(argv_a: argparse.ArgumentParser):
 	for p, b in vmbr_map.items():
 		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list (Port Mapping).")
 		if not b in bridges: raise Exception(f"{b} was not found in the Bridge list (Port Mapping).")
-
+	
+	print(vmbr_map)
 	# Check if ethtool is installed when requiring offload disabled
 	if not argv_a.keep_offloading:
 		pkg = "ethtool"
