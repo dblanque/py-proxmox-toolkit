@@ -56,16 +56,16 @@ def main(argv_a: argparse.ArgumentParser):
 					current_bridge = f"vmbr{vmbr_index}"
 					print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
 					configured_ifaces[current_bridge] = {
-						"name": str(current_bridge),
+						"name": current_bridge,
 						"auto": True,
 						"type": "static",
-						"bridge-ports": str(nic),
-						"bridge-fd": str(0)
+						"bridge-ports": [ nic ],
+						"bridge-fd": [ 0 ]
 					}
 					
 					print_c(bcolors.L_BLUE, f"Parsing NIC {nic}")
 					configured_ifaces[nic] = {
-						"name": str(nic),
+						"name": nic,
 						"type": "manual",
 						"post-up": "/sbin/ethtool -offload eno1 tx off rx off; /sbin/ethtool -K eno1 gso off; /sbin/ethtool -K eno1 tso off;".split()
 					}
