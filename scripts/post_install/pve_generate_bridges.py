@@ -68,11 +68,14 @@ def main(argv_a: argparse.ArgumentParser):
 					continue
 				else:
 					current_bridge = f"vmbr{vmbr_index}"
-					if not nic in argv_a.map and not current_bridge in configured_ifaces:
+					# Increase bridge index if NIC is not mapped
+					while f"vmbr{vmbr_index}" in configured_ifaces and not nic in argv_a.map:
+						vmbr_index += 1
+						current_bridge = f"vmbr{vmbr_index}"
+					
+					# Generate VMBR if non-existent
+					if not current_bridge in configured_ifaces:
 						print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
-						while f"vmbr{vmbr_index}" in configured_ifaces:
-							vmbr_index += 1
-							current_bridge = f"vmbr{vmbr_index}"
 						configured_ifaces[current_bridge] = {
 							"name": current_bridge,
 							"auto": True,
