@@ -95,7 +95,7 @@ def stringify_interfaces(network_interfaces_dict: dict) -> str:
 				output = f"{output}\n#{v}"
 			else:
 				try:
-					output = f"{output}\n\t{k} {' '.join(v)}"
+					output = f"{output}\n\t{k} {' '.join([str(e) for e in v])}"
 				except:
 					print("Offending value:")
 					print(v)
