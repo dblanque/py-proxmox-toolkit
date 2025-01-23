@@ -22,6 +22,7 @@ def argparser() -> argparse.ArgumentParser:
 
 def main(argv_a: argparse.ArgumentParser):
 	iface_data = dict()
+	use_linux_bridge = not argv_a.ovs_bridge
 	vmbr_index = 0
 	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"
 
@@ -64,7 +65,7 @@ def main(argv_a: argparse.ArgumentParser):
 	with open(NEW_INTERFACES_FILE, "w") as f:
 		f.write(DEFAULT_PVE_HEADER)
 		for nic in ifaces:
-			if not argv_a.ovs_bridge:
+			if use_linux_bridge:
 				if nic in configured_ifaces and not argv_a.reconfigure_all:
 					print_c(bcolors.L_YELLOW, f"{nic} is already configured, skipping.")
 					continue
