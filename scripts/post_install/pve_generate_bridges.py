@@ -36,11 +36,11 @@ def main(argv_a: argparse.ArgumentParser):
 	bridges = get_interfaces(interface_patterns=VIRTUAL_BRIDGE_PATTERNS)
 	configured_ifaces = parse_interfaces(file=argv_a.source)
 	if argv_a.reconfigure_all:
+		print_c(bcolors.L_RED, "WARNING: All bridges will be reset.")
 		for b in bridges:
 			if b in configured_ifaces:
 				del configured_ifaces[b]
 
-	print(configured_ifaces)
 	for p, b in vmbr_map.items():
 		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list.")
 		if not b in bridges: raise Exception(f"{b} was not found in the Bridge list.")
