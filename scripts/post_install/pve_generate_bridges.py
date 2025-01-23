@@ -17,7 +17,7 @@ def argparser() -> argparse.ArgumentParser:
 	parser.add_argument("-o", "--ovs-bridge", help="Generate OVS Bridges instead of Linux Bridges.", action="store_true")
 	parser.add_argument("-r", "--reconfigure-all", help="Ignores existing configuration and regenerates all NIC and Bridge assignments.", action="store_true")
 	parser.add_argument("-x", "--keep-offloading", help="Do not disable offloading with ethtool.", action="store_true")
-	parser.add_argument("-m", "--map", help="Map port to a specific bridge.", nargs="*", default={})
+	parser.add_argument("-m", "--map", help="Map port to a specific bridge. (Separated by spaces, written as 'port:bridge')", nargs="*", default={})
 	return parser
 
 def main(argv_a: argparse.ArgumentParser):
@@ -28,7 +28,7 @@ def main(argv_a: argparse.ArgumentParser):
 		for i in argv_a.map:
 			i: str = i.split(":")
 			vmbr_map[i[0]] = i[1]
-			if len(i) > 2: raise Exception(f"Invalid map element (Length must be 2) {i}.")
+			if len(i) != 2: raise Exception(f"Invalid map element (Length must be 2) {i}.")
 	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"
 
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
