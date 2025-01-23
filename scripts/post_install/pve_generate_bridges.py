@@ -13,25 +13,36 @@ def argparser() -> argparse.ArgumentParser:
 		prog="Proxmox VE VMBR Generator Script",
 		description="This program is used to generate Proxmox VE network bridges."
 	)
+	parser.add_argument("-s", "--source", help="Source specific Interfaces file.", default=FILE_NETWORK_INTERFACES)
 	parser.add_argument("-o", "--ovs-bridge", help="Generate OVS Bridges instead of Linux Bridges.", action="store_true")
 	parser.add_argument("-r", "--reconfigure-all", help="Ignores existing configuration and regenerates all NIC and Bridge assignments.", action="store_true")
 	parser.add_argument("-x", "--keep-offloading", help="Do not disable offloading with ethtool.", action="store_true")
-	parser.add_argument("-m", "--map", help="Map port to a specific bridge.", nargs="*", default=None)
+	parser.add_argument("-m", "--map", help="Map port to a specific bridge.", nargs="*", default={})
 	return parser
 
 def main(argv_a: argparse.ArgumentParser):
 	iface_data = dict()
 	vmbr_index = 0
-	NEW_INTERFACES_FILE = f"{FILE_NETWORK_INTERFACES}.auto"
+	vmbr_map = dict()
+	if argv_a.map:
+		for i in argv_a.map:
+			i: str = i.split(":")
+			vmbr_map[i[0]] = i[1]
+			if len(i) > 2: raise Exception(f"Invalid map element (Length must be 2) {i}.")
+	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"
 
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	ifaces = get_interfaces(interface_patterns=PHYSICAL_INTERFACE_PATTERNS)
 	bridges = get_interfaces(interface_patterns=VIRTUAL_BRIDGE_PATTERNS)
-	configured_ifaces = parse_interfaces()
+	configured_ifaces = parse_interfaces(file=argv_a.source)
 	if argv_a.reconfigure_all:
 		for b in bridges:
 			if b in configured_ifaces:
 				del configured_ifaces[b]
+
+	for p, b in vmbr_map.items():
+		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list.")
+		if not b in bridges: raise Exception(f"{b} was not found in the Bridge list.")
 
 	# Check if ethtool is installed when requiring offload disabled
 	if not argv_a.keep_offloading:
@@ -55,19 +66,22 @@ def main(argv_a: argparse.ArgumentParser):
 					print_c(bcolors.L_YELLOW, f"{nic} is already configured, skipping.")
 					continue
 				else:
-					while f"vmbr{vmbr_index}" in configured_ifaces:
-						vmbr_index += 1
-					current_bridge = f"vmbr{vmbr_index}"
-					print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
-					configured_ifaces[current_bridge] = {
-						"name": current_bridge,
-						"auto": True,
-						"type": "static",
-						"bridge-ports": [ nic ],
-						"bridge-stp": [ "off" ],
-						"bridge-fd": [ 0 ]
-					}
-					
+					if not nic in argv_a.map.values() and not current_bridge in configured_ifaces:
+						while f"vmbr{vmbr_index}" in configured_ifaces:
+							vmbr_index += 1
+						current_bridge = f"vmbr{vmbr_index}"
+						print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
+						configured_ifaces[current_bridge] = {
+							"name": current_bridge,
+							"auto": True,
+							"type": "static",
+							"bridge-ports": [ nic ],
+							"bridge-stp": [ "off" ],
+							"bridge-fd": [ 0 ]
+						}
+					else:
+						configured_ifaces[current_bridge]["bridge-ports"].append(nic)
+
 					print_c(bcolors.L_BLUE, f"Parsing NIC {nic}")
 					configured_ifaces[nic] = {
 						"name": nic,
