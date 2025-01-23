@@ -1,7 +1,7 @@
 # Author: Dylan Blanqué
 # BR Consulting S.R.L. 2024
 import os, re, logging, subprocess
-from .pve_constants import PVE_CFG_NODES_DIR
+from .constants import PVE_CFG_NODES_DIR
 
 logger = logging.getLogger()
 

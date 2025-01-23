@@ -1,8 +1,8 @@
 # Author: Dylan Blanqué
 # BR Consulting S.R.L. 2024
 import logging, subprocess
-from .pve_constants import PVE_CFG_STORAGE
-from .pve_guest import get_guest_cfg
+from .constants import PVE_CFG_STORAGE
+from .guests import get_guest_cfg
 from dataclasses import dataclass
 
 logger = logging.getLogger()
