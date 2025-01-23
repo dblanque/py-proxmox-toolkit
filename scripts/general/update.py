@@ -16,17 +16,12 @@ def argparser():
 	parser.add_argument('-df', '--download-first', help="Execute package download only first, then update.", action="store_true")
 	parser.add_argument('-q', '--quiet', help="Make apt commands quiet.", action="store_true")
 	parser.add_argument('-p', '--show-prompts', help="Show prompts from apt commands, default is auto-yes.", action="store_true")
-	parser.add_argument('-w', '--windows-newline', help="Prints line endings with CRLF instead of LF.", action="store_true")
 	return parser
 
 def main(argv_a):
 	if os.geteuid() != 0:
 		print_c(bcolors.L_YELLOW, "Script must be executed as root.")
 		exit()
-	line_ending="\n"
-	if argv_a.windows_newline:
-		print_c(bcolors.L_YELLOW, f"[WARNING]{bcolors.NC} - Using CRLF for line-endings.")
-		line_ending="\r\n"
 
 	commands = [ "apt update" ]
 	if argv_a.download_only:
