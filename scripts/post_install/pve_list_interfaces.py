@@ -26,9 +26,9 @@ def main(argv_a):
 		regex_list = [ r"^.*$" ]
 
 	if argv_a.physical:
-		regex_list = regex_list + PHYSICAL_INTERFACE_PATTERNS
+		regex_list = regex_list + list(PHYSICAL_INTERFACE_PATTERNS)
 	if argv_a.virtual:
-		regex_list = regex_list + VIRTUAL_INTERFACE_PATTERNS + VIRTUAL_BRIDGE_PATTERNS
+		regex_list = regex_list + list(VIRTUAL_INTERFACE_PATTERNS) + list(VIRTUAL_BRIDGE_PATTERNS)
 	if argv_a.regex and len(argv_a.regex) > 0:
 		regex_list = regex_list + argv_a.regex
 
