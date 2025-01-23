@@ -28,6 +28,10 @@ def main(argv_a: argparse.ArgumentParser):
 	ifaces = get_interfaces(interface_patterns=PHYSICAL_INTERFACE_PATTERNS)
 	bridges = get_interfaces(interface_patterns=VIRTUAL_BRIDGE_PATTERNS)
 	configured_ifaces = parse_interfaces()
+	if argv_a.reconfigure_all:
+		for b in bridges:
+			if b in configured_ifaces:
+				del configured_ifaces[b]
 
 	# Check if ethtool is installed when requiring offload disabled
 	if not argv_a.keep_offloading:
@@ -51,7 +55,7 @@ def main(argv_a: argparse.ArgumentParser):
 					print_c(bcolors.L_YELLOW, f"{nic} is already configured, skipping.")
 					continue
 				else:
-					while f"vmbr{vmbr_index}" in bridges:
+					while f"vmbr{vmbr_index}" in configured_ifaces:
 						vmbr_index += 1
 					current_bridge = f"vmbr{vmbr_index}"
 					print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
