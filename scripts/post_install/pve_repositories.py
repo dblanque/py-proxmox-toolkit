@@ -12,9 +12,9 @@ from core.proxmox.manager import pve_version_exists, get_pve_version
 from core.exceptions.base import DependencyMissing
 from core.utils.yes_no_input import yes_no_input
 from core.format.colors import bcolors, print_c
-from .apt_sources.ceph import CEPH_SOURCES
-from .apt_sources.pve import SRC_PVE_ENTERPRISE, SRC_PVE_NO_SUBSCRIPTION
-from .apt_sources.debian import SRC_DEB_BOOKWORM_SYNTAX
+from .apt.sources.ceph import CEPH_SOURCES
+from .apt.sources.pve import SRC_PVE_ENTERPRISE, SRC_PVE_NO_SUBSCRIPTION
+from .apt.sources.debian import SRC_DEB_BOOKWORM_SYNTAX
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"

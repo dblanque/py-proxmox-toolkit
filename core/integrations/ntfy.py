@@ -1,4 +1,5 @@
 import requests, logging
+# TODO - replace requests with urllib3 or httplib2
 from ..validators.url import url_validator
 logger = logging.getLogger()
 

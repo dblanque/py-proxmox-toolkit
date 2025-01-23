@@ -9,8 +9,8 @@ signal.signal(signal.SIGINT, graceful_exit)
 from core.debian import os_release
 from core.utils.yes_no_input import yes_no_input
 from core.format.colors import bcolors, print_c
-from .apt_sources.pbs import SRC_PBS_ENTERPRISE, SRC_PBS_NO_SUBSCRIPTION
-from .apt_sources.debian import SRC_DEB_BOOKWORM_SYNTAX
+from .apt.sources.pbs import SRC_PBS_ENTERPRISE, SRC_PBS_NO_SUBSCRIPTION
+from .apt.sources.debian import SRC_DEB_BOOKWORM_SYNTAX
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PBS_NS = f"{SOURCES_LIST_DIR}/pbs-no-subscription.list"

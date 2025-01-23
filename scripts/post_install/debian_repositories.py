@@ -9,7 +9,7 @@ signal.signal(signal.SIGINT, graceful_exit)
 from core.debian import os_release
 from core.utils.yes_no_input import yes_no_input
 from core.format.colors import bcolors, print_c
-from .apt_sources.debian import DEB_LISTS
+from .apt.sources.debian import DEB_LISTS
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 
