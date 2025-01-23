@@ -5,8 +5,8 @@
 # Documentation (LXC): https://pve.proxmox.com/pve-docs/pct.1.html
 import sys, os, argparse, socket, subprocess, signal, time, logging
 from copy import deepcopy
-from pve_constants import PVE_CFG_NODES_DIR
-from pve_guest import (
+from core.proxmox.constants import PVE_CFG_NODES_DIR
+from core.proxmox.guests import (
 	get_guest_cfg,
 	get_all_guests,
 	get_guest_is_ct,

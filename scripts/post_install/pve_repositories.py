@@ -8,7 +8,7 @@ signal.signal(signal.SIGINT, graceful_exit)
 
 MIN_VERSION = "8.0.0"
 from core.debian import os_release
-from core.proxmox.pve_manager import pve_version_exists, get_pve_version
+from core.proxmox.manager import pve_version_exists, get_pve_version
 from core.exceptions.base import DependencyMissing
 from core.utils.yes_no_input import yes_no_input
 from core.format.colors import bcolors, print_c

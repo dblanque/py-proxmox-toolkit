@@ -28,9 +28,9 @@ signal.signal(signal.SIGINT, graceful_exit)
 
 # IMPORTS
 import logging, sys, os, argparse, socket, signal, subprocess, re
-from core.proxmox.pve_guest import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
-from core.proxmox.pve_storage import get_storage_cfg
-from core.proxmox.pve_constants import DISK_TYPES, PVE_CFG_REPLICATION
+from core.proxmox.guests import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
+from core.proxmox.storage import get_storage_cfg
+from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 from core.classes.ColoredFormatter import set_logger
 from core.signal_handlers.sigint import graceful_exit
 
