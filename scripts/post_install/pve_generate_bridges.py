@@ -17,15 +17,16 @@ def argparser() -> argparse.ArgumentParser:
 	parser.add_argument("-o", "--ovs-bridge", help="Generate OVS Bridges instead of Linux Bridges.", action="store_true")
 	parser.add_argument("-r", "--reconfigure-all", help="Ignores existing configuration and regenerates all NIC and Bridge assignments.", action="store_true")
 	parser.add_argument("-x", "--keep-offloading", help="Do not disable offloading with ethtool.", action="store_true")
-	parser.add_argument("-m", "--map", help="Map port to a specific bridge. (Separated by spaces, written as 'port:bridge')", nargs="*", default={})
+	parser.add_argument("-p", "--port-map", help="Map port to a specific bridge. (Separated by spaces, written as 'port:bridge')", nargs="*", default=[])
 	return parser
 
 def main(argv_a: argparse.ArgumentParser):
 	iface_data = dict()
 	vmbr_index = 0
 	vmbr_map = dict()
-	if argv_a.map:
-		for i in argv_a.map:
+	port_map_list: dict[str] = argv_a.port_map
+	if port_map_list:
+		for i in port_map_list:
 			i: str = i.split(":")
 			vmbr_map[i[0]] = i[1]
 			if len(i) != 2: raise Exception(f"Invalid map element (Length must be 2) {i}.")
@@ -42,8 +43,8 @@ def main(argv_a: argparse.ArgumentParser):
 				del configured_ifaces[b]
 
 	for p, b in vmbr_map.items():
-		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list.")
-		if not b in bridges: raise Exception(f"{b} was not found in the Bridge list.")
+		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list (Port Mapping).")
+		if not b in bridges: raise Exception(f"{b} was not found in the Bridge list (Port Mapping).")
 
 	# Check if ethtool is installed when requiring offload disabled
 	if not argv_a.keep_offloading:
@@ -69,7 +70,7 @@ def main(argv_a: argparse.ArgumentParser):
 				else:
 					current_bridge = f"vmbr{vmbr_index}"
 					# Increase bridge index if NIC is not mapped
-					while f"vmbr{vmbr_index}" in configured_ifaces and not nic in argv_a.map:
+					while f"vmbr{vmbr_index}" in configured_ifaces and not nic in vmbr_map:
 						vmbr_index += 1
 						current_bridge = f"vmbr{vmbr_index}"
 					
