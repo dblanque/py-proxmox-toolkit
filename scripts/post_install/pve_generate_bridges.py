@@ -40,6 +40,7 @@ def main(argv_a: argparse.ArgumentParser):
 			if b in configured_ifaces:
 				del configured_ifaces[b]
 
+	print(configured_ifaces)
 	for p, b in vmbr_map.items():
 		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list.")
 		if not b in bridges: raise Exception(f"{b} was not found in the Bridge list.")
@@ -68,10 +69,10 @@ def main(argv_a: argparse.ArgumentParser):
 				else:
 					current_bridge = f"vmbr{vmbr_index}"
 					if not nic in argv_a.map and not current_bridge in configured_ifaces:
+						print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
 						while f"vmbr{vmbr_index}" in configured_ifaces:
 							vmbr_index += 1
 							current_bridge = f"vmbr{vmbr_index}"
-						print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")
 						configured_ifaces[current_bridge] = {
 							"name": current_bridge,
 							"auto": True,
@@ -81,6 +82,7 @@ def main(argv_a: argparse.ArgumentParser):
 							"bridge-fd": [ 0 ]
 						}
 					else:
+						print_c(bcolors.L_BLUE, f"Linking port to virtual bridge {current_bridge}")
 						configured_ifaces[current_bridge]["bridge-ports"].append(nic)
 
 					print_c(bcolors.L_BLUE, f"Parsing NIC {nic}")
