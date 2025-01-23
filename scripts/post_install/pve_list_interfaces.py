@@ -2,7 +2,7 @@ if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
 import argparse
-from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_INTERFACE_PATTERNS
+from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
 from core.format.colors import bcolors, print_c
 
 def argparser():
@@ -28,7 +28,7 @@ def main(argv_a):
 	if argv_a.physical:
 		regex_list = regex_list + PHYSICAL_INTERFACE_PATTERNS
 	if argv_a.virtual:
-		regex_list = regex_list + VIRTUAL_INTERFACE_PATTERNS
+		regex_list = regex_list + VIRTUAL_INTERFACE_PATTERNS + VIRTUAL_BRIDGE_PATTERNS
 	if argv_a.regex and len(argv_a.regex) > 0:
 		regex_list = regex_list + argv_a.regex
 

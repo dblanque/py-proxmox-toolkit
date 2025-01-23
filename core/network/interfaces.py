@@ -1,6 +1,13 @@
 import os, re
 from core.format.colors import print_c, bcolors
 
+NETWORK_INTERFACES_INET_TYPES = [
+	"static",
+	"manual",
+	"loopback",
+	"dhcp",
+]
+
 PHYSICAL_INTERFACE_PATTERNS=[
 	r"^eth[0-9].*$",
 	r"^eno[0-9].*$",
@@ -9,8 +16,11 @@ PHYSICAL_INTERFACE_PATTERNS=[
 	r"^ens[0-9].*$",
 ]
 
-VIRTUAL_INTERFACE_PATTERNS=[
+VIRTUAL_BRIDGE_PATTERNS=[
 	r"^vmbr[0-9].*$",
+]
+
+VIRTUAL_INTERFACE_PATTERNS=[
 	r"^veth[0-9].*$",
 	r"^fwbr[0-9].*$",
 	r"^fwln[0-9].*$",
