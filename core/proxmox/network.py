@@ -94,5 +94,10 @@ def stringify_interfaces(network_interfaces_dict: dict) -> str:
 			if k == "description":
 				output = f"{output}\n#{v}"
 			else:
-				output = f"{output}\n\t{k} {' '.join(v)}"
+				try:
+					output = f"{output}\n\t{k} {' '.join(v)}"
+				except:
+					print("Offending value:")
+					print(v)
+					raise
 	return f"{output}\n"
