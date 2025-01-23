@@ -46,7 +46,7 @@ def get_interfaces(interface_patterns=None, override_patterns=False, verbose=Fal
 		if skip == True: continue
 
 		for regex in check_patterns:
-			if re.match(regex, iface):
+			if re.match(regex, iface) and not iface in filtered_interfaces:
 				filtered_interfaces.append(iface)
 				match = True
 
