@@ -64,6 +64,7 @@ def main(argv_a: argparse.ArgumentParser):
 						"auto": True,
 						"type": "static",
 						"bridge-ports": [ nic ],
+						"bridge-stp": [ "off" ],
 						"bridge-fd": [ 0 ]
 					}
 					
