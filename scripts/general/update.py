@@ -2,15 +2,17 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import os, sys, subprocess, signal, argparse
+import os, sys, subprocess, signal
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
+from core.parser import make_parser, ArgumentParser
 signal.signal(signal.SIGINT, graceful_exit)
 
-def argparser():
-	parser = argparse.ArgumentParser(
+def argparser(**kwargs) -> ArgumentParser:
+	parser = make_parser(
 		prog="OS Update Script",
-		description="This program is used to update system packages with APT."
+		description="This program is used to update system packages with APT.",
+		**kwargs
 	)
 	parser.add_argument('-d', '--download-only', help="Execute package download only.", action="store_true")
 	parser.add_argument('-df', '--download-first', help="Execute package download only first, then update.", action="store_true")

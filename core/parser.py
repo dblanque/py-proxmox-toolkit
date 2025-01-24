@@ -3,12 +3,12 @@ if __name__ == "__main__":
 	raise Exception("This module cannot be executed as a script")
 
 # Source for ColoredArgParser: https://stackoverflow.com/questions/47155189/how-to-output-color-using-argparse-in-python-if-any-errors-happen
-from core.format.colors import bcolors
-import argparse
 import sys
+from core.format.colors import bcolors
+from argparse import ArgumentParser
 from gettext import gettext
 
-class ColoredArgParser(argparse.ArgumentParser):
+class ColoredArgParser(ArgumentParser):
 
 	# color_dict is a class attribute, here we avoid compatibility
 	# issues by attempting to override the __init__ method
@@ -37,7 +37,7 @@ class ColoredArgParser(argparse.ArgumentParser):
 				file.write(message)
 			else:
 				# \x1b[ is the ANSI Control Sequence Introducer (CSI)
-				file.write('\x1b[' + color + message.strip() + '\x1b[0m\n')
+				file.write('\x1b[' + color.value + message.strip() + '\x1b[0m\n')
 
 	def exit(self, status = 0, message = None):
 		if message:
@@ -48,3 +48,7 @@ class ColoredArgParser(argparse.ArgumentParser):
 		self.print_usage(sys.stderr)
 		args = {'prog' : self.prog, 'message': message}
 		self.exit(2, gettext('%(prog)s: Error: %(message)s\n') % args)
+
+def make_parser(**kwargs) -> ArgumentParser:
+	parser = ColoredArgParser(**kwargs)
+	return parser

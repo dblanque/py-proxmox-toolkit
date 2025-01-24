@@ -1,11 +1,15 @@
-import subprocess, logging, argparse
+import subprocess, logging
+from core.parser import make_parser, ArgumentParser
 logger = logging.getLogger(__name__)
 
-parser = argparse.ArgumentParser(
-	prog='Interface Status Fetcher',
-	description='Gets interface status with ip binary')
-parser.add_argument('interface')
-args = parser.parse_args()
+def argparser(**kwargs) -> ArgumentParser:
+	parser = make_parser(
+		prog='Interface Status Fetcher',
+		description='Gets interface status with ip binary',
+		**kwargs
+	)
+	parser.add_argument('interface')
+	return parser
 
 def get_iface_status(iface_name):
 	IP_ARGS=[
@@ -24,17 +28,18 @@ def get_iface_status(iface_name):
 	iface_status_line = None
 	for l in errors:
 		if "does not exist" in l:
-			raise ValueError(f"Interface {args.interface} does not exist")
+			raise ValueError(f"Interface {iface_name} does not exist")
 	for l in output:
 		if "state" in l:
 			iface_status_line = l.split(" ")
 	iface_status = iface_status_line[iface_status_line.index("state") + 1].strip()
 	return iface_status
 
-def main():
+def main(argv_a: ArgumentParser = None):
+	if not argv_a:
+		argv_a = argparser().parse_args()
 	try:
-		bridge_status = get_iface_status(args.interface)
-		print(bridge_status)
+		print( get_iface_status(argv_a.interface) )
 	except:
 		raise
 

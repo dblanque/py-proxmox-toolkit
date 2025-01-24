@@ -27,17 +27,19 @@ from core.signal_handlers.sigint import graceful_exit
 signal.signal(signal.SIGINT, graceful_exit)
 
 # IMPORTS
-import logging, sys, os, argparse, socket, signal, subprocess, re
+import logging, sys, os, socket, signal, subprocess, re
 from core.proxmox.guests import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
 from core.proxmox.storage import get_storage_cfg
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 from core.classes.ColoredFormatter import set_logger
 from core.signal_handlers.sigint import graceful_exit
+from core.parser import make_parser, ArgumentParser
 
-def argparser():
-	parser = argparse.ArgumentParser(
+def argparser(**kwargs) -> ArgumentParser:
+	parser = make_parser(
 		prog="Batch PVE Guest Network Modifier",
-		description="This program is used for scripted network modifications that might imply a network cutout or require an automatic rollback."
+		description="This program is used for scripted network modifications that might imply a network cutout or require an automatic rollback.",
+		**kwargs
 	)
 	parser.add_argument('-l', '--remote-user', default="root")  # Bool
 	parser.add_argument('-i', '--origin-id', default=None)  # Bool

@@ -1,16 +1,18 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import argparse, subprocess, os
+import subprocess, os
 from core.format.colors import bcolors, print_c
 from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
 from core.debian.constants import FILE_NETWORK_INTERFACES
 from core.proxmox.network import parse_interfaces, DEFAULT_PVE_HEADER, stringify_interfaces
+from core.parser import make_parser, ArgumentParser
 
-def argparser() -> argparse.ArgumentParser:
-	parser = argparse.ArgumentParser(
+def argparser(**kwargs) -> ArgumentParser:
+	parser = make_parser(
 		prog="Proxmox VE VMBR Generator Script",
-		description="This program is used to generate Proxmox VE network bridges."
+		description="This program is used to generate Proxmox VE network bridges.",
+		**kwargs
 	)
 	parser.add_argument("-s", "--source", help="Source specific Interfaces file.", default=FILE_NETWORK_INTERFACES)
 	parser.add_argument("-o", "--ovs-bridge", help="Generate OVS Bridges instead of Linux Bridges.", action="store_true")
@@ -19,7 +21,7 @@ def argparser() -> argparse.ArgumentParser:
 	parser.add_argument("-p", "--port-map", help="Map port to a specific bridge. (Separated by spaces, written as 'port:bridge')", nargs="*", default=[])
 	return parser
 
-def main(argv_a: argparse.ArgumentParser):
+def main(argv_a: ArgumentParser):
 	iface_data = dict()
 	use_linux_bridge = not argv_a.ovs_bridge
 	vmbr_index = 0

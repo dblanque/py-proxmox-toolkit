@@ -1,22 +1,24 @@
 #!/usr/bin/python3
-import argparse, sys
-is_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
-if is_interactive: print("Interactive mode enabled.")
-parser = argparse.ArgumentParser(
-	prog='Main Program file for Python Proxmox Toolkit Execution',
+from argparse import ArgumentParser
+import sys
+
+main_parser = ArgumentParser(
+	prog='Python Proxmox Toolkit Parser',
 	description='Use this program to execute sub-scripts from the toolkit',
 	add_help=False
 )
-parser.add_argument('filename')
-args, unknown_args = parser.parse_known_args()
+main_parser.add_argument('filename')
+args, unknown_args = main_parser.parse_known_args()
+
+is_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
+if is_interactive:
+	print("Interactive mode enabled.")
 
 # Construct sub-script name
-try:
-	parsed_filename = str(args.filename)
-	if parsed_filename.endswith(".py"):
-		parsed_filename = parsed_filename.split(".py")[0]
-		parsed_filename = parsed_filename.replace("/",".")
-except: raise
+parsed_filename = str(args.filename)
+if parsed_filename.endswith(".py"):
+	parsed_filename = parsed_filename.split(".py")[0]
+	parsed_filename = parsed_filename.replace("/",".")
 
 # Import main function from sub-script
 try:
@@ -28,17 +30,13 @@ except:
 	if is_interactive: print("No main function detected.")
 	else: raise
 
-# Import argparser function from subscript if existent.
-try:
-	if script_parser:
-		new_parser: argparse.ArgumentParser = script_parser()
-		new_parser.add_argument('filename')
-		args = new_parser.parse_args()
-		script_func(args)
-	else: script_func()
-except: 
-	if is_interactive: print("No argparser function detected.")
-	else: raise
+if script_func and script_parser:
+	new_parser: ArgumentParser = script_parser(
+		parents=[ main_parser ]
+	)
+	args = new_parser.parse_args()
+	script_func(args)
+else: script_func()
 
 if not is_interactive:
 	sys.exit(0)

@@ -2,15 +2,17 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import os, sys, subprocess, signal, argparse
+import os, sys, subprocess, signal
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
+from core.parser import make_parser, ArgumentParser
 signal.signal(signal.SIGINT, graceful_exit)
 
-def argparser():
-	parser = argparse.ArgumentParser(
+def argparser(**kwargs) -> ArgumentParser:
+	parser = make_parser(
 		prog="Useful Tools Installation Script",
-		description="This program is used to install system administration tools that might be useful long term."
+		description="This program is used to install system administration tools that might be useful long term.",
+		**kwargs
 	)
 	parser.add_argument('-l', '--light', action="store_true")
 	return parser

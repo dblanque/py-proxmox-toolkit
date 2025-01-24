@@ -1,14 +1,15 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import argparse
 from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
 from core.format.colors import bcolors, print_c
+from core.parser import make_parser, ArgumentParser
 
-def argparser():
-	parser = argparse.ArgumentParser(
+def argparser(**kwargs) -> ArgumentParser:
+	parser = make_parser(
 		prog="Proxmox VE Network Interface Listing Script",
-		description="This program is used to list network interfaces."
+		description="This program is used to list network interfaces.",
+		**kwargs
 	)
 	parser.add_argument("-p", "--physical", help="Physical Interface Filtering ONLY.", action="store_true")
 	parser.add_argument("-v", "--virtual", help="Virtual Interface Filtering ONLY.", action="store_true")

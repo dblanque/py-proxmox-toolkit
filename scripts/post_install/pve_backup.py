@@ -2,11 +2,12 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import signal, argparse, os, sys, subprocess
+import signal, os, sys, subprocess
 from datetime import datetime, timezone
 from time import perf_counter
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import bcolors, print_c
+from core.parser import make_parser, ArgumentParser
 signal.signal(signal.SIGINT, graceful_exit)
 
 BKP_DIRS = [
@@ -14,10 +15,11 @@ BKP_DIRS = [
 ]
 DATE_FMT = "%Y-%m-%d_%H-%M-%S"
 
-def argparser():
-	parser = argparse.ArgumentParser(
+def argparser(**kwargs) -> ArgumentParser:
+	parser = make_parser(
 		prog="Proxmox VE Metadata Backup Script",
-		description="This program is used to backup relevant Proxmox VE Host and Guest Configuration Metadata."
+		description="This program is used to backup relevant Proxmox VE Host and Guest Configuration Metadata.",
+		**kwargs
 	)
 	parser.add_argument('-p', '--output-path', default="/opt", help="Backup Tar output path, use without trailing slash.")
 	parser.add_argument('-e', '--extra-dirs', help="Extra directories to backup.", nargs="+")
