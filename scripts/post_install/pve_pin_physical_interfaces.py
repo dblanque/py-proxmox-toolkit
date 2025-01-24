@@ -57,7 +57,7 @@ def main(argv_a):
 				attrs = ""
 				for k, v in udev_info.items():
 					if k in udev_fields:
-						attrs = attrs + "\n" + f"Property={k}={v}" + "\n"
+						attrs = attrs + f"Property={k}={v}" + "\n"
 				data = UDEV_BY_PROPERTY.format(
 					iface_name=iface_name,
 					iface_mac_addr=iface_mac_addr,
