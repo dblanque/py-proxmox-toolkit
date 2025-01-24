@@ -17,7 +17,7 @@ from core.parser import make_parser, ArgumentParser
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
-		prog='Batch PVE Guest Network Modifier',
+		prog='Proxmox VE Staged Guest Network Modifier',
 		description='This program is used for scripted network modifications that might imply a network cutout and require an automatic rollback.',
 		**kwargs
 	)
