@@ -5,6 +5,9 @@ if __name__ == "__main__":
 from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
 from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
+from core.templates.udev.overrides import UDEV_BY_MAC_ADDRESS
+from core.validators.mac import mac_address_validator
+import subprocess
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -20,7 +23,10 @@ def main(argv_a):
 
 	interfaces = get_interfaces(
 		interface_patterns=regex_list,
-		override_patterns=any([argv_a.only_regex, argv_a.physical, argv_a.virtual]),
 		verbose=argv_a.verbose
 	)
-	print([i for i in interfaces])
+	for iface_name in interfaces:
+		iface_mac_addr = subprocess.run(f"cat /sys/class/net/{iface_name}/address".split(), capture_output=True)
+		if mac_address_validator(iface_mac_addr):
+			print(f"Interface {iface_name} will be pinned with MAC Address {iface_mac_addr}")
+
