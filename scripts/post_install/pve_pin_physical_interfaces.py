@@ -16,21 +16,22 @@ def argparser(**kwargs) -> ArgumentParser:
 		description="This program is used to pin network interfaces to their corresponding MAC Address and/or Serial Number.",
 		**kwargs
 	)
-	parser.add_argument("-f", "--use-field", help="Use specific field as identifier if available instead of MAC Address.", nargs="+", default=None)
+	parser.add_argument("-i", "--interface", help="Use specific interfaces.", nargs="+", default=None)
+	parser.add_argument("-f", "--fields", help="Use specific UDEV Info Properties as identifier if available instead of MAC Address.", nargs="+", default=None)
 	parser.add_argument("-o", "--overwrite", help="Over-write pre-existing UDEV Link Files.", action="store_true")
 	parser.add_argument("-p", "--print", help="Print data instead of writing to UDEV Link Files.", action="store_true")
 	parser.add_argument("-v", "--verbose", action="store_true")
 	return parser
 
 def main(argv_a):
-	udev_fields = argv_a.use_field
+	udev_fields = argv_a.fields
 	use_print = argv_a.print
 	use_overwrite = argv_a.overwrite
 	UDEV_PATH = "/etc/systemd/network"
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	regex_list = list(PHYSICAL_INTERFACE_PATTERNS)
 
-	interfaces = get_interfaces(
+	interfaces = argv_a.interface or get_interfaces(
 		interface_patterns=regex_list,
 		verbose=argv_a.verbose
 	)
@@ -52,7 +53,10 @@ def main(argv_a):
 				continue
 
 			data = None
-			udev_info = get_inet_udev_info(iface_name)
+			if udev_fields:
+				udev_info = get_inet_udev_info(iface_name)
+
+			# If UDEV Fields/Properties are specified.
 			if udev_fields and any([f in udev_info for f in udev_fields]):
 				attrs = ""
 				for k, v in udev_info.items():
