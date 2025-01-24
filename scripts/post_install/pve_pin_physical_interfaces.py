@@ -27,7 +27,15 @@ def main(argv_a):
 		verbose=argv_a.verbose
 	)
 	for iface_name in interfaces:
-		iface_mac_addr = subprocess.run(f"cat /sys/class/net/{iface_name}/address".split(), capture_output=True)
+		iface_mac_addr = None
+		mac_addr_subprocess = subprocess.Popen(f"cat /sys/class/net/{iface_name}/address".split(),
+			stdout=subprocess.PIPE, 
+			stderr=subprocess.PIPE,
+		)
+		out, err = mac_addr_subprocess.communicate()
+		returncode = mac_addr_subprocess.returncode
+		if returncode > 0:
+			iface_mac_addr = out.decode("utf-8").strip()
 		if mac_address_validator(iface_mac_addr):
 			print(f"Interface {iface_name} will be pinned with MAC Address {iface_mac_addr}")
 
