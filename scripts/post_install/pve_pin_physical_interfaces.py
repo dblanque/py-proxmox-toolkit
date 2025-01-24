@@ -44,15 +44,16 @@ def main(argv_a):
 			if os.path.isfile(udev_link_name):
 				print(f"UDEV Link File {udev_link_name} for Interface {iface_name} already exists, skipping.")
 				continue
-			with open(udev_link_name, "w") as iface_udev_link:
-				data = UDEV_BY_MAC_ADDRESS.format(
-					iface_name=iface_name,
-					iface_mac_addr=iface_mac_addr
-				).strip()
-				if argv_a.print:
-					print(f"Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.")
-					print(data)
-				else:
+			
+			data = UDEV_BY_MAC_ADDRESS.format(
+				iface_name=iface_name,
+				iface_mac_addr=iface_mac_addr
+			).strip()
+			if argv_a.print:
+				print(f"Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.")
+				print(data)
+			else:
+				with open(udev_link_name, "w") as iface_udev_link:
 					print(f"Writing UDEV Link File {udev_link_name} for Interface {iface_name}.")
 					iface_udev_link.write(data)
 					print(f"UDEV Link Written.")
