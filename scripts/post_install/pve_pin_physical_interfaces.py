@@ -40,7 +40,7 @@ def main(argv_a):
 		if returncode == 0:
 			iface_mac_addr = out.decode("utf-8").strip()
 		if mac_address_validator(iface_mac_addr):
-			print(f"Interface {iface_name} will be pinned with MAC Address {iface_mac_addr}")
+			print(f"Interface {bcolors.L_BLUE}{iface_name}{bcolors.NC} will be pinned with MAC Address {bcolors.L_RED}{iface_mac_addr}{bcolors.NC}")
 			if os.path.isfile(udev_link_name):
 				print(f"UDEV Link File {udev_link_name} for Interface {iface_name} already exists, skipping.")
 				continue
@@ -50,7 +50,7 @@ def main(argv_a):
 				iface_mac_addr=iface_mac_addr
 			).strip()
 			if argv_a.print:
-				print(f"Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.")
+				print(f"{bcolors.L_YELLOW}Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.{bcolors.NC}")
 				print(data)
 			else:
 				with open(udev_link_name, "w") as iface_udev_link:
@@ -59,6 +59,6 @@ def main(argv_a):
 					print(f"UDEV Link Written.")
 			print("-"*12 + "\n")
 
-		print(f"You may execute the command {bcolors.L_YELLOW}systemctl restart systemd-udev-trigger{bcolors.NC} to refresh the Interface UDEV Links.")
+	print(f"You may execute the command {bcolors.L_YELLOW}systemctl restart systemd-udev-trigger{bcolors.NC} to refresh the Interface UDEV Links.")
 
 
