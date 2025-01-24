@@ -17,12 +17,15 @@ def argparser(**kwargs) -> ArgumentParser:
 		**kwargs
 	)
 	parser.add_argument("-f", "--use-field", help="Use specific field as identifier if available instead of MAC Address.", nargs="+", default=None)
+	parser.add_argument("-o", "--overwrite", help="Over-write pre-existing UDEV Link Files.", action="store_true")
 	parser.add_argument("-p", "--print", help="Print data instead of writing to UDEV Link Files.", action="store_true")
 	parser.add_argument("-v", "--verbose", action="store_true")
 	return parser
 
 def main(argv_a):
 	use_field = argv_a.use_field
+	use_print = argv_a.print
+	use_overwrite = argv_a.overwrite
 	UDEV_PATH = "/etc/systemd/network"
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	regex_list = list(PHYSICAL_INTERFACE_PATTERNS)
@@ -44,8 +47,8 @@ def main(argv_a):
 			iface_mac_addr = out.decode("utf-8").strip()
 		if mac_address_validator(iface_mac_addr):
 			print(f"Interface {bcolors.L_BLUE}{iface_name}{bcolors.NC} will be pinned with MAC Address {bcolors.L_RED}{iface_mac_addr}{bcolors.NC}")
-			if os.path.isfile(udev_link_name):
-				print(f"UDEV Link File {udev_link_name} for Interface {iface_name} already exists, skipping.")
+			if os.path.isfile(udev_link_name) and not use_overwrite:
+				print(f"UDEV Link File {udev_link_name} for Interface {iface_name} already exists, skipping.\n")
 				continue
 
 			data = None
@@ -64,7 +67,7 @@ def main(argv_a):
 					iface_name=iface_name,
 					iface_mac_addr=iface_mac_addr
 				).strip()
-			if argv_a.print:
+			if use_print:
 				print(f"{bcolors.L_YELLOW}Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.{bcolors.NC}")
 				print(data)
 			else:
