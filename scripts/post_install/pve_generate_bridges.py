@@ -5,7 +5,6 @@ import argparse, subprocess, os
 from core.format.colors import bcolors, print_c
 from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
 from core.debian.constants import FILE_NETWORK_INTERFACES
-from core.templates.proxmox.interfaces.vmbr import VMBR_TEMPLATE_LINUX, VMBR_TEMPLATE_OVS
 from core.proxmox.network import parse_interfaces, DEFAULT_PVE_HEADER, stringify_interfaces
 
 def argparser() -> argparse.ArgumentParser:
