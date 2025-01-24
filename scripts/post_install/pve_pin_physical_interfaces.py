@@ -5,7 +5,8 @@ if __name__ == "__main__":
 from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
 from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
-from core.templates.udev.overrides import UDEV_BY_MAC_ADDRESS
+from core.templates.udev.overrides import UDEV_BY_MAC_ADDRESS, UDEV_BY_PROPERTY
+from core.debian.udev import get_inet_udev_info
 from core.validators.mac import mac_address_validator
 import subprocess, os
 
@@ -15,11 +16,13 @@ def argparser(**kwargs) -> ArgumentParser:
 		description="This program is used to pin network interfaces to their corresponding MAC Address and/or Serial Number.",
 		**kwargs
 	)
+	parser.add_argument("-f", "--use-field", help="Use specific field as identifier if available instead of MAC Address.", nargs="+", default=None)
 	parser.add_argument("-p", "--print", help="Print data instead of writing to UDEV Link Files.", action="store_true")
 	parser.add_argument("-v", "--verbose", action="store_true")
 	return parser
 
 def main(argv_a):
+	use_field = argv_a.use_field
 	UDEV_PATH = "/etc/systemd/network"
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	regex_list = list(PHYSICAL_INTERFACE_PATTERNS)
@@ -31,12 +34,12 @@ def main(argv_a):
 	for iface_name in interfaces:
 		iface_mac_addr = None
 		udev_link_name = os.path.join(UDEV_PATH, f"10-{iface_name}.link")
-		mac_addr_subprocess = subprocess.Popen(f"cat /sys/class/net/{iface_name}/address".split(),
+		mac_address_sp = subprocess.Popen(f"cat /sys/class/net/{iface_name}/address".split(),
 			stdout=subprocess.PIPE, 
 			stderr=subprocess.PIPE,
 		)
-		out, err = mac_addr_subprocess.communicate()
-		returncode = mac_addr_subprocess.returncode
+		out, err = mac_address_sp.communicate()
+		returncode = mac_address_sp.returncode
 		if returncode == 0:
 			iface_mac_addr = out.decode("utf-8").strip()
 		if mac_address_validator(iface_mac_addr):
@@ -44,11 +47,23 @@ def main(argv_a):
 			if os.path.isfile(udev_link_name):
 				print(f"UDEV Link File {udev_link_name} for Interface {iface_name} already exists, skipping.")
 				continue
-			
-			data = UDEV_BY_MAC_ADDRESS.format(
-				iface_name=iface_name,
-				iface_mac_addr=iface_mac_addr
-			).strip()
+
+			data = None
+			if use_field:
+				attrs = ""
+				for k, v in get_inet_udev_info(iface_name):
+					if k in use_field:
+						attrs = attrs + "\n" + f"Property={k}={v}" + "\n"
+				data = UDEV_BY_PROPERTY.format(
+					iface_name=iface_name,
+					iface_mac_addr=iface_mac_addr,
+					attrs=attrs.strip()
+				).strip()
+			else:
+				data = UDEV_BY_MAC_ADDRESS.format(
+					iface_name=iface_name,
+					iface_mac_addr=iface_mac_addr
+				).strip()
 			if argv_a.print:
 				print(f"{bcolors.L_YELLOW}Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.{bcolors.NC}")
 				print(data)
@@ -58,6 +73,7 @@ def main(argv_a):
 					iface_udev_link.write(data)
 					print(f"UDEV Link Written.")
 			print("-"*12 + "\n")
+		else: print(f"{iface_name} has an invalid MAC Address, skipping.")
 
 	print(f"You may execute the command {bcolors.L_YELLOW}systemctl restart systemd-udev-trigger{bcolors.NC} to refresh the Interface UDEV Links.")
 
