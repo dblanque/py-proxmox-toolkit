@@ -23,7 +23,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 def main(argv_a):
-	use_field = argv_a.use_field
+	udev_fields = argv_a.use_field
 	use_print = argv_a.print
 	use_overwrite = argv_a.overwrite
 	UDEV_PATH = "/etc/systemd/network"
@@ -52,10 +52,11 @@ def main(argv_a):
 				continue
 
 			data = None
-			if use_field:
+			udev_info = get_inet_udev_info(iface_name)
+			if udev_fields and any([f in udev_info for f in udev_fields]):
 				attrs = ""
-				for k, v in get_inet_udev_info(iface_name).items():
-					if k in use_field:
+				for k, v in udev_info.items():
+					if k in udev_fields:
 						attrs = attrs + "\n" + f"Property={k}={v}" + "\n"
 				data = UDEV_BY_PROPERTY.format(
 					iface_name=iface_name,
