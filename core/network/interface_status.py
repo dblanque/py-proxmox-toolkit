@@ -3,6 +3,7 @@ if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
 import subprocess, logging
+from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
 logger = logging.getLogger(__name__)
 
@@ -40,4 +41,10 @@ def get_iface_status(iface_name):
 	return iface_status
 
 def main(argv_a: ArgumentParser = None):
-	print( get_iface_status(argv_a.interface) )
+	status = get_iface_status(argv_a.interface)
+	if status == "UP":
+		print_c(bcolors.L_GREEN, status)
+	elif status == "DOWN":
+		print_c(bcolors.L_RED, status)
+	else:
+		print_c(bcolors.L_BLUE, status)
