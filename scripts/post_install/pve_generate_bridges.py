@@ -95,7 +95,7 @@ def main(argv_a: argparse.ArgumentParser):
 					configured_ifaces[nic] = {
 						"name": nic,
 						"type": "manual",
-						"post-up": "/sbin/ethtool -offload eno1 tx off rx off; /sbin/ethtool -K eno1 gso off; /sbin/ethtool -K eno1 tso off;".split()
+						"post-up": f"/sbin/ethtool -offload {nic} tx off rx off; /sbin/ethtool -K {nic} gso off; /sbin/ethtool -K {nic} tso off;".split()
 					}
 			else:
 				raise Exception("OVS Bridges are currently Unsupported.")
