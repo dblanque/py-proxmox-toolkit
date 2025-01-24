@@ -2,7 +2,7 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
+from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS
 from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
 from core.templates.udev.overrides import UDEV_BY_MAC_ADDRESS, UDEV_BY_PROPERTY
