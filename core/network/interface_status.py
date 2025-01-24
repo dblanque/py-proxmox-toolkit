@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+if __name__ == "__main__":
+	raise Exception("This python script cannot be executed individually, please use main.py")
+
 import subprocess, logging
 from core.parser import make_parser, ArgumentParser
 logger = logging.getLogger(__name__)
@@ -36,12 +40,4 @@ def get_iface_status(iface_name):
 	return iface_status
 
 def main(argv_a: ArgumentParser = None):
-	if not argv_a:
-		argv_a = argparser().parse_args()
-	try:
-		print( get_iface_status(argv_a.interface) )
-	except:
-		raise
-
-if __name__ == "__main__":
-	main()
+	print( get_iface_status(argv_a.interface) )
