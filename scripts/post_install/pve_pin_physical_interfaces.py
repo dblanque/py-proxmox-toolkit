@@ -15,6 +15,7 @@ def argparser(**kwargs) -> ArgumentParser:
 		description="This program is used to pin network interfaces to their corresponding MAC Address and/or Serial Number.",
 		**kwargs
 	)
+	parser.add_argument("-v", "--verbose", action="store_true")
 	return parser
 
 def main(argv_a):
