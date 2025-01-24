@@ -21,14 +21,10 @@ if parsed_filename.endswith(".py"):
 	parsed_filename = parsed_filename.replace("/",".")
 
 # Import main function from sub-script
-try:
-	script_func = getattr(__import__(parsed_filename, fromlist=["main"]), "main")
-	script_parser = None
-	if hasattr(__import__(parsed_filename, fromlist=["argparser"]), "argparser"):
-		script_parser = getattr(__import__(parsed_filename, fromlist=["argparser"]), "argparser")
-except:
-	if is_interactive: print("No main function detected.")
-	else: raise
+script_func = getattr(__import__(parsed_filename, fromlist=["main"]), "main")
+script_parser = None
+if hasattr(__import__(parsed_filename, fromlist=["argparser"]), "argparser"):
+	script_parser = getattr(__import__(parsed_filename, fromlist=["argparser"]), "argparser")
 
 if script_func and script_parser:
 	new_parser: ArgumentParser = script_parser(
