@@ -1,6 +1,6 @@
 import subprocess
 
-def get_inet_udev_info(device: str):
+def get_inet_udev_info(device: str) -> dict:
 	"""Fetches dictionary or specific value within UDEV Information for a
 	Linux Network Interface Device.
 

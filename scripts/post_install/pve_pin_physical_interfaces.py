@@ -54,7 +54,7 @@ def main(argv_a):
 			data = None
 			if use_field:
 				attrs = ""
-				for k, v in get_inet_udev_info(iface_name):
+				for k, v in get_inet_udev_info(iface_name).items():
 					if k in use_field:
 						attrs = attrs + "\n" + f"Property={k}={v}" + "\n"
 				data = UDEV_BY_PROPERTY.format(
