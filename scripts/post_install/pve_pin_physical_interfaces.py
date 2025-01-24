@@ -34,7 +34,7 @@ def main(argv_a):
 		)
 		out, err = mac_addr_subprocess.communicate()
 		returncode = mac_addr_subprocess.returncode
-		if returncode > 0:
+		if returncode == 0:
 			iface_mac_addr = out.decode("utf-8").strip()
 		if mac_address_validator(iface_mac_addr):
 			print(f"Interface {iface_name} will be pinned with MAC Address {iface_mac_addr}")
