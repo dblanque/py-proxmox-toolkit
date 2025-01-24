@@ -57,6 +57,6 @@ def main(argv_a):
 					iface_udev_link.write(data)
 					print(f"UDEV Link Written.")
 
-		print_c(f"You may execute the command {bcolors.L_YELLOW}systemctl restart systemd-udev-trigger{bcolors.NC} to refresh the Interface UDEV Links.")
+		print_c(bcolors.NC, f"You may execute the command {bcolors.L_YELLOW}systemctl restart systemd-udev-trigger{bcolors.NC} to refresh the Interface UDEV Links.")
 
 
