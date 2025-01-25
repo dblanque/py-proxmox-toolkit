@@ -69,7 +69,7 @@ shell=args.shell
 script_file_exists=os.path.isfile(script)
 
 if interval <= ping_timeout:
-	msg=f"The gateway check Interval cannot be shorter than the Ping Timeout"
+	msg="The gateway check Interval cannot be shorter than the Ping Timeout"
 	print_c(bcolors.RED, msg)
 	raise ValueError(interval, ping_timeout)
 
@@ -83,7 +83,7 @@ def main():
 		ping_success = False
 		if ping(gateway, ping_count, ping_timeout, args=ping_args_array) == 0:
 			ping_success = True
-			msg=f"Ping to gateway successful"
+			msg="Ping to gateway successful"
 			print_c(bcolors.L_GREEN, msg)
 
 		if not ping_success:
@@ -100,13 +100,13 @@ def main():
 				connection_name=connection
 			)
 
-			msg=f'Deactivating Connection for 5 seconds'
+			msg='Deactivating Connection for 5 seconds'
 			print_c(bcolors.YELLOW, msg)
 
 			try:
 				openvpn.deactivate()
 			except Exception as e:
-				print_c(bcolors.YELLOW, f"VPN Handler Exception")
+				print_c(bcolors.YELLOW, "VPN Handler Exception")
 				print(e)
 				pass
 				# if isinstance(e, ChildProcessError):
@@ -114,7 +114,7 @@ def main():
 				# raise
 			sleep(5)
 
-			msg=f'Attempting Re-connection'
+			msg='Attempting Re-connection'
 			print_c(bcolors.BLUE, msg)
 			sleep(5)
 
@@ -122,7 +122,7 @@ def main():
 			try:
 				openvpn.activate()
 			except Exception as e:
-				print_c(bcolors.YELLOW, f"VPN Handler Exception")
+				print_c(bcolors.YELLOW, "VPN Handler Exception")
 				print(e)
 				vpn_activated=False
 				pass

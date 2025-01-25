@@ -43,7 +43,7 @@ class SQLite():
 			if isinstance(where[k], str):
 				q = q + f"'{where[k]}', "
 			elif where[k] is None:
-				q = q + f"NULL, "
+				q = q + "NULL, "
 			else:
 				q = q + f"{where[k]}, "
 		q=q.rstrip(", ")
@@ -56,7 +56,7 @@ class SQLite():
 		query = f"INSERT INTO {table} ({','.join(values.keys())}) VALUES ("
 		for v in values:
 			if not v:
-				query = query + f"NULL, "
+				query = query + "NULL, "
 			if isinstance(v, str):
 				query = query + f"'{values[v]}', "
 			else:
@@ -66,7 +66,7 @@ class SQLite():
 		try:
 			self.cursor.execute(query)
 		except Exception as e:
-			logger.critical(f"Query: {query}")
+			logger.critical("Query: %s", query)
 			logger.critical(e)
 			raise OperationalError(e)
 		self.conn.commit()
@@ -77,7 +77,7 @@ class SQLite():
 		try:
 			self.cursor.execute(query)
 		except Exception as e:
-			logger.critical(f"Query: {query}")
+			logger.critical("Query: %s", query)
 			logger.critical(e)
 			raise OperationalError(e)
 		self.conn.commit()
@@ -112,7 +112,7 @@ class SQLite():
 		try:
 			self.cursor.execute(f"{query};")
 		except Exception as e:
-			logger.critical(f"Query: {query}")
+			logger.critical("Query: %s", query)
 			logger.critical(e)
 			raise OperationalError(e)
 		return self.cursor.fetchall()
@@ -123,7 +123,7 @@ class SQLite():
 		try:
 			self.cursor.execute(query)
 		except Exception as e:
-			logger.critical(f"Query: {query}")
+			logger.critical("Query: %s", query)
 			logger.critical(e)
 			raise OperationalError(e)
 		return self.conn.commit()
