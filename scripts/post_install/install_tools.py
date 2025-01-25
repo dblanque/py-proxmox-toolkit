@@ -65,5 +65,5 @@ def main(argv_a):
 		except: pass
 
 	try:
-		subprocess.call(f"apt-get install".split() + tools)
+		subprocess.call("apt-get install".split() + tools)
 	except: raise

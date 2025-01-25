@@ -62,7 +62,7 @@ class SQLite():
 			else:
 				query = query + f"{values[v]}, "
 		query = query.rstrip(", ") + f") {extra};"
-		logger.debug(f"SQL Insert Statement: {query}")
+		logger.debug("SQL Insert Statement: %s", query)
 		try:
 			self.cursor.execute(query)
 		except Exception as e:
@@ -73,7 +73,7 @@ class SQLite():
 
 	def update(self, table: str, values: dict, where: dict):
 		query=f"UPDATE {table} SET {self.parse_dict_to_sql(values)} WHERE {self.parse_dict_to_sql(where)};"
-		logger.debug(f"SQL Update Statement: {query}")
+		logger.debug("SQL Update Statement: %s", query)
 		try:
 			self.cursor.execute(query)
 		except Exception as e:
@@ -98,7 +98,7 @@ class SQLite():
 		try:
 			return self.insert(table=table, values=values, extra=extra_sql)
 		except:
-			logger.error(f"Could not upsert values {values} onto table {table}")
+			logger.error("Could not upsert values %s onto table %s", values, table)
 			raise
 
 	def select(self, table: str, values: None, where: dict={}):
@@ -108,7 +108,7 @@ class SQLite():
 		query=f"SELECT {values} FROM {table}"
 		where=self.parse_dict_to_sql(where)
 		if where: query = f"{query} WHERE {where}"
-		logger.debug(f"SQL Select Statement: {query}")
+		logger.debug("SQL Select Statement: %s", query)
 		try:
 			self.cursor.execute(f"{query};")
 		except Exception as e:
@@ -119,7 +119,7 @@ class SQLite():
 	
 	def delete(self, table: str, where: dict, debug=False):
 		query=f"DELETE from {table} WHERE {self.parse_dict_to_sql(where)};"
-		logger.debug(f"SQL Delete Statement: {query}")
+		logger.debug("SQL Delete Statement: %s", query)
 		try:
 			self.cursor.execute(query)
 		except Exception as e:

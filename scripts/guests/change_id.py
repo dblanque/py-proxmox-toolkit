@@ -117,7 +117,8 @@ def valid_pve_disk_type(label: str, disk_data: str, exclude_media=True) -> bool:
 def rename_guest_replication(old_id: int, new_id: int) -> None:
 	logger = logging.getLogger()
 	# Rename disk in Guest Configuration
-	logger.info(f"Changing replication jobs for Guest {old_id} to {new_id} in {PVE_CFG_REPLICATION}")
+	logger.info("Changing replication jobs for Guest %s to %s in %s",
+													old_id, new_id, PVE_CFG_REPLICATION)
 	rpl_cmd_args = [
 		"/usr/bin/sed",
 		"-i",
@@ -155,10 +156,10 @@ def main(argv_a):
 		id_target = vmid_prompt(target=True)
 
 	if not get_guest_exists(id_origin):
-		logger.error(f"Guest with Origin ID ({id_origin}) does not exist.")
+		logger.error("Guest with Origin ID (%s) does not exist.", id_origin)
 		sys.exit(ERR_GUEST_NOT_EXISTS)
 	if get_guest_exists(id_target): 
-		logger.error(f"Guest with Target ID ({id_target}) already exists.")
+		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
 	confirm_prompt(id_origin, id_target)
 
@@ -185,25 +186,25 @@ def main(argv_a):
 	except: raise
 
 	if argv_a.verbose:
-		logger.info(f"Guest is on Host: {guest_cfg_host}")
-		logger.info(f"Selected Origin ID: {id_origin}")
-		logger.info(f"Selected Target ID: {id_target}")
-	logger.debug(f"Guest Configuration: {guest_cfg}")
+		logger.info("Guest is on Host: %s", guest_cfg_host)
+		logger.info("Selected Origin ID: %s", id_origin)
+		logger.info("Selected Target ID: %s", id_target)
+	logger.debug("Guest Configuration: %s", guest_cfg)
 
 	guest_state = get_guest_status(guest_id=id_origin, remote_args=args_ssh)
 	if guest_state != "stopped":
-		logger.error(f"Guest must be in stopped state (Currently {guest_state})")
+		logger.error("Guest must be in stopped state (Currently %s)", guest_state)
 		sys.exit(ERR_GUEST_NOT_STOPPED)
 	# Change Config ID - Move config file
 	old_cfg_path = guest_cfg_details['path']
 	new_cfg_path = guest_cfg_details['path'].replace(f"{id_origin}.conf", f"{id_target}.conf")
-	args_mv = [f"/usr/bin/mv", old_cfg_path, new_cfg_path]
+	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
 	if guest_on_remote_host:
 		args_mv = args_ssh + args_mv
 
 	# Rename Guest Configuration
 	if argv_a.dry_run:
-		logger.info(f"{args_mv}")
+		logger.info(args_mv)
 	else:
 		proc = subprocess.Popen(args_mv, stdout=subprocess.PIPE)
 		proc_o, proc_e = proc.communicate()
@@ -217,11 +218,11 @@ def main(argv_a):
 		if not valid_pve_disk_type(i, d): continue
 		if "raw_values" in d:
 			if len(d['raw_values']) != 1:
-				logger.error(f"Bad Parsing.")
-				logger.error(f"Disk {i} has more than one path ({d['raw_values']}).")
-				logger.error(f"Path Array Length: {len(d['raw_values'])}")
+				logger.error("Bad Parsing.")
+				logger.error("Disk %s has more than one path (%s).", i, d['raw_values'])
+				logger.error("Path Array Length: %s", len(d['raw_values']))
 				raise ValueError(d['raw_values'])
-			logger.info(f"{i}: {d['raw_values'][0]}")
+			logger.info("%s: %s", i, d['raw_values'][0])
 			disk_dicts.append({
 				"interface": i,
 				"raw_values": d['raw_values'][0],

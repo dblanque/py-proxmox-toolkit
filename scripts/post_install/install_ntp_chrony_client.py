@@ -15,7 +15,7 @@ def main():
 			stderr=subprocess.STDOUT
 		)
 		if ec == 0:
-			print_c(bcolors.L_GREEN, f"Chrony is already installed.")
+			print_c(bcolors.L_GREEN, "Chrony is already installed.")
 			sys.exit(0)
 	except: pass
 

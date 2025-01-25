@@ -32,15 +32,15 @@ def get_cpu_vendor_json():
 	json_output: list = json.loads(output)['lscpu']
 	for d in json_output:
 		d: dict
-		f: str = d["field"]
-		f = f.lower().rstrip(":")
-		v = d["data"]
-		if "vendor" in f: return v
+		field: str = d["field"]
+		field = field.lower().rstrip(":")
+		value = d["data"]
+		if "vendor" in field: return value
 
 def main():
 	cpu_vendor = get_cpu_vendor()
 	if not cpu_vendor:
-		print_c(bcolors.L_RED, f"CPU Vendor not found.")
+		print_c(bcolors.L_RED, "CPU Vendor not found.")
 		sys.exit(1)
 	if not cpu_vendor.lower() in SUPPORTED_CPU_VENDORS:
 		print_c(bcolors.L_YELLOW, f"CPU Vendor is not supported ({cpu_vendor}).")

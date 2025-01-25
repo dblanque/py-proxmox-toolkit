@@ -69,9 +69,9 @@ class PVEStorage:
 				f"{new_disk_path}/{new_disk_name}",
 			]
 			# Attempt to create unexisting dir
-			logger.debug(f"Ensuring path exists ({new_disk_path}).")
+			logger.debug("Ensuring path exists (%s).", new_disk_path)
 			if dry_run:
-				logger.info(f"mkdir {new_disk_path}")
+				logger.info("mkdir %s", new_disk_path)
 			else:
 				mkdir_args = ["/usr/bin/mkdir", "-p", new_disk_path]
 				if remote_args: mkdir_args = remote_args + mkdir_args
@@ -92,10 +92,10 @@ class PVEStorage:
 		if remote_args:
 			cmd_args = remote_args + cmd_args
 		# ! Rename disk in Storage
-		logger.debug(f"Changing disk name in storage.")
+		logger.debug("Changing disk name in storage.")
 		logger.debug(cmd_args)
 		if dry_run:
-			logger.info(f"{cmd_args}")
+			logger.info(cmd_args)
 		else:
 			proc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE)
 			proc_o, proc_e = proc.communicate()
@@ -119,7 +119,8 @@ class PVEStorage:
 			guest_cfg_path
 		]
 		sed_cmd_args = sed_cmd_args
-		logger.debug(f"Changing disk in Guest Configuration ({guest_cfg_path}) from {disk_name} to {new_disk_name}.")
+		logger.debug("Changing disk in Guest Configuration ({%s}) from {%s} to {%s}.",
+			   		guest_cfg_path, disk_name, new_disk_name)
 		logger.debug(sed_cmd_args)
 		if dry_run:
 			logger.info(sed_cmd_args)
@@ -150,7 +151,7 @@ class PVEStorage:
 				if proc.returncode != 0:
 					logger.error("Could not change LV Tags properly, beware of checking them after the script finishes.")
 		if old_disk_path:
-			logger.debug(f"Attempting to remove {old_disk_path}")
+			logger.debug("Attempting to remove %s", old_disk_path)
 			try:
 				rmdir_args = ["/usr/bin/rmdir", old_disk_path]
 				if remote_args: rmdir_args = remote_args + rmdir_args
@@ -159,7 +160,7 @@ class PVEStorage:
 				if proc.returncode != 0:
 					raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 			except:
-				logger.error(f"Could not delete prior Guest ID Images Path ({old_disk_path})")
+				logger.error("Could not delete prior Guest ID Images Path (%s)", old_disk_path)
 		return
 
 def get_storage_cfg(storage_name: str) -> PVEStorage:

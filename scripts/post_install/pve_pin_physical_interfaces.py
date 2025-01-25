@@ -79,7 +79,7 @@ def main(argv_a):
 				with open(udev_link_name, "w") as iface_udev_link:
 					print(f"Writing UDEV Link File {udev_link_name} for Interface {iface_name}.")
 					iface_udev_link.write(data)
-					print(f"UDEV Link Written.")
+					print("UDEV Link Written.")
 			print("-"*12 + "\n")
 		else: print(f"{iface_name} has an invalid MAC Address, skipping.")
 

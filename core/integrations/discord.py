@@ -59,7 +59,7 @@ def emit_discord(
 	* icon_url: str
 	"""
 	if not discord_webhook_url:
-		logger.warning(f"discord_webhook_url is not configured ({discord_webhook_url}).")
+		logger.warning("discord_webhook_url is not configured (%s).", discord_webhook_url)
 		return None
 	webhook = DiscordWebhook(url=discord_webhook_url, username=discord_webhook_username)
 
