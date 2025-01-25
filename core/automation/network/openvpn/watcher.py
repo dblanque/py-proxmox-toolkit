@@ -78,7 +78,7 @@ def main():
 		raise ValueError(gateway)
 	print_c(bcolors.L_GREEN, f"{prog_name} started")
 	if ping_args and len(ping_args) > 0: ping_args_array = ping_args.split(" ") 
-	else: ping_args_array=list()
+	else: ping_args_array = []
 	while True:
 		ping_success = False
 		if ping(gateway, ping_count, ping_timeout, args=ping_args_array) == 0:

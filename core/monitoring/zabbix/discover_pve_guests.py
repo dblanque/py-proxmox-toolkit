@@ -26,7 +26,7 @@ def discover_guests(command):
 		guest_type = "CT"
 	args = [f"/usr/sbin/{command}", "list"]
 	proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=sys.stderr)
-	proc_out_parsed = list()
+	proc_out_parsed = []
 	for i, l_out in enumerate(proc.stdout):
 		ln = l_out.decode('utf-8'.strip())
 		ln = ln.split()
@@ -37,7 +37,7 @@ def discover_guests(command):
 			continue
 		if ln and len(ln) > 0: proc_out_parsed.append(ln)
 
-	result = list()
+	result = []
 	for guest in proc_out_parsed:
 		if "lock" in cols and len(guest) < len(cols):
 			cols.remove("lock")
@@ -80,7 +80,7 @@ def main():
 		if status == "running": print(GUEST_RUNNING)
 		else: print(GUEST_STOPPED)
 		sys.exit()
-	statuses = list()
+	statuses = []
 	statuses.extend(discover_guests("qm"))
 	statuses.extend(discover_guests("pct"))
 	print(json.dumps({"data": statuses}))

@@ -41,7 +41,7 @@ def get_interfaces(
 	if not interface_patterns and override_patterns:
 		print("interface_patterns should contain at least one Regex Pattern if override_patterns is used.")
 
-	filtered_interfaces=list()
+	filtered_interfaces = []
 	network_interfaces=os.listdir('/sys/class/net/')
 	check_patterns = []
 

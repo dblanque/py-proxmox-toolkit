@@ -68,12 +68,12 @@ def get_guest_status(guest_id: int, remote_args=None):
 	return result[0].strip().split(": ")[-1]
 
 GUEST_CONF_REGEX = r"^[0-9]+.conf$"
-def get_all_guests(filter_ids: list | dict=list()):
+def get_all_guests(filter_ids: list | dict = []):
 	if type(filter_ids) == dict:
 		filter_ids = list(filter_ids.keys())
 	guests = dict()
-	guests["vm"] = list()
-	guests["ct"] = list()
+	guests["vm"] = []
+	guests["ct"] = []
 	for host in os.listdir(PVE_CFG_NODES_DIR):
 		for i in os.listdir(f"{PVE_CFG_NODES_DIR}/{host}/qemu-server/"):
 			if re.match(GUEST_CONF_REGEX, i):
@@ -135,7 +135,7 @@ def parse_guest_cfg(guest_id, remote=False, remote_user="root", remote_host=None
 				else:
 					if not sub_v or sub_v.lower() == "none": continue
 					if not "raw_values" in guest_cfg[option_k]:
-						guest_cfg[option_k]["raw_values"] = list()
+						guest_cfg[option_k]["raw_values"] = []
 					try: sub_v = int(sub_v)
 					except: pass
 					guest_cfg[option_k]["raw_values"].append(sub_v)

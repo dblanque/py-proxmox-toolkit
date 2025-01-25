@@ -171,7 +171,7 @@ def main(argv_a):
 		logger.info(all_guests)
 		sys.exit(0)
 
-	cmd_args: list = list()
+	cmd_args: list = []
 	for guest_id in guest_net_map:
 		logger.info("Making changes to %s", guest_id)
 		guest_is_ct = get_guest_is_ct(guest_id)

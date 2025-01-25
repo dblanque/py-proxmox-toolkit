@@ -211,7 +211,7 @@ def main(argv_a):
 		if proc.returncode != 0:
 			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 
-	disk_dicts: list[dict] = list()
+	disk_dicts: list[dict] = []
 	logger.info("The following disks will be migrated: ")
 	# For each discovered disk, do pre-checks
 	for i, d in guest_cfg.items():

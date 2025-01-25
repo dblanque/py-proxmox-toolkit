@@ -36,7 +36,7 @@ def append_tar_dirs(in_dirs: list, out_dirs: list) -> list:
 def main(argv_a):
 	backup_date = datetime.now().astimezone(timezone.utc)
 	backup_date_fmted = backup_date.strftime(DATE_FMT)
-	tar_dirs = list()
+	tar_dirs = []
 	if not os.path.isdir(argv_a.output_path):
 		try: os.mkdir(argv_a.output_path)
 		except: raise

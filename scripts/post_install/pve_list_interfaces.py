@@ -23,7 +23,7 @@ def argparser(**kwargs) -> ArgumentParser:
 
 def main(argv_a):
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
-	regex_list = list()
+	regex_list = []
 	if not argv_a.physical and not argv_a.virtual and not argv_a.regex:
 		regex_list = [ r"^.*$" ]
 

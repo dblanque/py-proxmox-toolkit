@@ -24,8 +24,8 @@ def get_iface_status(iface_name):
 		iface_name
 	]
 	with subprocess.Popen(IP_ARGS, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as ip_proc:
-		output: list[str] = list()
-		errors: list[str] = list()
+		output: list[str] = []
+		errors: list[str] = []
 		for l_out in ip_proc.stdout:
 			output.append(l_out.decode('utf-8').strip())
 		for l_err in ip_proc.stderr:
