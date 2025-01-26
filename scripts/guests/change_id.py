@@ -17,7 +17,9 @@
 # * Change Backup Tasks
 # * Change Backup Names
 
-import os, sys, signal
+import os
+import sys
+import signal
 script_path = os.path.realpath(__file__)
 script_dir = os.path.dirname(script_path)
 if __name__ == "__main__":
@@ -27,7 +29,10 @@ from core.signal_handlers.sigint import graceful_exit
 signal.signal(signal.SIGINT, graceful_exit)
 
 # IMPORTS
-import logging, sys, os, socket, signal, subprocess, re
+import logging
+import socket
+import subprocess
+import re
 from core.proxmox.guests import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
 from core.proxmox.storage import get_storage_cfg
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION

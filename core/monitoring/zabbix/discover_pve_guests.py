@@ -1,5 +1,10 @@
 #!/usr/bin/python3
-import subprocess, sys, argparse, os, socket, json
+import subprocess
+import sys
+import argparse
+import os
+import socket
+import json
 
 GUEST_STOPPED=0
 GUEST_RUNNING=1

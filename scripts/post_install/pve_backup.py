@@ -2,7 +2,10 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import signal, os, sys, subprocess
+import signal
+import os
+import sys
+import subprocess
 from datetime import datetime, timezone
 from time import perf_counter
 from core.signal_handlers.sigint import graceful_exit

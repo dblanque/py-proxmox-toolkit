@@ -1,4 +1,5 @@
-import os, re
+import os
+import re
 from core.format.colors import print_c, bcolors
 
 NETWORK_INTERFACES_INET_TYPES = (

@@ -1,4 +1,5 @@
-import sqlite3, logging
+import sqlite3
+import logging
 from sqlite3 import OperationalError
 logger = logging.getLogger(__name__)
 

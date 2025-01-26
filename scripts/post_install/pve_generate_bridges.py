@@ -2,7 +2,8 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import subprocess, os
+import subprocess
+import os
 from core.format.colors import bcolors, print_c
 from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
 from core.debian.constants import FILE_NETWORK_INTERFACES

@@ -1,4 +1,4 @@
-import sys, os
+import os
 from ..exceptions.base import DependencyMissing
 import importlib.util
 

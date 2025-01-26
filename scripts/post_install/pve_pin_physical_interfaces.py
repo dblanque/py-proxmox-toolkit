@@ -2,13 +2,14 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
+import subprocess
+import os
 from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS
 from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
 from core.templates.udev.overrides import UDEV_BY_MAC_ADDRESS, UDEV_BY_PROPERTY
 from core.debian.udev import get_inet_udev_info
 from core.validators.mac import mac_address_validator
-import subprocess, os
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(

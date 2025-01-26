@@ -2,7 +2,10 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import os, sys, subprocess, signal
+import os
+import sys
+import subprocess
+import signal
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
 from core.parser import make_parser, ArgumentParser

@@ -1,6 +1,7 @@
 # Author: Dylan Blanqué
 # BR Consulting S.R.L. 2024
-import logging, subprocess
+import logging
+import subprocess
 from .constants import PVE_CFG_STORAGE
 from .guests import get_guest_cfg
 from dataclasses import dataclass

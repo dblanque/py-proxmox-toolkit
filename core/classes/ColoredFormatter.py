@@ -1,4 +1,6 @@
-import logging, sys, os
+import logging
+import sys
+import os
 from core.format.colors import bcolors
 
 DEFAULT_LOG_FILE_LN_LIMIT=1000
