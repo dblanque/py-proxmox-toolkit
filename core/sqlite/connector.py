@@ -83,7 +83,7 @@ class SQLite():
 			raise OperationalError(e)
 		self.conn.commit()
 		return self.cursor.fetchall()
-	
+
 	def upsert(self, table: str, values: dict, on_conflict: list=None):
 		if on_conflict and len(on_conflict) >= 1:
 			extra_sql = "ON CONFLICT DO UPDATE SET"
@@ -103,7 +103,7 @@ class SQLite():
 			raise
 
 	def select(self, table: str, values: None, where: dict={}):
-		if not values: 
+		if not values:
 			values = "*"
 
 		query=f"SELECT {values} FROM {table}"
@@ -117,7 +117,7 @@ class SQLite():
 			logger.critical(e)
 			raise OperationalError(e)
 		return self.cursor.fetchall()
-	
+
 	def delete(self, table: str, where: dict, debug=False):
 		query=f"DELETE from {table} WHERE {self.parse_dict_to_sql(where)};"
 		logger.debug("SQL Delete Statement: %s", query)
@@ -131,7 +131,7 @@ class SQLite():
 
 	def show_table_schema(self, table):
 		"""Return a string representing the table's CREATE"""
-		try: 
+		try:
 			cursor = self.cursor.execute(f"SELECT sql FROM sqlite_master WHERE name={table};")
 		except Exception as e:
 			logger.critical(e)

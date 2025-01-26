@@ -77,7 +77,7 @@ def main():
 	if len(gateway) < 1:
 		raise ValueError(gateway)
 	print_c(bcolors.L_GREEN, f"{prog_name} started")
-	if ping_args and len(ping_args) > 0: ping_args_array = ping_args.split(" ") 
+	if ping_args and len(ping_args) > 0: ping_args_array = ping_args.split(" ")
 	else: ping_args_array = []
 	while True:
 		ping_success = False
@@ -96,7 +96,7 @@ def main():
 				command = 'systemctl'
 
 			openvpn = VPNController(
-				net_command=command, 
+				net_command=command,
 				connection_name=connection
 			)
 

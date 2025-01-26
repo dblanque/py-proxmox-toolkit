@@ -1,4 +1,4 @@
-# For more ANSI Color Codes see: 
+# For more ANSI Color Codes see:
 # https://misc.flogisoft.com/bash/tip_colors_and_formatting
 from enum import Enum
 class bcolors(Enum):

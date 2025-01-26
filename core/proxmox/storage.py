@@ -27,7 +27,7 @@ class PVEStorage:
 
 	def __str__(self):
 		return self.name
-	
+
 	def reassign_disk(self, disk_name: str, new_guest_id: int, new_guest_cfg: str=None, remote_args=None, dry_run=False):
 		cmd_args = None
 		lv_tags = False

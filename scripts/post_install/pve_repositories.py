@@ -71,7 +71,7 @@ def main():
 	if yes_no_input(
 		msg="Do you wish to disable High-Availability Services?",
 		input_default=False
-	): 
+	):
 		ha_services = [
 			"pve-ha-lrm",
 			"pve-ha-crm",
@@ -102,7 +102,7 @@ def main():
 		pve_list_file = SOURCES_LIST_PVE_EN
 		pve_list_data = SRC_PVE_ENTERPRISE
 		pve_list_delete = SOURCES_LIST_PVE_NS
-	
+
 	with open(pve_list_file, "w") as pve_apt_lists:
 		pve_apt_lists.write(pve_list_data.format(debian_distribution))
 	if os.path.exists(pve_list_delete): os.remove(pve_list_delete)

@@ -9,7 +9,7 @@ def get_inet_udev_info(device: str) -> dict:
 	"""
 	data = {}
 	with subprocess.Popen(f"udevadm info /sys/class/net/{device}".split(),
-		stdout=subprocess.PIPE, 
+		stdout=subprocess.PIPE,
 		stderr=subprocess.PIPE,
 	) as sp:
 		out, err = sp.communicate()

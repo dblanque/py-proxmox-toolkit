@@ -45,7 +45,7 @@ def main(argv_a):
 			"sysstat",
 		]
 
-	try: 
+	try:
 		ec = subprocess.check_call(
 				"apt-get update -y".split(),
 				stdout=open(os.devnull, 'wb'),

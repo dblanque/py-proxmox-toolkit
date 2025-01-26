@@ -47,8 +47,8 @@ def discover_guests(command):
 		if "lock" in cols and len(guest) < len(cols):
 			cols.remove("lock")
 		result.append({
-			"{#GUEST_ID}": guest[cols.index("vmid")], 
-			"{#GUEST_NAME}": guest[cols.index("name")], 
+			"{#GUEST_ID}": guest[cols.index("vmid")],
+			"{#GUEST_NAME}": guest[cols.index("name")],
 			# "{#GUEST_STATUS}": guest[cols.index("status")],
 			"{#GUEST_TYPE}": guest_type
 		})

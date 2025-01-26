@@ -50,7 +50,7 @@ def main(argv_a: ArgumentParser):
 	for p, b in vmbr_map.items():
 		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list (Port Mapping).")
 		if not b in bridges: raise Exception(f"{b} was not found in the Bridge list (Port Mapping).")
-	
+
 	# Check if ethtool is installed when requiring offload disabled
 	if not argv_a.keep_offloading:
 		pkg = "ethtool"
@@ -79,7 +79,7 @@ def main(argv_a: ArgumentParser):
 						while f"vmbr{vmbr_index}" in configured_ifaces:
 							vmbr_index += 1
 							current_bridge = f"vmbr{vmbr_index}"
-					
+
 					# Generate VMBR if non-existent
 					if not current_bridge in configured_ifaces:
 						print_c(bcolors.L_BLUE, f"Setting up virtual bridge {current_bridge}")

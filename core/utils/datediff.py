@@ -10,7 +10,7 @@ parser.add_argument('-td', '--threshold-days', required=False, default=0, type=i
 parser.add_argument('-th', '--threshold-hours', required=False, default=0, type=int)
 parser.add_argument('-tm', '--threshold-minutes', required=False, default=0, type=int)
 parser.add_argument('-ts', '--threshold-seconds', required=False, default=0, type=int)
-parser.add_argument('-go', '--greater-only', 
+parser.add_argument('-go', '--greater-only',
 					required=False,
 					default=False,
 					action="store_true",

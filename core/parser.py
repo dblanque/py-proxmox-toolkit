@@ -12,12 +12,12 @@ class ColoredArgParser(ArgumentParser):
 
 	# color_dict is a class attribute, here we avoid compatibility
 	# issues by attempting to override the __init__ method
-	# RED : Error, GREEN : Okay, YELLOW : Warning, Blue: Help/Info 
+	# RED : Error, GREEN : Okay, YELLOW : Warning, Blue: Help/Info
 
 	def print_usage(self, file = None):
 		if file is None:
 			file = sys.stdout
-		self._print_message(self.format_usage()[0].upper() + 
+		self._print_message(self.format_usage()[0].upper() +
 							self.format_usage()[1:],
 							file, bcolors.YELLOW)
 

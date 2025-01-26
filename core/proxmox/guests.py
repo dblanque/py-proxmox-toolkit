@@ -23,7 +23,7 @@ def get_guest_cfg(
 	"""
 	Returns config path by default
 
-	Dict returns 
+	Dict returns
 	* path
 	* host
 	* type [ct|vm]
@@ -35,7 +35,7 @@ def get_guest_cfg(
 			if os.path.isfile(p):
 				guest_type = "vm"
 				if subp == "lxc": guest_type = "ct"
-				if get_as_dict: 
+				if get_as_dict:
 					return {
 						"path":p,
 						"host":h,

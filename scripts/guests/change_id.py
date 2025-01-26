@@ -145,7 +145,7 @@ def main(argv_a):
 	debug_verbose = (argv_a.debug and argv_a.verbose)
 	log_file = f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
 	logger = set_logger(
-		logger, 
+		logger,
 		log_console=(not running_in_background),
 		log_file=log_file,
 		level=log_level,
@@ -163,7 +163,7 @@ def main(argv_a):
 	if not get_guest_exists(id_origin):
 		logger.error("Guest with Origin ID (%s) does not exist.", id_origin)
 		sys.exit(ERR_GUEST_NOT_EXISTS)
-	if get_guest_exists(id_target): 
+	if get_guest_exists(id_target):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
 	confirm_prompt(id_origin, id_target)
@@ -172,10 +172,10 @@ def main(argv_a):
 	guest_cfg_details = get_guest_cfg(guest_id=id_origin, get_as_dict=True)
 	guest_cfg_host = guest_cfg_details["host"]
 	guest_is_ct = (guest_cfg_details["type"] == "ct")
-	# Set command based on Guest Type	
+	# Set command based on Guest Type
 	if guest_is_ct:
 		proc_cmd = "pct"
-	else: 
+	else:
 		proc_cmd = "qm"
 	guest_on_remote_host = (hostname != guest_cfg_host)
 	args_ssh = None

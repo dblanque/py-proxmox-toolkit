@@ -83,7 +83,7 @@ def TimedInputYN(question, default="yes", timeout=30, timeoutmsg="Prompt Timed O
 		answer = query_yes_no(question, default)
 		signal.alarm(0)
 		return answer
-	except TimeoutError:   
+	except TimeoutError:
 		if timeoutmsg:
 			logger.info("\n%s", timeoutmsg)
 		signal.signal(signal.SIGALRM, signal.SIG_IGN)
@@ -93,7 +93,7 @@ def TimedInputYN(question, default="yes", timeout=30, timeoutmsg="Prompt Timed O
 def main(argv_a):
 	logger = logging.getLogger()
 	logger.setLevel(logging.INFO)
-	
+
 	hostname = socket.gethostname()
 	guest_net_map = None
 	guest_net_map: dict
@@ -222,7 +222,7 @@ def main(argv_a):
 
 	if not running_in_background:
 		do_rollback = TimedInputYN(
-			question=f"Do you wish to Rollback the changes? (Timeout in {rollback_delay} seconds)", 
+			question=f"Do you wish to Rollback the changes? (Timeout in {rollback_delay} seconds)",
 			default="yes",
 			timeout=rollback_delay,
 			timeoutmsg="Starting Rollback."

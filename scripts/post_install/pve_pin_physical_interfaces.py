@@ -40,7 +40,7 @@ def main(argv_a):
 		iface_mac_addr = None
 		udev_link_name = os.path.join(UDEV_PATH, f"10-{iface_name}.link")
 		mac_address_sp = subprocess.Popen(f"cat /sys/class/net/{iface_name}/address".split(),
-			stdout=subprocess.PIPE, 
+			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 		)
 		out, err = mac_address_sp.communicate()
