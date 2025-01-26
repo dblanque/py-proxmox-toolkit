@@ -47,8 +47,8 @@ def get_interfaces(
 	check_patterns = []
 
 	if interface_patterns:
-		for p in interface_patterns:
-			check_patterns.append(re.compile(p))
+		for pattern in interface_patterns:
+			check_patterns.append(re.compile(pattern))
 	for iface in network_interfaces:
 		iface = iface.strip()
 		skip = False
@@ -56,13 +56,16 @@ def get_interfaces(
 
 		if exclude_patterns:
 			for regex in exclude_patterns:
-				if re.match(regex, iface): skip = True
-		if skip == True: continue
+				if re.match(regex, iface):
+					skip = True
+		if skip is True:
+			continue
 
 		for regex in check_patterns:
 			if re.match(regex, iface) and not iface in filtered_interfaces:
 				filtered_interfaces.append(iface)
 				match = True
 
-		if not match and verbose: print_c(bcolors.L_BLUE, f"[DEBUG] - Skipping {iface} (did not match regex).")
+		if not match and verbose:
+			print_c(bcolors.L_BLUE, f"[DEBUG] - Skipping {iface} (did not match regex).")
 	return tuple(filtered_interfaces)
