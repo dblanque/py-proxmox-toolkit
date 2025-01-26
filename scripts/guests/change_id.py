@@ -131,10 +131,10 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 		PVE_CFG_REPLICATION
 	]
 	logger.debug(rpl_cmd_args)
-	proc = subprocess.Popen(rpl_cmd_args, stdout=subprocess.PIPE)
-	proc_o, proc_e = proc.communicate()
-	if proc.returncode != 0:
-		raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+	with subprocess.Popen(rpl_cmd_args, stdout=subprocess.PIPE) as proc:
+		proc_o, proc_e = proc.communicate()
+		if proc.returncode != 0:
+			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 	return
 
 def main(argv_a):
@@ -211,10 +211,10 @@ def main(argv_a):
 	if argv_a.dry_run:
 		logger.info(args_mv)
 	else:
-		proc = subprocess.Popen(args_mv, stdout=subprocess.PIPE)
-		proc_o, proc_e = proc.communicate()
-		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+		with subprocess.Popen(args_mv, stdout=subprocess.PIPE) as proc:
+			proc_o, proc_e = proc.communicate()
+			if proc.returncode != 0:
+				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 
 	disk_dicts: list[dict] = []
 	logger.info("The following disks will be migrated: ")
