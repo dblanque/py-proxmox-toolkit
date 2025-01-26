@@ -46,25 +46,25 @@ def main(argv_a):
 		]
 
 	try:
-		ec = subprocess.check_call(
-				"apt-get update -y".split(),
-				stdout=open(os.devnull, 'wb'),
-				stderr=subprocess.STDOUT
-			)
+		subprocess.check_call(
+			"apt-get update -y".split(),
+			stdout=open(os.devnull, 'wb'),
+			stderr=subprocess.STDOUT
+		)
 	except subprocess.CalledProcessError as e:
 		print_c(bcolors.L_RED, f"Could not do apt update (non-zero exit status {e.returncode}).")
 		sys.exit(0)
 
 	for pkg in tools:
 		try:
-			ec = subprocess.check_call(
+			with subprocess.check_call(
 				f"dpkg -l {pkg}".split(),
 				stdout=open(os.devnull, 'wb'),
 				stderr=subprocess.STDOUT
-			)
-			if ec == 0:
-				print_c(bcolors.L_GREEN, f"{pkg} is already installed.")
-				tools.remove(pkg)
+			) as ec:
+				if ec == 0:
+					print_c(bcolors.L_GREEN, f"{pkg} is already installed.")
+					tools.remove(pkg)
 		except: pass
 
 	try:

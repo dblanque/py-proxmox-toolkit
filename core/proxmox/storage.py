@@ -76,10 +76,10 @@ class PVEStorage:
 			else:
 				mkdir_args = ["/usr/bin/mkdir", "-p", new_disk_path]
 				if remote_args: mkdir_args = remote_args + mkdir_args
-				proc = subprocess.Popen(mkdir_args, stdout=subprocess.PIPE)
-				proc_o, proc_e = proc.communicate()
-				if proc.returncode != 0:
-					raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+				with subprocess.Popen(mkdir_args, stdout=subprocess.PIPE) as proc:
+					proc_o, proc_e = proc.communicate()
+					if proc.returncode != 0:
+						raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 		elif self.type == "rbd":
 			cmd_args = [
 				"/usr/bin/rbd",
@@ -98,10 +98,10 @@ class PVEStorage:
 		if dry_run:
 			logger.info(cmd_args)
 		else:
-			proc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE)
-			proc_o, proc_e = proc.communicate()
-			if proc.returncode != 0:
-				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+			with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
+				proc_o, proc_e = proc.communicate()
+				if proc.returncode != 0:
+					raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 
 		# ! Rename disk in Guest Configuration
   		# Does not require SSH
@@ -126,10 +126,10 @@ class PVEStorage:
 		if dry_run:
 			logger.info(sed_cmd_args)
 		else:
-			proc = subprocess.Popen(sed_cmd_args, stdout=subprocess.PIPE)
-			proc_o, proc_e = proc.communicate()
-			if proc.returncode != 0:
-				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+			with subprocess.Popen(sed_cmd_args, stdout=subprocess.PIPE) as proc:
+				proc_o, proc_e = proc.communicate()
+				if proc.returncode != 0:
+					raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 
 		# ! Change LV Tags
 		if lv_tags:
@@ -147,19 +147,19 @@ class PVEStorage:
 			if dry_run:
 				logger.info(lvtag_cmd_args)
 			else:
-				proc = subprocess.Popen(lvtag_cmd_args, stdout=subprocess.PIPE)
-				proc_o, proc_e = proc.communicate()
-				if proc.returncode != 0:
-					logger.error("Could not change LV Tags properly, beware of checking them after the script finishes.")
+				with subprocess.Popen(lvtag_cmd_args, stdout=subprocess.PIPE) as proc:
+					proc_o, proc_e = proc.communicate()
+					if proc.returncode != 0:
+						logger.error("Could not change LV Tags properly, beware of checking them after the script finishes.")
 		if old_disk_path:
 			logger.debug("Attempting to remove %s", old_disk_path)
 			try:
 				rmdir_args = ["/usr/bin/rmdir", old_disk_path]
 				if remote_args: rmdir_args = remote_args + rmdir_args
-				proc = subprocess.Popen(rmdir_args, stdout=subprocess.PIPE)
-				proc_o, proc_e = proc.communicate()
-				if proc.returncode != 0:
-					raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+				with subprocess.Popen(rmdir_args, stdout=subprocess.PIPE) as proc:
+					proc_o, proc_e = proc.communicate()
+					if proc.returncode != 0:
+						raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 			except:
 				logger.error("Could not delete prior Guest ID Images Path (%s)", old_disk_path)
 		return
@@ -168,41 +168,41 @@ def get_storage_cfg(storage_name: str) -> PVEStorage:
 	cmd_args = [
 		"/usr/bin/sed", "-n", "/.*: " + storage_name + "$/,/^$/p", PVE_CFG_STORAGE,
 	]
-	proc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	proc_o, proc_e = proc.communicate()
-	if proc.returncode != 0:
-		raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
-	storage = {}
-	for line in proc_o.decode().split("\n"):
-		line = line.rstrip()
-		if len(line) < 1: continue
-		# Path Definition
-		if ": " in line:
-			line = line.split(": ")
-			storage["type"] = line[0].strip()
-			storage["name"] = line[1].strip()
-		# Attribute Definitions
-		else:
-			line = line.split(" ")
-			attr_key = line[0].strip()
-			attr_val = line[1].strip()
-			storage[attr_key] = attr_val
-	if not storage["type"] in PATH_ASSOC:
-		raise Exception(f"Storage type unsupported ({storage['type']})")
-	path_def = PATH_ASSOC[storage["type"]]
-	if not path_def in storage:
-		raise Exception("Bad storage parameters, path definition not found.", storage)
-	r = PVEStorage(
-		name=storage["name"],
-		type=storage["type"],
-		path=storage[path_def]
-	)
-	try:
-		for k, v in storage.items():
-			if k in ["name", "type", path_def]: continue
-			setattr(r, k, v)
-	except:
-		try: print(storage.__dict__())
-		except: pass
-		raise
-	return r
+	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+		proc_o, proc_e = proc.communicate()
+		if proc.returncode != 0:
+			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+		storage = {}
+		for line in proc_o.decode().split("\n"):
+			line = line.rstrip()
+			if len(line) < 1: continue
+			# Path Definition
+			if ": " in line:
+				line = line.split(": ")
+				storage["type"] = line[0].strip()
+				storage["name"] = line[1].strip()
+			# Attribute Definitions
+			else:
+				line = line.split(" ")
+				attr_key = line[0].strip()
+				attr_val = line[1].strip()
+				storage[attr_key] = attr_val
+		if not storage["type"] in PATH_ASSOC:
+			raise Exception(f"Storage type unsupported ({storage['type']})")
+		path_def = PATH_ASSOC[storage["type"]]
+		if not path_def in storage:
+			raise Exception("Bad storage parameters, path definition not found.", storage)
+		r = PVEStorage(
+			name=storage["name"],
+			type=storage["type"],
+			path=storage[path_def]
+		)
+		try:
+			for k, v in storage.items():
+				if k in ["name", "type", path_def]: continue
+				setattr(r, k, v)
+		except:
+			try: print(storage.__dict__())
+			except: pass
+			raise
+		return r
