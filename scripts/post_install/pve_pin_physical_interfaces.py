@@ -39,15 +39,19 @@ def main(argv_a):
 	for iface_name in interfaces:
 		iface_mac_addr = None
 		udev_link_name = os.path.join(UDEV_PATH, f"10-{iface_name}.link")
-		mac_address_sp = subprocess.Popen(f"cat /sys/class/net/{iface_name}/address".split(),
+		with subprocess.Popen(f"cat /sys/class/net/{iface_name}/address".split(),
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
-		)
-		out, err = mac_address_sp.communicate()
-		returncode = mac_address_sp.returncode
-		if returncode == 0:
-			iface_mac_addr = out.decode("utf-8").strip()
-		if mac_address_validator(iface_mac_addr):
+		) as mac_address_sp:
+			out, err = mac_address_sp.communicate()
+			returncode = mac_address_sp.returncode
+			if returncode == 0:
+				iface_mac_addr = out.decode("utf-8").strip()
+
+			if not mac_address_validator(iface_mac_addr):
+				print(f"{iface_name} has an invalid MAC Address, skipping.")
+				continue
+
 			print(f"Interface {bcolors.L_BLUE}{iface_name}{bcolors.NC} will be pinned with MAC Address {bcolors.L_RED}{iface_mac_addr}{bcolors.NC}")
 			if os.path.isfile(udev_link_name) and not use_overwrite:
 				print(f"UDEV Link File {udev_link_name} for Interface {iface_name} already exists, skipping.\n")
@@ -82,7 +86,6 @@ def main(argv_a):
 					iface_udev_link.write(data)
 					print("UDEV Link Written.")
 			print("-"*12 + "\n")
-		else: print(f"{iface_name} has an invalid MAC Address, skipping.")
 
 	print(f"You may execute the command {bcolors.L_YELLOW}systemctl restart systemd-udev-trigger{bcolors.NC} to refresh the Interface UDEV Links.")
 
