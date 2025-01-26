@@ -1,3 +1,7 @@
+import os
+import subprocess
+from core.format.colors import print_c, bcolors
+
 DEFAULT_CHOICES = {
 	"yes":["yes","y"],
 	"no":["no","n"]
@@ -34,3 +38,24 @@ def yes_no_input(
 			return False
 		else:
 			print(f"Please enter a valid choice {choices_str}.")
+
+def prompt_update():
+	if yes_no_input(
+		msg="Do you wish to perform an update?",
+		input_default=True
+	):
+		update_cmds = [
+			"apt-get update -y",
+			"apt-get dist-upgrade --fix-missing --fix-broken -y"
+		]
+		for c in update_cmds:
+			subprocess.call(c.split())
+	print_c(bcolors.L_GREEN, "Update Complete.")
+
+def prompt_reboot():
+	if yes_no_input(
+		msg="Do you wish to reboot now?",
+		input_default=False
+	):
+		print_c(bcolors.L_YELLOW, "Rebooting System.")
+		os.system("reboot")

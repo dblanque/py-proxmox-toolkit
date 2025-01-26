@@ -19,6 +19,7 @@ from core.proxmox.guests import (
 	parse_guest_netcfg,
 	parse_net_opts_to_string
 )
+from core.utils.prompt import yes_no_input
 from core.parser import make_parser, ArgumentParser
 
 def argparser(**kwargs) -> ArgumentParser:
@@ -41,37 +42,6 @@ def sigint_handler(sig, frame):
 	sys.exit(0)
 signal.signal(signal.SIGINT, sigint_handler)
 
-# src: https://stackoverflow.com/questions/3041986/apt-command-line-interface-like-yes-no-input
-def query_yes_no(question, default="yes"):
-	"""Ask a yes/no question via raw_input() and return their answer.
-
-	"question" is a string that is presented to the user.
-	"default" is the presumed answer if the user just hits <Enter>.
-			It must be "yes" (the default), "no" or None (meaning
-			an answer is required of the user).
-
-	The "answer" return value is True for "yes" or False for "no".
-	"""
-	valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
-	if default is None:
-		prompt = " [y/n] "
-	elif default == "yes":
-		prompt = " [Y/n] "
-	elif default == "no":
-		prompt = " [y/N] "
-	else:
-		raise ValueError("invalid default answer: '%s'" % default)
-
-	while True:
-		sys.stdout.write(question + prompt)
-		choice = input().lower()
-		if default is not None and choice == "":
-			return valid[default]
-		elif choice in valid:
-			return valid[choice]
-		else:
-			sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
-
 # src: https://stackoverflow.com/questions/44037060/how-to-set-a-timeout-for-input
 def TimedInputYN(question, default="yes", timeout=30, timeoutmsg="Prompt Timed Out."):
 	logger = logging.getLogger()
@@ -80,7 +50,7 @@ def TimedInputYN(question, default="yes", timeout=30, timeoutmsg="Prompt Timed O
 	signal.signal(signal.SIGALRM, timeout_error)
 	signal.alarm(timeout)
 	try:
-		answer = query_yes_no(question, default)
+		answer = yes_no_input(question, default)
 		signal.alarm(0)
 		return answer
 	except TimeoutError:

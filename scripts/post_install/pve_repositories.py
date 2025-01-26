@@ -10,14 +10,13 @@ from core.signal_handlers.sigint import graceful_exit
 signal.signal(signal.SIGINT, graceful_exit)
 
 MIN_VERSION = "8.0.0"
-from core.debian import os_release
 from core.proxmox.manager import pve_version_exists, get_pve_version
 from core.exceptions.base import DependencyMissing
-from core.utils.yes_no_input import yes_no_input
+from core.utils.prompt import yes_no_input, prompt_reboot, prompt_update
 from core.format.colors import bcolors, print_c
+from .debian_repositories import pre_checks, set_debian_sources
 from .apt.sources.ceph import CEPH_SOURCES
 from .apt.sources.pve import SRC_PVE_ENTERPRISE, SRC_PVE_NO_SUBSCRIPTION
-from .apt.sources.debian import SRC_DEB_BOOKWORM_SYNTAX
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"
@@ -25,11 +24,8 @@ SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
 
 def main():
-	release_info = os_release.get_data()
-	if not os_release.is_valid_version(release_info):
-		print_c(bcolors.L_RED, f'Unsupported OS Distribution ({release_info["id"].capitalize()}).')
-		sys.exit(1)
-	debian_distribution = release_info["version_codename"]
+	debian_distribution = pre_checks()
+	set_debian_sources(debian_distribution)
 
 	# Check if proxmox version valid (>8.0)
 	if not pve_version_exists: raise DependencyMissing()
@@ -43,11 +39,6 @@ def main():
 		sys.exit(1)
 
 	###################################### CHOICES #######################################
-	# Setting debian sources
-	reset_debian_sources = yes_no_input(
-		msg="Do you wish to check the Debian Sources?",
-		input_default=True
-	)
 	# Setting PVE No-Subscription or Enterprise Sources
 	pve_src_no_subscription = yes_no_input(
 		msg="Do you wish to use the PVE No-Subscription Repositories?",
@@ -87,12 +78,6 @@ def main():
 		print_c(bcolors.BLUE, "HA Services disabled.")
 	######################################################################################
 
-	# Debian SRCs
-	if reset_debian_sources:
-		with open("/etc/apt/sources.list", "w") as debian_apt_lists:
-			debian_apt_lists.write(SRC_DEB_BOOKWORM_SYNTAX.format(debian_distribution))
-		print_c(bcolors.BLUE, "Debian Sources Set.")
-
 	# PVE SRCs
 	if pve_src_no_subscription:
 		pve_list_file = SOURCES_LIST_PVE_NS
@@ -127,23 +112,7 @@ def main():
 		if os.path.exists(SOURCES_LIST_CEPH): os.remove(SOURCES_LIST_CEPH)
 
 	# Update Proxmox
-	if yes_no_input(
-		msg="Do you wish to perform an update?",
-		input_default=True
-	):
-		update_cmds = [
-			"apt-get update -y",
-			"apt-get dist-upgrade --fix-missing --fix-broken -y"
-		]
-		for c in update_cmds:
-			try: subprocess.call(c.split())
-			except: raise
-	print_c(bcolors.L_GREEN, "Update Complete.")
+	prompt_update()
 
 	# Offer Reboot
-	if yes_no_input(
-		msg="Do you wish to reboot now?",
-		input_default=False
-	):
-		print_c(bcolors.L_YELLOW, "Rebooting System.")
-		os.system("reboot")
+	prompt_reboot()

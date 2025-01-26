@@ -10,19 +10,26 @@ from core.signal_handlers.sigint import graceful_exit
 signal.signal(signal.SIGINT, graceful_exit)
 
 from core.debian import os_release
-from core.utils.yes_no_input import yes_no_input
+from core.utils.prompt import yes_no_input, prompt_reboot, prompt_update
 from core.format.colors import bcolors, print_c
 from .apt.sources.debian import DEB_LISTS
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 
-def main():
+def pre_checks() -> str:
+	"""
+	Performs Debian Release and Version Pre-checks
+	:returns: Debian Distribution Name.
+	:rtype: str
+	"""
 	release_info = os_release.get_data()
 	if not os_release.is_valid_version(release_info):
 		print_c(bcolors.L_RED, f'Unsupported OS Distribution ({release_info["id"].capitalize()}).')
 		sys.exit(1)
 	debian_distribution = release_info["version_codename"]
+	return debian_distribution
 
+def set_debian_sources(debian_distribution) -> None:
 	###################################### CHOICES #######################################
 	# Setting debian sources
 	reset_debian_sources = yes_no_input(
@@ -37,24 +44,12 @@ def main():
 			debian_apt_lists.write(DEB_LISTS[debian_distribution].format(debian_distribution))
 	print_c(bcolors.BLUE, "Debian Sources Set.")
 
+def main():
+	debian_distribution = pre_checks()
+	set_debian_sources(debian_distribution)
+
 	# Update Proxmox
-	if yes_no_input(
-		msg="Do you wish to perform an update?",
-		input_default=True
-	):
-		update_cmds = [
-			"apt-get update -y",
-			"apt-get dist-upgrade --fix-missing --fix-broken -y"
-		]
-		for c in update_cmds:
-			try: subprocess.call(c.split())
-			except: raise
-	print_c(bcolors.L_GREEN, "Update Complete.")
+	prompt_update()
 
 	# Offer Reboot
-	if yes_no_input(
-		msg="Do you wish to reboot now?",
-		input_default=False
-	):
-		print_c(bcolors.L_YELLOW, "Rebooting System.")
-		os.system("reboot")
+	prompt_reboot()
