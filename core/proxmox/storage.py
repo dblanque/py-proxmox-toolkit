@@ -172,7 +172,7 @@ def get_storage_cfg(storage_name: str) -> PVEStorage:
 	proc_o, proc_e = proc.communicate()
 	if proc.returncode != 0:
 		raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
-	storage = dict()
+	storage = {}
 	for line in proc_o.decode().split("\n"):
 		line = line.rstrip()
 		if len(line) < 1: continue

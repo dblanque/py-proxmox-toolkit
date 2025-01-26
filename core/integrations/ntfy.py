@@ -38,7 +38,7 @@ def emit_ntfy(ntfy_server, ntfy_token, message: str, title: str=None, priority="
 		raise ValueError("Invalid Priority Tag on NTFY Emit.", priority)
 
 	# Set headers
-	r_headers = dict()
+	r_headers = {}
 	if priority_valid_int(priority=priority):
 		r_headers["X-Priority"] = int(priority)
 	else:

@@ -74,7 +74,7 @@ GUEST_CONF_REGEX = r"^[0-9]+.conf$"
 def get_all_guests(filter_ids: list | dict = []):
 	if type(filter_ids) == dict:
 		filter_ids = list(filter_ids.keys())
-	guests = dict()
+	guests = {}
 	guests["vm"] = []
 	guests["ct"] = []
 	for host in os.listdir(PVE_CFG_NODES_DIR):
@@ -101,7 +101,7 @@ def parse_guest_cfg(guest_id, remote=False, remote_user="root", remote_host=None
 	logger.info("Collecting Config for Guest %s", guest_id)
 	if remote and not remote_host:
 		raise ValueError("remote_host is required when calling as remote function")
-	guest_cfg = dict()
+	guest_cfg = {}
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
 
@@ -121,7 +121,7 @@ def parse_guest_cfg(guest_id, remote=False, remote_user="root", remote_host=None
 		option_v = line_split[-1]
 		# If Option has multiple key/value pairs in it (Comma separated)
 		if "," in option_v:
-			if not option_k in guest_cfg: guest_cfg[option_k] = dict()
+			if not option_k in guest_cfg: guest_cfg[option_k] = {}
 			option_v = option_v.replace(",,",",").split(",")
 			for sub_v in option_v:
 				# Guess Separator
@@ -152,7 +152,7 @@ def parse_guest_netcfg(guest_id, remote=False, remote_user="root", remote_host=N
 	logger.info("Collecting Network Config for Guest %s", guest_id)
 	if remote and not remote_host:
 		raise ValueError("remote_host is required when calling as remote function")
-	net_cfg = dict()
+	net_cfg = {}
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
 
@@ -169,7 +169,7 @@ def parse_guest_netcfg(guest_id, remote=False, remote_user="root", remote_host=N
 			line_split = line.split(": ")
 			net_index = line_split[0].lstrip("net")
 			net_opts = line_split[-1].split(",")
-			net_opts_parsed = dict()
+			net_opts_parsed = {}
 			for o in net_opts:
 				k, v = o.split("=")
 				net_opts_parsed[k] = v

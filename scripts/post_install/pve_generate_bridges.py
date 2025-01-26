@@ -24,7 +24,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 def main(argv_a: ArgumentParser):
-	iface_data = dict()
+	iface_data = {}
 	use_linux_bridge = not argv_a.ovs_bridge
 	vmbr_index = 0
 	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"
@@ -39,7 +39,7 @@ def main(argv_a: ArgumentParser):
 			if b in configured_ifaces:
 				del configured_ifaces[b]
 
-	vmbr_map = dict()
+	vmbr_map = {}
 	port_map_list: dict[str] = argv_a.port_map
 	if port_map_list:
 		for i in port_map_list:

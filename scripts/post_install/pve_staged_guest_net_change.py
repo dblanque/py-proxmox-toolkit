@@ -158,7 +158,7 @@ def main(argv_a):
 	if argv_a.dry_run: logger.info("Running in dry-run mode. Commands will only be printed.")
 
 	all_guests = get_all_guests(filter_ids=guest_net_map)
-	guest_net_orig = dict()
+	guest_net_orig = {}
 	for guest_type in all_guests:
 		for guest_id in all_guests[guest_type]:
 			guest_host = get_guest_cfg(guest_id=guest_id, get_host=True)

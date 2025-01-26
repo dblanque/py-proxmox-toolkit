@@ -24,7 +24,7 @@ class NetworkInterfacesParseException(Exception):
 	pass
 
 def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> dict[dict]:
-	ifaces = dict()
+	ifaces = {}
 	if not isfile(file):
 		raise Exception(f"{file} does not exist.")
 	with open(file, "r") as f:
@@ -38,7 +38,7 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> dict[dict]:
 				param = l_args[0]
 				if param == "iface":
 					if not l_args[1] in ifaces:
-						ifaces[l_args[1]] = dict()
+						ifaces[l_args[1]] = {}
 					iface_name = l_args[1]
 					ifaces[iface_name]["name"] = iface_name
 
@@ -55,12 +55,12 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> dict[dict]:
 
 				elif param.startswith("auto"):
 					if not l_args[1] in ifaces:
-						ifaces[l_args[1]] = dict()
+						ifaces[l_args[1]] = {}
 					ifaces[l_args[1]]["auto"] = True
 
 				elif param.startswith("allow-hotplug"):
 					if not l_args[1] in ifaces:
-						ifaces[l_args[1]] = dict()
+						ifaces[l_args[1]] = {}
 					ifaces[l_args[1]]["allow-hotplug"] = True
 
 				elif iface_name:

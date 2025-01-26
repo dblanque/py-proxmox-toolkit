@@ -1,5 +1,5 @@
 def get_data() -> dict:
-	os_data = dict()
+	os_data = {}
 	try:
 		for line in open("/etc/os-release", "r"):
 			line_data = line.strip().split("=")
