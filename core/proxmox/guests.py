@@ -159,19 +159,19 @@ def parse_guest_netcfg(guest_id, remote=False, remote_user="root", remote_host=N
 	cmd_args = [f'/usr/sbin/{proc_cmd}', "config", str(guest_id), "--current"]
 	if remote: cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
 	if debug: logger.debug(cmd_args)
-	proc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE)
-	proc_o, proc_e = proc.communicate()
-	if proc.returncode != 0:
-		raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
-	for line in proc_o.decode().split("\n"):
-		line = line.rstrip()
-		if re.search(r"^net[0-9]+:.*$", line):
-			line_split = line.split(": ")
-			net_index = line_split[0].lstrip("net")
-			net_opts = line_split[-1].split(",")
-			net_opts_parsed = {}
-			for o in net_opts:
-				k, v = o.split("=")
-				net_opts_parsed[k] = v
-			net_cfg[int(net_index)] = net_opts_parsed
-	return net_cfg
+	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
+		proc_o, proc_e = proc.communicate()
+		if proc.returncode != 0:
+			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+		for line in proc_o.decode().split("\n"):
+			line = line.rstrip()
+			if re.search(r"^net[0-9]+:.*$", line):
+				line_split = line.split(": ")
+				net_index = line_split[0].lstrip("net")
+				net_opts = line_split[-1].split(",")
+				net_opts_parsed = {}
+				for o in net_opts:
+					k, v = o.split("=")
+					net_opts_parsed[k] = v
+				net_cfg[int(net_index)] = net_opts_parsed
+		return net_cfg
