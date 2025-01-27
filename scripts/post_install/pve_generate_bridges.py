@@ -105,4 +105,5 @@ def main(argv_a: ArgumentParser):
 			else:
 				raise Exception("OVS Bridges are currently Unsupported.")
 		f.write(stringify_interfaces(configured_ifaces, top_level_args))
-	print_c(bcolors.L_BLUE, f"New interfaces generated at {NEW_INTERFACES_FILE}, rename it to {FILE_NETWORK_INTERFACES} to apply changes.")
+	print(	f"New interfaces generated at {bcolors.L_YELLOW}{NEW_INTERFACES_FILE}{bcolors.NC}, "+
+			f"rename it to {bcolors.L_YELLOW}{FILE_NETWORK_INTERFACES}{bcolors.NC} to apply changes.")
