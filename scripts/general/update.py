@@ -54,16 +54,10 @@ def main(argv_a):
 			cmd = f"{cmd} -y"
 		print_c(bcolors.L_BLUE, f"{cmd}")
 		try:
-			with subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as sp:
-				# src: https://stackoverflow.com/questions/63129698/python-subprocess-stdout-doesnt-capture-input-prompt
-				while sp.poll() is None:
-					out_bytes = sp.stdout.read(1).decode(sys.stdout.encoding)
-					sys.stdout.write(out_bytes)
-					sys.stdout.flush()
-
-				if sp.returncode and sp.returncode != 0:
-					print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {sp.returncode}).")
-					sys.exit(sp.returncode)
+			sp = subprocess.call(cmd.split())
+			if sp and sp != 0:
+				print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {sp}).")
+				sys.exit(sp)
 		except subprocess.CalledProcessError as e:
 			print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {e.returncode}).")
 			sys.exit(e.returncode)
