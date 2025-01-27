@@ -45,6 +45,10 @@ def main(argv_a):
 			"sysstat",
 		]
 
+	print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
+	for package in tools:
+		print(f"\t- {package}")
+
 	try:
 		subprocess.check_call(
 			"apt-get update -y".split(),
