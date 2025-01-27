@@ -32,7 +32,7 @@ def main(argv_a: ArgumentParser):
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	ifaces = get_interfaces(interface_patterns=PHYSICAL_INTERFACE_PATTERNS)
 	bridges = get_interfaces(interface_patterns=VIRTUAL_BRIDGE_PATTERNS)
-	configured_ifaces = parse_interfaces(file=argv_a.source)
+	configured_ifaces, top_level_args = parse_interfaces(file=argv_a.source)
 	if argv_a.reconfigure_all:
 		print_c(bcolors.L_RED, "WARNING: All bridges will be reset.")
 		for b in bridges:
@@ -103,4 +103,4 @@ def main(argv_a: ArgumentParser):
 					}
 			else:
 				raise Exception("OVS Bridges are currently Unsupported.")
-		f.write(stringify_interfaces(configured_ifaces))
+		f.write(stringify_interfaces(configured_ifaces, top_level_args))
