@@ -21,6 +21,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 def main(argv_a):
+	already_installed = []
 	tools = [
 		"sudo",
 		"net-tools",
@@ -45,10 +46,6 @@ def main(argv_a):
 			"sysstat",
 		]
 
-	print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
-	for package in tools:
-		print(f"\t- {package}")
-
 	try:
 		subprocess.check_call(
 			"apt-get update -y".split(),
@@ -69,7 +66,16 @@ def main(argv_a):
 				if ec == 0:
 					print_c(bcolors.L_GREEN, f"{pkg} is already installed.")
 					tools.remove(pkg)
+					already_installed.append(pkg)
 		except: pass
+
+	print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
+	for package in tools:
+		print(f"\t- {package}")
+
+	print(f"{bcolors.L_GREEN}The following packages are already installed:{bcolors.NC}")
+	for package in already_installed:
+		print(f"\t- {package}")
 
 	try:
 		subprocess.call("apt-get install".split() + tools)
