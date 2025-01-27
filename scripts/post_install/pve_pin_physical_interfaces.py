@@ -73,6 +73,9 @@ def main(argv_a):
 					attrs=attrs.strip()
 				).strip()
 			else:
+				if udev_fields:
+					print("None of the requested UDEV Fields were found.")
+					print("Using standard MAC Address UDEV Link.")
 				data = UDEV_BY_MAC_ADDRESS.format(
 					iface_name=iface_name,
 					iface_mac_addr=iface_mac_addr
