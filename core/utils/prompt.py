@@ -39,7 +39,7 @@ def yes_no_input(
 		else:
 			print(f"Please enter a valid choice {choices_str}.")
 
-def prompt_update():
+def prompt_update(dist_upgrade=True):
 	if yes_no_input(
 		msg="Do you wish to perform an update?",
 		input_default=True
