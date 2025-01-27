@@ -88,5 +88,3 @@ def main(argv_a):
 			print("-"*12 + "\n")
 
 	print(f"You may execute the command {bcolors.L_YELLOW}systemctl restart systemd-udev-trigger{bcolors.NC} to refresh the Interface UDEV Links.")
-
-
