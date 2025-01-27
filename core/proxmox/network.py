@@ -36,9 +36,6 @@ INITIAL_ARGS = [
 	*TOP_LEVEL_LONE_ARGS
 ]
 
-def parameter_is_top_level(parameter):
-	return parameter in TOP_LEVEL_LONE_ARGS
-
 class NetworkInterfacesParseException(Exception):
 	pass
 
