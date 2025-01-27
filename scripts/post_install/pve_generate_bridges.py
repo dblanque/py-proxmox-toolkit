@@ -23,6 +23,12 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-p", "--port-map", help="Map port to a specific bridge. (Separated by spaces, written as 'port:bridge')", nargs="*", default=[])
 	return parser
 
+def iface_sort(x: str):
+	import re
+	prefix = re.sub('\d+', '', x)
+	number = x.replace(prefix, "")
+	return prefix, number
+
 def main(argv_a: ArgumentParser):
 	iface_data = {}
 	use_linux_bridge = not argv_a.ovs_bridge
@@ -114,6 +120,6 @@ def main(argv_a: ArgumentParser):
 					print_c(bcolors.L_BLUE, f"Adding offloading to pre-configured Interface {iface}.")
 					configured_ifaces[iface]["post-up"] = OFFLOADING_CMD.format(iface).split()
 
-		f.write(stringify_interfaces(configured_ifaces, top_level_args))
+		f.write(stringify_interfaces(configured_ifaces, top_level_args, sort_function=iface_sort))
 	print(	f"New interfaces generated at {bcolors.L_YELLOW}{NEW_INTERFACES_FILE}{bcolors.NC}, "+
 			f"rename it to {bcolors.L_YELLOW}{FILE_NETWORK_INTERFACES}{bcolors.NC} to apply changes.")

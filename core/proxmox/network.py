@@ -46,7 +46,6 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 		raise Exception(f"{file} does not exist.")
 	with open(file, "r") as f:
 		iface_name: str = None
-		iface_type: str = None
 		for l in f.readlines():
 			l = l.strip()
 			if len(l) <= 0: continue
@@ -74,8 +73,6 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 					if not l_args[1] in ifaces:
 						ifaces[l_args[1]] = {}
 					ifaces[l_args[1]][param] = True
-				elif iface_name:
-					ifaces[iface_name][param] = l_args[1:]
 				elif param.startswith("#"):
 					if ("description" in ifaces[iface_name] and
 		 				(ifaces[iface_name]["description"] or 
@@ -84,16 +81,20 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 						raise NetworkInterfacesParseException("A network interface has multiple descriptions.", ifaces[iface_name]["description"])
 					ifaces[iface_name]["description"] = re.sub(r"^(#+)(.*)$", "\\2", l)
 					iface_name = None
+				elif iface_name:
+					ifaces[iface_name][param] = l_args[1:]
 			except:
 				print("Offending line:")
 				print(l)
 				raise
 	return ifaces, top_level_args
 
-def stringify_interfaces(network_interfaces_dict: dict, top_level_args: dict) -> str:
+def stringify_interfaces(network_interfaces_dict: dict, top_level_args: dict, sort_function=None) -> str:
 	output = DEFAULT_PVE_HEADER
-	for iface_key, iface_dict in network_interfaces_dict.items():
-		iface_dict: dict
+	if sort_function:
+		network_interfaces_keys_sorted = sorted(network_interfaces_dict.keys(), key=sort_function)
+	for iface_key in network_interfaces_keys_sorted:
+		iface_dict: dict = network_interfaces_dict[iface_key]
 		l = ""
 		try:
 			iface_name = iface_dict.pop("name")
@@ -111,10 +112,11 @@ def stringify_interfaces(network_interfaces_dict: dict, top_level_args: dict) ->
 		output = f"{output}\n{l}"
 		for k, v in iface_dict.items():
 			if k == "description":
-				output = f"{output}\n#{v}"
+				v: str
+				output = f"{output}\n#{v.strip()}"
 			else:
 				try:
-					output = f"{output}\n\t{k} {' '.join([str(e) for e in v])}"
+					output = f"{output}\n\t{k} {' '.join([str(e) for e in v]).strip()}"
 				except:
 					print("Offending value:")
 					print(v)
@@ -123,6 +125,6 @@ def stringify_interfaces(network_interfaces_dict: dict, top_level_args: dict) ->
 	output = f"{output}\n"
 	for stanza, arg_values in top_level_args.items():
 		for v in arg_values:
-			output = f"{output}\n{stanza} {' '.join([str(e) for e in v])}"
+			output = f"{output}\n{stanza} {' '.join([str(e) for e in v]).strip()}"
 
 	return f"{output}\n"
