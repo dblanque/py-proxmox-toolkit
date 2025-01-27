@@ -83,7 +83,7 @@ def main(argv_a):
 			else:
 				with open(udev_link_name, "w") as iface_udev_link:
 					print(f"Writing UDEV Link File {udev_link_name} for Interface {iface_name}.")
-					iface_udev_link.write(data)
+					iface_udev_link.write(data + "\n")
 					print("UDEV Link Written.")
 			print("-"*12 + "\n")
 
