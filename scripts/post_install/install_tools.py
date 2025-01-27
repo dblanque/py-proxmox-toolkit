@@ -58,15 +58,15 @@ def main(argv_a):
 
 	for pkg in tools:
 		try:
-			with subprocess.check_call(
+			ec = subprocess.check_call(
 				f"dpkg -l {pkg}".split(),
 				stdout=open(os.devnull, 'wb'),
 				stderr=subprocess.STDOUT
-			) as ec:
-				if ec == 0:
-					print_c(bcolors.L_GREEN, f"{pkg} is already installed.")
-					tools.remove(pkg)
-					already_installed.append(pkg)
+			)
+			if ec == 0:
+				print_c(bcolors.L_GREEN, f"{pkg} is already installed.")
+				tools.remove(pkg)
+				already_installed.append(pkg)
 		except: pass
 
 	print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
