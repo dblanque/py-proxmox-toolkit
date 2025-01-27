@@ -91,7 +91,7 @@ def main(argv_a):
 					print("UDEV Link Written.")
 			print("-"*12 + "\n")
 
-	print("You may execute the command %s to refresh the Interface UDEV Links."
+	print("You may execute the command {0} to refresh the Interface UDEV Links."
 		.format(
 			colorize(bcolors.L_YELLOW, "systemctl restart systemd-udev-trigger")
 		)
