@@ -77,11 +77,11 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 				elif iface_name:
 					ifaces[iface_name][param] = l_args[1:]
 				elif param.startswith("#"):
-					# if ("description" in ifaces[iface_name] and
-		 			# 	(ifaces[iface_name]["description"] or 
-					# 	len(ifaces[iface_name]["description"]) > 1)
-					# ):
-					# 	raise NetworkInterfacesParseException("A network interface has multiple descriptions.", ifaces[iface_name]["description"])
+					if ("description" in ifaces[iface_name] and
+		 				(ifaces[iface_name]["description"] or 
+						len(ifaces[iface_name]["description"]) > 1)
+					):
+						raise NetworkInterfacesParseException("A network interface has multiple descriptions.", ifaces[iface_name]["description"])
 					ifaces[iface_name]["description"] = re.sub(r"^(#+)(.*)$", "\\2", l)
 					iface_name = None
 			except:
