@@ -28,9 +28,10 @@ def main(argv_a: ArgumentParser):
 	use_linux_bridge = not argv_a.ovs_bridge
 	vmbr_index = 0
 	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"
+	OFFLOADING_CMD = "/sbin/ethtool -offload {0} tx off rx off; /sbin/ethtool -K {0} gso off; /sbin/ethtool -K {0} tso off;"
 
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
-	ifaces = get_interfaces(interface_patterns=PHYSICAL_INTERFACE_PATTERNS)
+	physical_interfaces = get_interfaces(interface_patterns=PHYSICAL_INTERFACE_PATTERNS)
 	bridges = get_interfaces(interface_patterns=VIRTUAL_BRIDGE_PATTERNS)
 	configured_ifaces, top_level_args = parse_interfaces(file=argv_a.source)
 	if argv_a.reconfigure_all:
@@ -48,7 +49,7 @@ def main(argv_a: ArgumentParser):
 			if len(i) != 2: raise Exception(f"Invalid map element (Length must be 2) {i}.")
 
 	for p, b in vmbr_map.items():
-		if not p in ifaces: raise Exception(f"{p} was not found in the Interface list (Port Mapping).")
+		if not p in physical_interfaces: raise Exception(f"{p} was not found in the Interface list (Port Mapping).")
 		if not b in bridges: raise Exception(f"{b} was not found in the Bridge list (Port Mapping).")
 
 	# Check if ethtool is installed when requiring offload disabled
@@ -67,15 +68,15 @@ def main(argv_a: ArgumentParser):
 
 	with open(NEW_INTERFACES_FILE, "w") as f:
 		f.write(DEFAULT_PVE_HEADER)
-		for nic in ifaces:
+		for iface in physical_interfaces:
 			if use_linux_bridge:
-				if nic in configured_ifaces and not argv_a.reconfigure_all:
-					print_c(bcolors.L_YELLOW, f"{nic} is already configured, skipping.")
+				if iface in configured_ifaces and not argv_a.reconfigure_all:
+					print_c(bcolors.L_YELLOW, f"{iface} is already configured, skipping.")
 					continue
 				else:
 					current_bridge = f"vmbr{vmbr_index}"
 					# Increase bridge index if NIC is not mapped
-					if not nic in vmbr_map:
+					if not iface in vmbr_map:
 						while f"vmbr{vmbr_index}" in configured_ifaces:
 							vmbr_index += 1
 							current_bridge = f"vmbr{vmbr_index}"
@@ -87,23 +88,30 @@ def main(argv_a: ArgumentParser):
 							"name": current_bridge,
 							"auto": True,
 							"type": "static",
-							"bridge-ports": [ nic ],
+							"bridge-ports": [ iface ],
 							"bridge-stp": [ "off" ],
 							"bridge-fd": [ 0 ]
 						}
 					else:
 						print_c(bcolors.L_BLUE, f"Linking port to virtual bridge {current_bridge}")
-						configured_ifaces[current_bridge]["bridge-ports"].append(nic)
+						configured_ifaces[current_bridge]["bridge-ports"].append(iface)
 
-					print_c(bcolors.L_BLUE, f"Parsing NIC {nic}")
-					configured_ifaces[nic] = {
-						"name": nic,
+					print_c(bcolors.L_BLUE, f"Parsing NIC {iface}")
+					configured_ifaces[iface] = {
+						"name": iface,
 						"type": "manual",
 						"auto": True,
-						"post-up": f"/sbin/ethtool -offload {nic} tx off rx off; /sbin/ethtool -K {nic} gso off; /sbin/ethtool -K {nic} tso off;".split()
+						"post-up": OFFLOADING_CMD.format(iface).split()
 					}
 			else:
 				raise Exception("OVS Bridges are currently Unsupported.")
+
+		if not argv_a.keep_offloading:
+			for iface in configured_ifaces:
+				if not "post-up" in configured_ifaces[iface]:
+					print(f"Adding offloading to pre-configured Interface {iface}.")
+					configured_ifaces[iface]["post-up"] = OFFLOADING_CMD.format(iface).split()
+
 		f.write(stringify_interfaces(configured_ifaces, top_level_args))
 	print(	f"New interfaces generated at {bcolors.L_YELLOW}{NEW_INTERFACES_FILE}{bcolors.NC}, "+
 			f"rename it to {bcolors.L_YELLOW}{FILE_NETWORK_INTERFACES}{bcolors.NC} to apply changes.")
