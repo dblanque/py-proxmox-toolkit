@@ -110,7 +110,7 @@ def main(argv_a: ArgumentParser):
 			else:
 				raise Exception("OVS Bridges are currently Unsupported.")
 
-		if not argv_a.keep_offloading:
+		if argv_a.keep_offloading is not True:
 			for iface in configured_ifaces:
 				# Only on Physical Interfaces
 				if not iface in physical_interfaces: continue
