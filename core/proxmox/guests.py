@@ -63,12 +63,12 @@ def get_guest_status(guest_id: int, remote_args=None):
 	cmd_args = cmd_args + ["status", str(guest_id)]
 	if remote_args:
 		cmd_args = remote_args + cmd_args
-	proc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE)
-	proc_o, proc_e = proc.communicate()
-	if proc.returncode != 0:
-		raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
-	result = proc_o.decode().split("\n")
-	return result[0].strip().split(": ")[-1]
+	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
+		proc_o, proc_e = proc.communicate()
+		if proc.returncode != 0:
+			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+		result = proc_o.decode().split("\n")
+		return result[0].strip().split(": ")[-1]
 
 GUEST_CONF_REGEX = r"^[0-9]+.conf$"
 def get_all_guests(filter_ids: list | dict = []):
@@ -108,45 +108,45 @@ def parse_guest_cfg(guest_id, remote=False, remote_user="root", remote_host=None
 	cmd_args = [f'/usr/sbin/{proc_cmd}', "config", str(guest_id), "--current"]
 	if remote: cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
 	if debug: logger.debug(cmd_args)
-	proc = subprocess.Popen(cmd_args, stdout=subprocess.PIPE)
-	proc_o, proc_e = proc.communicate()
-	if proc.returncode != 0:
-		raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
-	if debug: logger.debug("Showing parsed Guest config lines:")
-	for line in proc_o.decode().split("\n"):
-		line = line.rstrip()
-		if debug: logger.debug(line)
-		line_split = line.split(": ")
-		option_k = line_split[0]
-		option_v = line_split[-1]
-		# If Option has multiple key/value pairs in it (Comma separated)
-		if "," in option_v:
-			if not option_k in guest_cfg: guest_cfg[option_k] = {}
-			option_v = option_v.replace(",,",",").split(",")
-			for sub_v in option_v:
-				# Guess Separator
-				fs = None
-				for sep in ["=", ":"]:
-					if sep in sub_v and sub_v.count(sep) == 1: fs = sep
-				# If separator is equal assume it's not a Volume/Disk path.
-				if fs == "=":
-					k, v = sub_v.split(fs)
-					try: v = int(v)
-					except: pass
-					guest_cfg[option_k][k] = v
-				# If it's a raw value
-				else:
-					if not sub_v or sub_v.lower() == "none": continue
-					if not "raw_values" in guest_cfg[option_k]:
-						guest_cfg[option_k]["raw_values"] = []
-					try: sub_v = int(sub_v)
-					except: pass
-					guest_cfg[option_k]["raw_values"].append(sub_v)
-		else:
-			try: option_v = int(option_v)
-			except: pass
-			guest_cfg[option_k] = option_v
-	return guest_cfg
+	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
+		proc_o, proc_e = proc.communicate()
+		if proc.returncode != 0:
+			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+		if debug: logger.debug("Showing parsed Guest config lines:")
+		for line in proc_o.decode().split("\n"):
+			line = line.rstrip()
+			if debug: logger.debug(line)
+			line_split = line.split(": ")
+			option_k = line_split[0]
+			option_v = line_split[-1]
+			# If Option has multiple key/value pairs in it (Comma separated)
+			if "," in option_v:
+				if not option_k in guest_cfg: guest_cfg[option_k] = {}
+				option_v = option_v.replace(",,",",").split(",")
+				for sub_v in option_v:
+					# Guess Separator
+					fs = None
+					for sep in ["=", ":"]:
+						if sep in sub_v and sub_v.count(sep) == 1: fs = sep
+					# If separator is equal assume it's not a Volume/Disk path.
+					if fs == "=":
+						k, v = sub_v.split(fs)
+						try: v = int(v)
+						except: pass
+						guest_cfg[option_k][k] = v
+					# If it's a raw value
+					else:
+						if not sub_v or sub_v.lower() == "none": continue
+						if not "raw_values" in guest_cfg[option_k]:
+							guest_cfg[option_k]["raw_values"] = []
+						try: sub_v = int(sub_v)
+						except: pass
+						guest_cfg[option_k]["raw_values"].append(sub_v)
+			else:
+				try: option_v = int(option_v)
+				except: pass
+				guest_cfg[option_k] = option_v
+		return guest_cfg
 
 def parse_guest_netcfg(guest_id, remote=False, remote_user="root", remote_host=None, debug=False):
 	logger.info("Collecting Network Config for Guest %s", guest_id)

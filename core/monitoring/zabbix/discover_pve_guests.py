@@ -30,29 +30,29 @@ def discover_guests(command):
 	else:
 		guest_type = "CT"
 	args = [f"/usr/sbin/{command}", "list"]
-	proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=sys.stderr)
-	proc_out_parsed = []
-	for i, l_out in enumerate(proc.stdout):
-		ln = l_out.decode('utf-8'.strip())
-		ln = ln.split()
-		if i == 0:
-			if (command == "qm" and len(ln) != 6) or (command == "pct" and len(ln) != 4):
-				raise Exception(f"Column length has changed for command {command}")
-			cols = [c.lower() for c in ln]
-			continue
-		if ln and len(ln) > 0: proc_out_parsed.append(ln)
+	with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=sys.stderr) as proc:
+		proc_out_parsed = []
+		for i, l_out in enumerate(proc.stdout):
+			ln = l_out.decode('utf-8'.strip())
+			ln = ln.split()
+			if i == 0:
+				if (command == "qm" and len(ln) != 6) or (command == "pct" and len(ln) != 4):
+					raise Exception(f"Column length has changed for command {command}")
+				cols = [c.lower() for c in ln]
+				continue
+			if ln and len(ln) > 0: proc_out_parsed.append(ln)
 
-	result = []
-	for guest in proc_out_parsed:
-		if "lock" in cols and len(guest) < len(cols):
-			cols.remove("lock")
-		result.append({
-			"{#GUEST_ID}": guest[cols.index("vmid")],
-			"{#GUEST_NAME}": guest[cols.index("name")],
-			# "{#GUEST_STATUS}": guest[cols.index("status")],
-			"{#GUEST_TYPE}": guest_type
-		})
-	return result
+		result = []
+		for guest in proc_out_parsed:
+			if "lock" in cols and len(guest) < len(cols):
+				cols.remove("lock")
+			result.append({
+				"{#GUEST_ID}": guest[cols.index("vmid")],
+				"{#GUEST_NAME}": guest[cols.index("name")],
+				# "{#GUEST_STATUS}": guest[cols.index("status")],
+				"{#GUEST_TYPE}": guest_type
+			})
+		return result
 
 def get_status(guest_id: int, guest_type: str):
 	guest_type = guest_type.lower()
@@ -62,9 +62,9 @@ def get_status(guest_id: int, guest_type: str):
 		command = "pct"
 	else: raise ValueError(f"Invalid Guest Type for Guest {guest_id}")
 	args = [f"/usr/sbin/{command}", "status", guest_id]
-	proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=sys.stderr)
-	out, err = proc.communicate()
-	return out.decode('utf-8'.strip()).split(": ")[-1].rstrip('\n').lstrip()
+	with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=sys.stderr) as proc:
+		out, err = proc.communicate()
+		return out.decode('utf-8'.strip()).split(": ")[-1].rstrip('\n').lstrip()
 
 def main():
 	if args.status and type(args.status) == list:
