@@ -99,6 +99,7 @@ def main(argv_a: ArgumentParser):
 					configured_ifaces[nic] = {
 						"name": nic,
 						"type": "manual",
+						"auto": True,
 						"post-up": f"/sbin/ethtool -offload {nic} tx off rx off; /sbin/ethtool -K {nic} gso off; /sbin/ethtool -K {nic} tso off;".split()
 					}
 			else:

@@ -52,16 +52,19 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 			if len(l) <= 0: continue
 			try:
 				l_args = l.split()
-				param = l_args[0]
+				param: str = l_args[0].strip()
 
 				for stanza in TOP_LEVEL_LONE_ARGS:
-					if param.startswith(stanza):
+					stanza: str
+					if param == (stanza):
 						if not stanza in top_level_args:
 							top_level_args[stanza] = []
 						top_level_args[stanza].append(l_args[1:])
 					continue
 
-				if param == "iface":
+				if param.startswith("#") and not iface_name:
+					continue
+				elif param == "iface":
 					if not l_args[1] in ifaces:
 						ifaces[l_args[1]] = {}
 					iface_name = l_args[1]
@@ -71,19 +74,20 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 						raise NetworkInterfacesParseException("Invalid network interface type.")
 					else:
 						ifaces[iface_name]["type"] = l_args[-1]
-				elif param.startswith("#") and iface_name:
-					if ifaces[iface_name]["description"] or len(ifaces[iface_name]["description"]) > 1:
-						raise NetworkInterfacesParseException("A network interface has multiple descriptions.")
+				elif param in TOP_LEVEL_IFACE_BOOL:
+					if not l_args[1] in ifaces:
+						ifaces[l_args[1]] = {}
+					ifaces[l_args[1]][param] = True
+				elif iface_name:
+					ifaces[iface_name][param] = l_args[1:]
+				elif param.startswith("#"):
+					# if ("description" in ifaces[iface_name] and
+		 			# 	(ifaces[iface_name]["description"] or 
+					# 	len(ifaces[iface_name]["description"]) > 1)
+					# ):
+					# 	raise NetworkInterfacesParseException("A network interface has multiple descriptions.", ifaces[iface_name]["description"])
 					ifaces[iface_name]["description"] = re.sub(r"^(#+)(.*)$", "\\2", l)
 					iface_name = None
-				else:
-					for bool_arg in TOP_LEVEL_IFACE_BOOL:
-						if not l_args[1] in ifaces:
-							ifaces[l_args[1]] = {}
-						ifaces[l_args[1]][bool_arg] = True
-						continue
-
-					ifaces[iface_name][param] = l_args[1:]
 			except:
 				print("Offending line:")
 				print(l)
@@ -92,11 +96,16 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 
 def stringify_interfaces(network_interfaces_dict: dict, top_level_args: dict) -> str:
 	output = DEFAULT_PVE_HEADER
-	for iface_dict in network_interfaces_dict.values():
+	for iface_key, iface_dict in network_interfaces_dict.items():
 		iface_dict: dict
 		l = ""
-		iface_name = iface_dict.pop("name")
-		iface_type = iface_dict.pop("type")
+		try:
+			iface_name = iface_dict.pop("name")
+			iface_type = iface_dict.pop("type")
+		except:
+			print(iface_key)
+			print(iface_dict)
+			raise
 		for bool_arg in TOP_LEVEL_IFACE_BOOL:
 			if bool_arg in iface_dict:
 				iface_dict.pop(bool_arg)
@@ -115,7 +124,9 @@ def stringify_interfaces(network_interfaces_dict: dict, top_level_args: dict) ->
 					print(v)
 					raise
 
+	output = f"{output}\n"
 	for stanza, arg_values in top_level_args.items():
-		for arg_value in arg_values:
-			output = f"{output}\n{stanza} {arg_value}"
+		for v in arg_values:
+			output = f"{output}\n{stanza} {' '.join([str(e) for e in v])}"
+
 	return f"{output}\n"
