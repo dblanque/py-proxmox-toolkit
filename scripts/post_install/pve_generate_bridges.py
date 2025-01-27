@@ -106,8 +106,7 @@ def main(argv_a: ArgumentParser):
 					configured_ifaces[iface] = {
 						"name": iface,
 						"type": "manual",
-						"auto": True,
-						"post-up": OFFLOADING_CMD.format(iface).split()
+						"auto": True
 					}
 			else:
 				raise Exception("OVS Bridges are currently Unsupported.")
