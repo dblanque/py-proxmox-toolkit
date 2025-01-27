@@ -119,6 +119,8 @@ def main(argv_a: ArgumentParser):
 				if not "post-up" in configured_ifaces[iface]:
 					print_c(bcolors.L_BLUE, f"Adding offloading to pre-configured Interface {iface}.")
 					configured_ifaces[iface]["post-up"] = OFFLOADING_CMD.format(iface).split()
+				else:
+					print_c(bcolors.L_RED, f"Interface {iface} already has a post-up argument, please disable offloading manually.")
 
 		f.write(stringify_interfaces(configured_ifaces, top_level_args, sort_function=iface_sort))
 	print(	f"New interfaces generated at {bcolors.L_YELLOW}{NEW_INTERFACES_FILE}{bcolors.NC}, "+
