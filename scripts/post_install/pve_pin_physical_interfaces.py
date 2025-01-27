@@ -67,6 +67,7 @@ def main(argv_a):
 				for k, v in udev_info.items():
 					if k in udev_fields:
 						attrs = attrs + f"Property={k}={v}" + "\n"
+						print_c(bcolors.L_YELLOW, f"Pinning interface with additional attribute {k} ({v}).")
 				data = UDEV_BY_PROPERTY.format(
 					iface_name=iface_name,
 					iface_mac_addr=iface_mac_addr,
