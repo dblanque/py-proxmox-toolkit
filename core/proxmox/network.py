@@ -36,6 +36,9 @@ INITIAL_ARGS = [
 	*TOP_LEVEL_LONE_ARGS
 ]
 
+def parameter_is_top_level(parameter):
+	return parameter in TOP_LEVEL_LONE_ARGS
+
 class NetworkInterfacesParseException(Exception):
 	pass
 
@@ -49,22 +52,16 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 		iface_type: str = None
 		for l in f.readlines():
 			l = l.strip()
-			stanza_parsed = False
 			if len(l) <= 0: continue
 			try:
 				l_args = l.split()
 				param: str = l_args[0].strip()
 
-				for stanza in TOP_LEVEL_LONE_ARGS:
-					stanza: str
-					if param == stanza:
-						if not stanza in top_level_args:
-							top_level_args[stanza] = []
-						top_level_args[stanza].append(l_args[1:])
-						stanza_parsed = True
-				if stanza_parsed: continue
-
-				if param.startswith("#") and not iface_name:
+				if param in TOP_LEVEL_LONE_ARGS:
+					if not param in top_level_args:
+						top_level_args[param] = []
+					top_level_args[param].append(l_args[1:])
+				elif param.startswith("#") and not iface_name:
 					continue
 				elif param == "iface":
 					if not l_args[1] in ifaces:
