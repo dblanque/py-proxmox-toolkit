@@ -42,7 +42,7 @@ def main():
 	with open(pbs_list_file, "w") as pbs_apt_lists:
 		pbs_apt_lists.write(pbs_list_data.format(debian_distribution))
 	if os.path.exists(pbs_list_delete): os.remove(pbs_list_delete)
-	print_c(bcolors.BLUE, "Proxmox Backup Server Sources Set.")
+	print_c(bcolors.L_GREEN, "Proxmox Backup Server Sources Set.")
 
 	# Update Proxmox
 	prompt_update()

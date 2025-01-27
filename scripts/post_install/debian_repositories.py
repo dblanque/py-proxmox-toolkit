@@ -42,7 +42,9 @@ def set_debian_sources(debian_distribution) -> None:
 	if reset_debian_sources:
 		with open("/etc/apt/sources.list", "w") as debian_apt_lists:
 			debian_apt_lists.write(DEB_LISTS[debian_distribution].format(debian_distribution))
-	print_c(bcolors.BLUE, "Debian Sources Set.")
+		print_c(bcolors.BLUE, "Debian Sources Set.")
+	else:
+		print_c(bcolors.BLUE, "Debian Sources Skipped.")
 
 def main():
 	debian_distribution = pre_checks()

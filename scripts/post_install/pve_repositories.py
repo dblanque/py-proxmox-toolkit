@@ -68,13 +68,12 @@ def main():
 			"pve-ha-crm",
 			"corosync",
 		]
-		print_c(bcolors.L_YELLOW, "Running commands:")
+		print_c(bcolors.L_YELLOW, "Executing Commands:")
 		for c in ha_services:
 			print(f"Disabling {c}.service")
 			c = f"systemctl disable --now {c}"
 			print(c)
-			try: subprocess.call(c.split())
-			except: raise
+			subprocess.call(c.split())
 		print_c(bcolors.BLUE, "HA Services disabled.")
 	######################################################################################
 
@@ -91,7 +90,7 @@ def main():
 	with open(pve_list_file, "w") as pve_apt_lists:
 		pve_apt_lists.write(pve_list_data.format(debian_distribution))
 	if os.path.exists(pve_list_delete): os.remove(pve_list_delete)
-	print_c(bcolors.BLUE, "Proxmox VE Sources Set.")
+	print_c(bcolors.L_GREEN, "Proxmox VE Sources Set.")
 
 	# CEPH SRCs
 	if use_ceph:
@@ -107,9 +106,10 @@ def main():
 				else:
 					ceph_list_data = CEPH_SOURCES["QUINCY"]["ENTERPRISE"]
 			ceph_apt_lists.write(ceph_list_data)
-		print_c(bcolors.BLUE, "CEPH Sources Set.")
+		print_c(bcolors.L_GREEN, "CEPH Sources Set.")
 	else:
 		if os.path.exists(SOURCES_LIST_CEPH): os.remove(SOURCES_LIST_CEPH)
+		print_c(bcolors.L_BLUE, "CEPH Sources Skipped.")
 
 	# Update Proxmox
 	prompt_update()
