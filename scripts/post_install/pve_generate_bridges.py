@@ -115,7 +115,7 @@ def main(argv_a: ArgumentParser):
 				# Only on Physical Interfaces
 				if not iface in physical_interfaces: continue
 				if not "post-up" in configured_ifaces[iface]:
-					print_c(bcolors.L_BLUE, f"Adding offloading to pre-configured Interface {iface}.")
+					print_c(bcolors.L_BLUE, f"Adding offloading to Interface {iface}.")
 					configured_ifaces[iface]["post-up"] = OFFLOADING_CMD.format(iface).split()
 				else:
 					print_c(bcolors.L_RED, f"Interface {iface} already has a post-up argument, please disable offloading manually.")
