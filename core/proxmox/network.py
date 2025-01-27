@@ -70,12 +70,12 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 					if not l_args[-1] in NETWORK_INTERFACES_INET_TYPES:
 						raise NetworkInterfacesParseException("Invalid network interface type.")
 					else:
-						iface_type = l_args[-1]
 						ifaces[iface_name]["type"] = l_args[-1]
 				elif param.startswith("#") and iface_name:
+					if ifaces[iface_name]["description"] or len(ifaces[iface_name]["description"]) > 1:
+						raise NetworkInterfacesParseException("A network interface has multiple descriptions.")
 					ifaces[iface_name]["description"] = re.sub(r"^(#+)(.*)$", "\\2", l)
 					iface_name = None
-					iface_type = None
 				else:
 					for bool_arg in TOP_LEVEL_IFACE_BOOL:
 						if not l_args[1] in ifaces:
@@ -83,8 +83,6 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 						ifaces[l_args[1]][bool_arg] = True
 						continue
 
-					if not iface_name or not iface_type:
-						raise NetworkInterfacesParseException("A network interface has multiple descriptions.")
 					ifaces[iface_name][param] = l_args[1:]
 			except:
 				print("Offending line:")
