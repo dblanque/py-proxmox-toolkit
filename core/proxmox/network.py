@@ -49,6 +49,7 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 		iface_type: str = None
 		for l in f.readlines():
 			l = l.strip()
+			stanza_parsed = False
 			if len(l) <= 0: continue
 			try:
 				l_args = l.split()
@@ -56,11 +57,12 @@ def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[li
 
 				for stanza in TOP_LEVEL_LONE_ARGS:
 					stanza: str
-					if param == (stanza):
+					if param == stanza:
 						if not stanza in top_level_args:
 							top_level_args[stanza] = []
 						top_level_args[stanza].append(l_args[1:])
-					continue
+						stanza_parsed = True
+				if stanza_parsed: continue
 
 				if param.startswith("#") and not iface_name:
 					continue
