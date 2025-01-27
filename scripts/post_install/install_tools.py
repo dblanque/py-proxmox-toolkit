@@ -46,6 +46,7 @@ def main(argv_a):
 			"sysstat",
 		]
 
+	print_c(bcolors.L_BLUE, "Doing apt update.")
 	try:
 		subprocess.check_call(
 			"apt-get update -y".split(),
@@ -54,8 +55,9 @@ def main(argv_a):
 		)
 	except subprocess.CalledProcessError as e:
 		print_c(bcolors.L_RED, f"Could not do apt update (non-zero exit status {e.returncode}).")
-		sys.exit(0)
+		sys.exit(e.returncode)
 
+	print_c(bcolors.L_BLUE, "Checking Installed Packages.")
 	for pkg in tools:
 		try:
 			ec = subprocess.check_call(
@@ -64,17 +66,17 @@ def main(argv_a):
 				stderr=subprocess.STDOUT
 			)
 			if ec == 0:
-				print_c(bcolors.L_GREEN, f"{pkg} is already installed.")
+				# print_c(bcolors.L_GREEN, f"{pkg} is already installed.")
 				tools.remove(pkg)
 				already_installed.append(pkg)
 		except: pass
 
-	print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
-	for package in tools:
-		print(f"\t- {package}")
-
 	print(f"{bcolors.L_GREEN}The following packages are already installed:{bcolors.NC}")
 	for package in already_installed:
+		print(f"\t- {package}")
+
+	print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
+	for package in tools:
 		print(f"\t- {package}")
 
 	try:
