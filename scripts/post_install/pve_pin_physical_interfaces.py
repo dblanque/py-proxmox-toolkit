@@ -5,7 +5,7 @@ if __name__ == "__main__":
 import subprocess
 import os
 from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS
-from core.format.colors import bcolors, print_c
+from core.format.colors import bcolors, print_c, colorize
 from core.parser import make_parser, ArgumentParser
 from core.templates.udev.overrides import UDEV_BY_MAC_ADDRESS, UDEV_BY_PROPERTY
 from core.debian.udev import get_inet_udev_info
@@ -52,7 +52,7 @@ def main(argv_a):
 				print(f"{iface_name} has an invalid MAC Address, skipping.")
 				continue
 
-			print(f"Interface {bcolors.L_BLUE}{iface_name}{bcolors.NC} will be pinned with MAC Address {bcolors.L_RED}{iface_mac_addr}{bcolors.NC}")
+			print(f"Interface {colorize(bcolors.L_BLUE, iface_name)} will be pinned with MAC Address {colorize(bcolors.L_RED, iface_mac_addr)}")
 			if os.path.isfile(udev_link_name) and not use_overwrite:
 				print(f"UDEV Link File {udev_link_name} for Interface {iface_name} already exists, skipping.\n")
 				continue
@@ -82,13 +82,17 @@ def main(argv_a):
 					iface_mac_addr=iface_mac_addr
 				).strip()
 			if use_print:
-				print(f"{bcolors.L_YELLOW}Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.{bcolors.NC}")
+				print_c(bcolors.L_YELLOW, f"Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.")
 				print(data)
 			else:
 				with open(udev_link_name, "w") as iface_udev_link:
-					print(f"Writing UDEV Link File {udev_link_name} for Interface {iface_name}.")
+					print(f"Writing UDEV Link File {colorize(bcolors.L_YELLOW, udev_link_name)} for Interface {colorize(bcolors.L_BLUE, iface_name)}.")
 					iface_udev_link.write(data + "\n")
 					print("UDEV Link Written.")
 			print("-"*12 + "\n")
 
-	print(f"You may execute the command {bcolors.L_YELLOW}systemctl restart systemd-udev-trigger{bcolors.NC} to refresh the Interface UDEV Links.")
+	print("You may execute the command %s to refresh the Interface UDEV Links."
+		.format(
+			colorize(bcolors.L_YELLOW, "systemctl restart systemd-udev-trigger")
+		)
+	)
