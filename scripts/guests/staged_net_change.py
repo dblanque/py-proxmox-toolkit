@@ -11,6 +11,7 @@ import signal
 import time
 import logging
 from copy import deepcopy
+from core.signal_handlers.sigint import graceful_exit
 from core.proxmox.constants import PVE_CFG_NODES_DIR
 from core.proxmox.guests import (
 	get_guest_cfg,
@@ -37,11 +38,6 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument('--example', action='store_true', help="Shows example config file") # Bool
 	return parser
 
-def sigint_handler(sig, frame):
-	print('Ctrl+C pressed, hard-quitting script.')
-	sys.exit(0)
-signal.signal(signal.SIGINT, sigint_handler)
-
 # src: https://stackoverflow.com/questions/44037060/how-to-set-a-timeout-for-input
 def TimedInputYN(question, default="yes", timeout=30, timeoutmsg="Prompt Timed Out."):
 	logger = logging.getLogger()
@@ -61,6 +57,7 @@ def TimedInputYN(question, default="yes", timeout=30, timeoutmsg="Prompt Timed O
 		else: return False
 
 def main(argv_a, **kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	logger = logging.getLogger()
 	logger.setLevel(logging.INFO)
 
