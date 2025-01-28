@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [[ ! "$workpath" ]]; then
+	workpath="`dirname "$(realpath "$0")"`"
+	cd "$workpath"
+fi
+
+cd "$workpath"
+find . | grep -E "(/__pycache__$|\.pyc$|\.pyo$)" | xargs rm -rf
+find . -type d -empty -delete
