@@ -3,11 +3,8 @@ if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
 import os
-import sys
-import subprocess
 import signal
 from core.signal_handlers.sigint import graceful_exit
-signal.signal(signal.SIGINT, graceful_exit)
 
 from core.utils.prompt import yes_no_input, prompt_reboot, prompt_update
 from core.format.colors import bcolors, print_c
@@ -19,6 +16,7 @@ SOURCES_LIST_PBS_NS = f"{SOURCES_LIST_DIR}/pbs-no-subscription.list"
 SOURCES_LIST_PBS_EN = f"{SOURCES_LIST_DIR}/pbs-enterprise.list"
 
 def main(**kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	debian_distribution = pre_checks()
 	set_debian_sources(debian_distribution)
 
