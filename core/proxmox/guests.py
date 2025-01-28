@@ -72,7 +72,7 @@ def get_guest_status(guest_id: int, remote_args=None):
 
 GUEST_CONF_REGEX = r"^[0-9]+.conf$"
 def get_all_guests(filter_ids: list | dict = []):
-	if type(filter_ids) == dict:
+	if isinstance(filter_ids, dict):
 		filter_ids = list(filter_ids.keys())
 	guests = {}
 	guests["vm"] = []
