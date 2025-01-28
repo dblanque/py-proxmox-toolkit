@@ -18,7 +18,7 @@ SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PBS_NS = f"{SOURCES_LIST_DIR}/pbs-no-subscription.list"
 SOURCES_LIST_PBS_EN = f"{SOURCES_LIST_DIR}/pbs-enterprise.list"
 
-def main():
+def main(**kwargs):
 	debian_distribution = pre_checks()
 	set_debian_sources(debian_distribution)
 

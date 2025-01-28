@@ -44,7 +44,7 @@ def set_debian_sources(debian_distribution) -> None:
 	else:
 		print_c(bcolors.BLUE, "Debian Sources Skipped.")
 
-def main():
+def main(**kwargs):
 	debian_distribution = pre_checks()
 	set_debian_sources(debian_distribution)
 

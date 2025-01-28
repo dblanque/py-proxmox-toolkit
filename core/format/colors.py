@@ -34,7 +34,7 @@ def print_c(color: bcolors, message: str, **kwargs):
 def colorize(color: bcolors, message: str):
 	return f"{color}{message}{bcolors.NC}"
 
-def main():
+def main(**kwargs):
 	for color in bcolors:
 			print( f"{color}{color.name}{bcolors.NC}" )
 

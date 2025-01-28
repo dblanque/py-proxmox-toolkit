@@ -66,7 +66,7 @@ def get_status(guest_id: int, guest_type: str):
 		out, err = proc.communicate()
 		return out.decode('utf-8'.strip()).split(": ")[-1].rstrip('\n').lstrip()
 
-def main():
+def main(**kwargs):
 	if args.status and type(args.status) == list:
 		guest_id = args.status[0]
 		guest_type = args.status[1].lower()

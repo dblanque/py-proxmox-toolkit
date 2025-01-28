@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 from argparse import ArgumentParser
 import sys
+import os
 
+toolkit_path=os.path.dirname(__file__)
 main_parser = ArgumentParser(
 	prog='Python Proxmox Toolkit Parser',
 	description='Use this program to execute sub-scripts from the toolkit',
@@ -32,10 +34,10 @@ if script_parser:
 	sub_parser = script_parser()
 	# Parse remaining arguments
 	sub_args = sub_parser.parse_args(unknown_args)
-	script_func(sub_args)
+	script_func(sub_args, toolkit_path=toolkit_path)
 else:
 	# Pass no arguments if no parser exists
-	script_func()
+	script_func(toolkit_path=toolkit_path)
 
 if not is_interactive:
 	sys.exit(0)

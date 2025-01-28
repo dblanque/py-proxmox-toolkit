@@ -21,7 +21,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-d", "--verbose", action="store_true")
 	return parser
 
-def main(argv_a):
+def main(argv_a, **kwargs):
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	regex_list = []
 	if not argv_a.physical and not argv_a.virtual and not argv_a.regex:

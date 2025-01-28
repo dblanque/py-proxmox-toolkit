@@ -41,7 +41,7 @@ def get_iface_status(iface_name):
 	iface_status = iface_status_line[iface_status_line.index("state") + 1].strip()
 	return iface_status
 
-def main(argv_a: ArgumentParser = None):
+def main(argv_a, **kwargs):
 	status = get_iface_status(argv_a.interface)
 	if status == "UP":
 		print_c(bcolors.L_GREEN, status)

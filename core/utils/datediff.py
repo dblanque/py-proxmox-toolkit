@@ -45,7 +45,7 @@ def check_date_threshold():
 	if args.greater_only: return date_target-date_start > threshold
 	return date_target-date_start >= threshold
 
-def main():
+def main(**kwargs):
 	try:
 		print(check_date_threshold())
 	except:

@@ -137,7 +137,7 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 	return
 
-def main(argv_a):
+def main(argv_a, **kwargs):
 	# Logging
 	logger = logging.getLogger()
 	log_level = "INFO"

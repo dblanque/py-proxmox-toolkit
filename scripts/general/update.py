@@ -23,7 +23,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument('-p', '--show-prompts', help="Show prompts from apt commands, default is auto-yes.", action="store_true")
 	return parser
 
-def main(argv_a):
+def main(argv_a, **kwargs):
 	if os.geteuid() != 0:
 		print_c(bcolors.L_YELLOW, "Script must be executed as root.")
 		exit()

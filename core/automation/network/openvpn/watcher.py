@@ -73,7 +73,7 @@ if interval <= ping_timeout:
 	print_c(bcolors.RED, msg)
 	raise ValueError(interval, ping_timeout)
 
-def main():
+def main(**kwargs):
 	if len(gateway) < 1:
 		raise ValueError(gateway)
 	print_c(bcolors.L_GREEN, f"{prog_name} started")

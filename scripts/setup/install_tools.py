@@ -20,7 +20,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument('-l', '--light', action="store_true")
 	return parser
 
-def main(argv_a):
+def main(argv_a, **kwargs):
 	already_installed = []
 	tools = [
 		"sudo",

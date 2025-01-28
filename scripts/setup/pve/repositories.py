@@ -23,7 +23,7 @@ SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"
 SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
 
-def main():
+def main(**kwargs):
 	debian_distribution = pre_checks()
 	set_debian_sources(debian_distribution)
 

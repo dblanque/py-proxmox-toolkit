@@ -60,7 +60,7 @@ def TimedInputYN(question, default="yes", timeout=30, timeoutmsg="Prompt Timed O
 		if default == "yes": return True
 		else: return False
 
-def main(argv_a):
+def main(argv_a, **kwargs):
 	logger = logging.getLogger()
 	logger.setLevel(logging.INFO)
 

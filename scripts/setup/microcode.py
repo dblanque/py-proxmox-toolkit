@@ -40,7 +40,7 @@ def get_cpu_vendor_json():
 		value = d["data"]
 		if "vendor" in field: return value
 
-def main():
+def main(**kwargs):
 	cpu_vendor = get_cpu_vendor()
 	if not cpu_vendor:
 		print_c(bcolors.L_RED, "CPU Vendor not found.")

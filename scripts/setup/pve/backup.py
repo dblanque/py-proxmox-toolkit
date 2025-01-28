@@ -36,7 +36,7 @@ def append_tar_dirs(in_dirs: list, out_dirs: list) -> list:
 		out_dirs.append(d)
 	return out_dirs
 
-def main(argv_a):
+def main(argv_a, **kwargs):
 	backup_date = datetime.now().astimezone(timezone.utc)
 	backup_date_fmted = backup_date.strftime(DATE_FMT)
 	tar_dirs = []

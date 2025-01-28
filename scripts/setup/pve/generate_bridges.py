@@ -29,7 +29,7 @@ def iface_sort(x: str):
 	number = x.replace(prefix, "")
 	return prefix, number
 
-def main(argv_a: ArgumentParser):
+def main(argv_a, **kwargs):
 	use_linux_bridge = not argv_a.ovs_bridge
 	vmbr_index = 0
 	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"

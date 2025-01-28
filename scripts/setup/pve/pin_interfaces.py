@@ -24,7 +24,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-v", "--verbose", action="store_true")
 	return parser
 
-def main(argv_a):
+def main(argv_a, **kwargs):
 	udev_fields = argv_a.fields
 	use_print = argv_a.print
 	use_overwrite = argv_a.overwrite
