@@ -9,7 +9,6 @@ import signal
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
 from core.parser import make_parser, ArgumentParser
-signal.signal(signal.SIGINT, graceful_exit)
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -21,6 +20,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 def main(argv_a, **kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	already_installed = []
 	tools = [
 		"sudo",

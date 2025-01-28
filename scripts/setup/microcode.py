@@ -8,7 +8,6 @@ import json
 import sys
 from core.format.colors import print_c, bcolors
 from core.signal_handlers.sigint import graceful_exit
-signal.signal(signal.SIGINT, graceful_exit)
 
 SUPPORTED_CPU_VENDORS = {
 	"authenticamd":{
@@ -41,6 +40,7 @@ def get_cpu_vendor_json():
 		if "vendor" in field: return value
 
 def main(**kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	cpu_vendor = get_cpu_vendor()
 	if not cpu_vendor:
 		print_c(bcolors.L_RED, "CPU Vendor not found.")

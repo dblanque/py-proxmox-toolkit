@@ -9,7 +9,6 @@ from core.signal_handlers.sigint import graceful_exit
 from core.templates.shell.act_sh import SCRIPT_TEMPLATE, SCRIPT_NAME
 from core.templates.shell.py_proxmox_aliases import TEMPLATE_ALIASES, TEMPLATE_COMPLETION
 from core.format.colors import print_c, bcolors
-signal.signal(signal.SIGINT, graceful_exit)
 from pathlib import Path
 
 def argparser(**kwargs) -> ArgumentParser:
@@ -63,6 +62,7 @@ def install_aliases(user_home, bash_completion, add_aliases):
 			print_c(bcolors.L_YELLOW, f"Wrote bash-completion to {ALIASES_PATH}")
 
 def main(argv_a, **kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	toolkit_path = kwargs.pop("toolkit_path")
 	user_home = Path.home()
 	act_sh_path = os.path.join(user_home, SCRIPT_NAME)

@@ -26,7 +26,6 @@ if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
 from core.signal_handlers.sigint import graceful_exit
-signal.signal(signal.SIGINT, graceful_exit)
 
 # IMPORTS
 import logging
@@ -53,19 +52,6 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument('--debug', action='store_true', default=False)  # Bool
 	parser.add_argument('-v', '--verbose', action='store_true', default=False)  # Bool
 	return parser
-hostname = socket.gethostname()
-running_in_background = True
-signal.signal(signal.SIGINT, graceful_exit)
-
-try:
-	if os.getpgrp() == os.tcgetpgrp(sys.stdout.fileno()):
-		running_in_background = False
-	else:
-		running_in_background = True
-		# Ignore SIGHUP
-		signal.signal(signal.SIGHUP, signal.SIG_IGN)
-except:
-	pass
 
 ## ERRORS
 ERR_GUEST_EXISTS=1
@@ -138,6 +124,20 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 	return
 
 def main(argv_a, **kwargs):
+	hostname = socket.gethostname()
+	running_in_background = True
+	signal.signal(signal.SIGINT, graceful_exit)
+
+	try:
+		if os.getpgrp() == os.tcgetpgrp(sys.stdout.fileno()):
+			running_in_background = False
+		else:
+			running_in_background = True
+			# Ignore SIGHUP
+			signal.signal(signal.SIGHUP, signal.SIG_IGN)
+	except:
+		pass
+
 	# Logging
 	logger = logging.getLogger()
 	log_level = "INFO"

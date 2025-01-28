@@ -11,7 +11,6 @@ from time import perf_counter
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
-signal.signal(signal.SIGINT, graceful_exit)
 
 BKP_DIRS = [
 	"/etc/pve"
@@ -37,6 +36,7 @@ def append_tar_dirs(in_dirs: list, out_dirs: list) -> list:
 	return out_dirs
 
 def main(argv_a, **kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	backup_date = datetime.now().astimezone(timezone.utc)
 	backup_date_fmted = backup_date.strftime(DATE_FMT)
 	tar_dirs = []

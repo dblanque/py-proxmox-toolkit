@@ -7,7 +7,6 @@ import sys
 import subprocess
 import signal
 from core.signal_handlers.sigint import graceful_exit
-signal.signal(signal.SIGINT, graceful_exit)
 
 MIN_VERSION = "8.0.0"
 from core.proxmox.manager import pve_version_exists, get_pve_version
@@ -24,6 +23,7 @@ SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
 
 def main(**kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	debian_distribution = pre_checks()
 	set_debian_sources(debian_distribution)
 

@@ -5,7 +5,6 @@ if __name__ == "__main__":
 import sys
 import signal
 from core.signal_handlers.sigint import graceful_exit
-signal.signal(signal.SIGINT, graceful_exit)
 
 from core.debian import os_release
 from core.utils.prompt import yes_no_input, prompt_reboot, prompt_update
@@ -45,6 +44,7 @@ def set_debian_sources(debian_distribution) -> None:
 		print_c(bcolors.BLUE, "Debian Sources Skipped.")
 
 def main(**kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	debian_distribution = pre_checks()
 	set_debian_sources(debian_distribution)
 

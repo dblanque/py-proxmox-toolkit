@@ -8,9 +8,9 @@ import subprocess
 import signal
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
-signal.signal(signal.SIGINT, graceful_exit)
 
 def main(**kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	try:
 		ec = subprocess.check_call(
 			"dpkg -l chrony".split(),
