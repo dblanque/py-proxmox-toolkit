@@ -14,25 +14,28 @@ is_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
 if is_interactive:
 	print("Interactive mode enabled.")
 
-# Construct sub-script name
-parsed_filename = str(args.filename)
-if parsed_filename.endswith(".py"):
-	parsed_filename = parsed_filename.split(".py")[0]
-	parsed_filename = parsed_filename.replace("/",".")
+parsed_filename = args.filename.rstrip(".py").replace("/", ".")
 
-# Import main function from sub-script
-script_func = getattr(__import__(parsed_filename, fromlist=["main"]), "main")
-script_parser = None
-if hasattr(__import__(parsed_filename, fromlist=["argparser"]), "argparser"):
-	script_parser = getattr(__import__(parsed_filename, fromlist=["argparser"]), "argparser")
+try:
+	# Import sub-script module
+	module = __import__(parsed_filename, fromlist=["main", "argparser"])
+	script_func = getattr(module, "main")
+except ImportError:
+	sys.exit(f"Error: Sub-script '{parsed_filename}' not found.")
+except AttributeError:
+	sys.exit(f"Error: Sub-script '{parsed_filename}' has no 'main' function.")
 
-if script_func and script_parser:
-	new_parser: ArgumentParser = script_parser(
-		parents=[ main_parser ]
-	)
-	args = new_parser.parse_args()
-	script_func(args)
-else: script_func()
+# Check if sub-script provides an argparser
+script_parser = getattr(module, "argparser", None)
+if script_parser:
+	# Initialize sub-script's parser (without inheriting main_parser)
+	sub_parser = script_parser()
+	# Parse remaining arguments
+	sub_args = sub_parser.parse_args(unknown_args)
+	script_func(sub_args)
+else:
+	# Pass no arguments if no parser exists
+	script_func()
 
 if not is_interactive:
 	sys.exit(0)
