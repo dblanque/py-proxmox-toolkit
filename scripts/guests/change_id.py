@@ -166,13 +166,6 @@ def main(argv_a, **kwargs):
 	if get_guest_exists(id_target):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
-
-	guest_state = get_guest_status(guest_id=id_origin, remote_args=args_ssh)
-	if guest_state != "stopped":
-		logger.error("Guest must be in stopped state (Currently %s)", guest_state)
-		sys.exit(ERR_GUEST_NOT_STOPPED)
-
-	# Ask for confirmation to Administrator
 	confirm_prompt(id_origin, id_target)
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
@@ -203,6 +196,10 @@ def main(argv_a, **kwargs):
 		logger.info("Selected Target ID: %s", id_target)
 	logger.debug("Guest Configuration: %s", guest_cfg)
 
+	guest_state = get_guest_status(guest_id=id_origin, remote_args=args_ssh)
+	if guest_state != "stopped":
+		logger.error("Guest must be in stopped state (Currently %s)", guest_state)
+		sys.exit(ERR_GUEST_NOT_STOPPED)
 	# Change Config ID - Move config file
 	old_cfg_path = guest_cfg_details['path']
 	new_cfg_path = guest_cfg_details['path'].replace(f"{id_origin}.conf", f"{id_target}.conf")
