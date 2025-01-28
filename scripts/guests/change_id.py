@@ -124,9 +124,9 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 	return
 
 def main(argv_a, **kwargs):
+	signal.signal(signal.SIGINT, graceful_exit)
 	hostname = socket.gethostname()
 	running_in_background = True
-	signal.signal(signal.SIGINT, graceful_exit)
 
 	try:
 		if os.getpgrp() == os.tcgetpgrp(sys.stdout.fileno()):
