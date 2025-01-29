@@ -54,10 +54,10 @@ def install_aliases(user_home, bash_completion, add_aliases):
 		else: # not found, we are at the eof
 			file.write("\n" + source_line + "\n") # append missing data
 	with open(ALIASES_PATH, "w") as aliases_file:
-		if add_aliases is True:
+		if add_aliases:
 			aliases_file.write(TEMPLATE_ALIASES)
 			print_c(bcolors.L_BLUE, f"Wrote aliases to {ALIASES_PATH}")
-		if bash_completion is True:
+		if bash_completion:
 			aliases_file.write(TEMPLATE_COMPLETION)
 			print_c(bcolors.L_YELLOW, f"Wrote bash-completion to {ALIASES_PATH}")
 

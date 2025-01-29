@@ -7,6 +7,7 @@ import sys
 import subprocess
 import signal
 from core.signal_handlers.sigint import graceful_exit
+from core.debian.apt import apt_install
 from core.format.colors import print_c, bcolors
 
 def main(**kwargs):
@@ -22,7 +23,4 @@ def main(**kwargs):
 			sys.exit(0)
 	except: pass
 
-	try:
-		subprocess.call("apt-get update -y".split())
-		subprocess.call("apt-get install chrony -y".split())
-	except: raise
+	apt_install(packages=["chrony"], force_yes=True)

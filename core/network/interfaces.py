@@ -58,7 +58,7 @@ def get_interfaces(
 			for regex in exclude_patterns:
 				if re.match(regex, iface):
 					skip = True
-		if skip is True:
+		if skip:
 			continue
 
 		for regex in check_patterns:

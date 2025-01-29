@@ -1,6 +1,6 @@
 import os
-import subprocess
 from core.format.colors import print_c, bcolors
+from core.debian.apt import apt_dist_upgrade, apt_update
 
 DEFAULT_CHOICES = {
 	"yes":["yes","y"],
@@ -44,12 +44,9 @@ def prompt_update(dist_upgrade=True):
 		msg="Do you wish to perform an update?",
 		input_default=True
 	):
-		update_cmds = [
-			"apt-get update -y",
-			"apt-get dist-upgrade --fix-missing --fix-broken -y"
-		]
-		for c in update_cmds:
-			subprocess.call(c.split())
+		apt_update()
+		if dist_upgrade:
+			apt_dist_upgrade()
 	print_c(bcolors.L_GREEN, "Update Complete.")
 
 def prompt_reboot():
