@@ -64,7 +64,7 @@ def main(argv_a, **kwargs):
 	script_args=argv_a.script_args
 	shell=argv_a.shell
 
-	script_file_exists=os.path.isfile(script)
+	script_file_exists = os.path.isfile(script) if script else None
 
 	if interval <= ping_timeout:
 		msg="The gateway check Interval cannot be shorter than the Ping Timeout"
