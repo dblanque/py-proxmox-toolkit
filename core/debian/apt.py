@@ -49,10 +49,14 @@ def apt_install(
 			for package in already_installed:
 				print(f"\t- {package}")
 
-	print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
-	for package in packages:
-		print(f"\t- {package}")
-	return subprocess.call(cmd.split() + packages)
+	if len(packages) > 0:
+		print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
+		for package in packages:
+			print(f"\t- {package}")
+		return subprocess.call(cmd.split() + packages)
+	else:
+		print_c(bcolors.L_BLUE, "Nothing to install.")
+		return 0
 
 def apt_dist_upgrade(
 		fix_missing=True,
