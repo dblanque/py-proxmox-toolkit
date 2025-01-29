@@ -86,14 +86,11 @@ def main(argv_a, **kwargs):
 	if guest_on_remote_host:
 		args_qm = args_ssh + args_qm
 
-	# Rename Guest Configuration
+	# Change Guest Config
 	if argv_a.dry_run:
 		print(args_qm)
 	else:
-		with subprocess.Popen(args_qm, stdout=subprocess.PIPE) as proc:
-			proc_o, proc_e = proc.communicate()
-			if proc.returncode != 0:
-				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+		subprocess.call(args_qm)
 
 	guest_state = get_guest_status(guest_id=argv_a.guest_id, remote_args=args_ssh)
 	if guest_state == "running":
@@ -103,11 +100,8 @@ def main(argv_a, **kwargs):
 	if guest_on_remote_host:
 		args_power = args_ssh + args_power
 
-	# Rename Guest Configuration
+	# Change Guest Config
 	if argv_a.dry_run:
 		print(args_power)
 	else:
-		with subprocess.Popen(args_power, stdout=subprocess.PIPE) as proc:
-			proc_o, proc_e = proc.communicate()
-			if proc.returncode != 0:
-				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+		subprocess.call(args_power)
