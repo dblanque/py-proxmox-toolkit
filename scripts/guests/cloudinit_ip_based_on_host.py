@@ -30,6 +30,7 @@ def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
 	reserved_ip_addresses = []
 	network = None
+	gateway = None
 	cmd = None
 	if not argv_a.guest_id:
 		raise ValueError("Please input a Guest ID.")
@@ -52,9 +53,17 @@ def main(argv_a, **kwargs):
 				continue
 			if network is None:
 				network = ipaddress.ip_network(iface_dict["cidr"], False)
-			reserved_ip_addresses.append(ipaddress.ip_address(iface_dict["address"]))
+				gateway = ipaddress.ip_address(iface_dict["gateway"], False)
+			_addr = ipaddress.ip_address(iface_dict["address"])
+			if _addr in network:
+				reserved_ip_addresses.append(_addr)
 
 	reserved_ip_addresses.sort()
 	cloudinit_guest_address = reserved_ip_addresses[-1] + 1
+	if not cloudinit_guest_address in network:
+		print("Cannot increment IP Address bits, attempting to use a lower address.")
+		cloudinit_guest_address = reserved_ip_addresses[0] - 1
 
-	print(cloudinit_guest_address)
+	assert cloudinit_guest_address in network, "Could not find a valid contiguous IP within requested subnet."
+
+	print(f"qm set {argv_a.guest_id} --ipconfig0 ip={cloudinit_guest_address}/{network.prefixlen},gw={gateway}")
