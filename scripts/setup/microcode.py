@@ -8,6 +8,7 @@ import json
 import sys
 from core.format.colors import print_c, bcolors
 from core.signal_handlers.sigint import graceful_exit
+from core.debian.apt import apt_install, apt_update
 
 SUPPORTED_CPU_VENDORS = {
 	"authenticamd":{
@@ -62,6 +63,7 @@ def main(**kwargs):
 			sys.exit(0)
 	except: pass
 
+	apt_update()
 	print_c(bcolors.L_BLUE, f"Downloading and Installing {cpu_vendor_data['label']} Processor Microcode.")
 	apt_search = subprocess.check_output(f"apt-cache search ^{cpu_microcode_deb}$".split())
 	if not apt_search.decode().strip().split(" - ")[0] == cpu_microcode_deb:
@@ -71,7 +73,7 @@ def main(**kwargs):
 		deb_to_install = [ cpu_microcode_deb ]
 		if "supplementary_packages" in cpu_vendor_data:
 			deb_to_install = deb_to_install + cpu_vendor_data["supplementary_packages"]
-		subprocess.call("apt-get install -y".split() + deb_to_install)
+		apt_install(packages=deb_to_install, do_update=False)
 	except:
 		raise
 	print_c(bcolors.L_GREEN, "Microcode Installed.")

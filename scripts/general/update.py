@@ -3,12 +3,11 @@ if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
 import os
-import sys
-import subprocess
 import signal
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
 from core.parser import make_parser, ArgumentParser
+from core.debian.apt import apt_update, apt_dist_upgrade, apt_autoremove, apt_autoclean
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -18,7 +17,6 @@ def argparser(**kwargs) -> ArgumentParser:
 	)
 	parser.add_argument('-d', '--download-only', help="Execute package download only.", action="store_true")
 	parser.add_argument('-df', '--download-first', help="Execute package download only first, then update.", action="store_true")
-	parser.add_argument('-q', '--quiet', help="Make apt commands quiet.", action="store_true")
 	parser.add_argument('-p', '--show-prompts', help="Show prompts from apt commands, default is auto-yes.", action="store_true")
 	return parser
 
@@ -28,40 +26,13 @@ def main(argv_a, **kwargs):
 		print_c(bcolors.L_YELLOW, "Script must be executed as root.")
 		exit()
 
-	commands = [ "apt update" ]
+	apt_update()
 	if argv_a.download_only:
-		commands = [ *commands,
-			"apt dist-upgrade --fix-broken --fix-missing -d"
-		]
+		apt_dist_upgrade(extra_args=["-d"])
 	elif argv_a.download_first:
-		commands = [ *commands,
-			"apt dist-upgrade --fix-broken --fix-missing -d",
-			"apt dist-upgrade --fix-broken --fix-missing"
-		]
+		apt_dist_upgrade(extra_args=["-d"])
+		apt_dist_upgrade()
 	else:
-		commands = [ *commands,
-			"apt dist-upgrade --fix-broken --fix-missing"
-		]
-	commands = [ *commands,
-		"apt autoclean",
-		"apt autoremove"
-	]
-
-	for cmd in commands:
-		if not argv_a.quiet:
-			cmd = f"{cmd} --quiet=0"
-		if not argv_a.show_prompts:
-			cmd = f"{cmd} -y"
-		print_c(bcolors.L_BLUE, f"{cmd}")
-		try:
-			sp = subprocess.call(cmd.split())
-			if sp and sp != 0:
-				print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {sp}).")
-				sys.exit(sp)
-		except subprocess.CalledProcessError as e:
-			print_c(bcolors.L_RED, f"Could not execute \"{cmd}\" (non-zero exit status {e.returncode}).")
-			sys.exit(e.returncode)
-		except Exception as e:
-			print_c(bcolors.L_RED, "Unhandled Exception.")
-			print(e)
-			sys.exit(1)
+		apt_dist_upgrade()
+	apt_autoclean()
+	apt_autoremove()
