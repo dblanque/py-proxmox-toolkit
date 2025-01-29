@@ -13,23 +13,27 @@ apt install git python3 -y
 cd /opt/
 
 # Clone the Repository
-git clone https://github.com/dblanque/py-pve-toolkit
+git clone https://github.com/dblanque/py-proxmox-toolkit
 
 # Change Directory
-cd ./py-pve-toolkit
+cd /opt/py-proxmox-toolkit
 
 # Using pve_repositories.py as an example.
+python3 main.py scripts/setup/microcode.py
+
+# OR
 python3 main.py scripts.post_install.pve_repositories
 ```
 
 ## Installation (With PIP)
-- Not required for any scripts as of yet.
+- NOT REQUIRED AS OF YET.
 
 ```bash
 # After executing the previous steps above, ensure python3-venv is installed.
 apt install python3-venv -y
 
 # Setup the virtual environment with the provided script.
+cd /opt/py-proxmox-toolkit
 bash setup_venv.sh ./
 ```
 
