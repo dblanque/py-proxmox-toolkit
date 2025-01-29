@@ -52,9 +52,9 @@ def main(argv_a, **kwargs):
 				continue
 			if network is None:
 				network = ipaddress.ip_network(iface_dict["cidr"], False)
-			reserved_ip_addresses.append(iface_dict["address"])
+			reserved_ip_addresses.append(ipaddress.ip_address(iface_dict["address"]))
 
-	hosts_iterator = (host for host in network.hosts() if str(host) not in reserved_ip_addresses)
-	cloudinit_guest_address = next(hosts_iterator)
+	reserved_ip_addresses.sort()
+	cloudinit_guest_address = reserved_ip_addresses[-1] + 1
 
 	print(cloudinit_guest_address)
