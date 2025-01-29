@@ -37,18 +37,23 @@ def main(argv_a, **kwargs):
 
 	PVE_NODE_LIST_CMD = "pvesh get /nodes --output-format json"
 	cmd = PVE_NODE_LIST_CMD.split()
-	PVE_NODE_DATA = json.loads(subprocess.check_output(cmd))
+	PVE_NODE_DATA: list[dict] = json.loads(subprocess.check_output(cmd))
 	PVE_NODE_LIST = tuple([ d["node"] for d in PVE_NODE_DATA ])
 
-	PVE_NETWORK_CMD = "pvesh get /nodes/{0}/network/vmbr0 --output-format json"
+	PVE_NETWORK_CMD = "pvesh get /nodes/{0}/network --output-format json"
 	for node in PVE_NODE_LIST:
 		cmd = PVE_NETWORK_CMD.format(node).split()
-		PVE_NETWORK_DATA = json.loads(subprocess.check_output(cmd))
-		print(PVE_NETWORK_DATA)
-		if network is None:
-			network = ipaddress.ip_network(PVE_NETWORK_DATA["cidr"], False)
-		reserved_ip_addresses.append(PVE_NETWORK_DATA["address"])
-	
+		PVE_NETWORK_DATA: list[dict] = json.loads(subprocess.check_output(cmd))
+		for iface_dict in PVE_NETWORK_DATA:
+			assert "iface" in iface_dict, f"Missing critical key in Interface Dictionary.\n{iface_dict}"
+			if not iface_dict["iface"].startswith("vmbr0"):
+				continue
+			if not "cidr" in iface_dict:
+				continue
+			if network is None:
+				network = ipaddress.ip_network(iface_dict["cidr"], False)
+			reserved_ip_addresses.append(iface_dict["address"])
+
 	hosts_iterator = (host for host in network.hosts() if str(host) not in reserved_ip_addresses)
 	cloudinit_guest_address = next(hosts_iterator)
 
