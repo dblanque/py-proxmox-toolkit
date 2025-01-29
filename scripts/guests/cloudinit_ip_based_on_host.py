@@ -38,7 +38,7 @@ def main(argv_a, **kwargs):
 	PVE_NODE_DATA = json.loads(subprocess.check_output(PVE_NODE_LIST_CMD))
 	PVE_NODE_LIST = tuple([ d["node"] for d in PVE_NODE_DATA ])
 
-	PVE_NETWORK_CMD = "pvesh get /nodes/{node}/network/vmbr0 --output-format json"
+	PVE_NETWORK_CMD = "pvesh get /nodes/{0}/network/vmbr0 --output-format json"
 	for node in PVE_NODE_LIST:
 		PVE_NETWORK_DATA = json.loads(subprocess.check_output(PVE_NETWORK_CMD.format(node)))
 		if network is None:
