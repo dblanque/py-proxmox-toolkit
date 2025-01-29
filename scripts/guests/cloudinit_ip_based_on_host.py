@@ -20,7 +20,7 @@ def argparser(**kwargs) -> ArgumentParser:
 		description="This program is used for scripted network modifications.",
 		**kwargs
 	)
-	parser.add_argument('-i', '--guest-id', default=None, type=int)  # Bool
+	parser.add_argument('guest-id', default=None, type=int)  # Bool
 	parser.add_argument('-d', '--dry-run', action='store_true', default=False)  # Bool
 	parser.add_argument('--debug', action='store_true', default=False)  # Bool
 	parser.add_argument('-v', '--verbose', action='store_true', default=False)  # Bool
