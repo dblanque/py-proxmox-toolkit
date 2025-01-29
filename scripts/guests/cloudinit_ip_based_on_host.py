@@ -11,7 +11,7 @@ import subprocess
 import json
 import socket
 import ipaddress
-from core.proxmox.guests import get_guest_exists, get_guest_cfg
+from core.proxmox.guests import get_guest_exists, get_guest_cfg, get_guest_status
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 
@@ -90,6 +90,23 @@ def main(argv_a, **kwargs):
 		print(args_qm)
 	else:
 		with subprocess.Popen(args_qm, stdout=subprocess.PIPE) as proc:
+			proc_o, proc_e = proc.communicate()
+			if proc.returncode != 0:
+				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+
+	guest_state = get_guest_status(guest_id=argv_a.guest_id, remote_args=args_ssh)
+	if guest_state == "running":
+		args_power = f"qm reboot {argv_a.guest_id}".split()
+	else:
+		args_power = f"qm start {argv_a.guest_id}".split()
+	if guest_on_remote_host:
+		args_power = args_ssh + args_power
+
+	# Rename Guest Configuration
+	if argv_a.dry_run:
+		print(args_power)
+	else:
+		with subprocess.Popen(args_power, stdout=subprocess.PIPE) as proc:
 			proc_o, proc_e = proc.communicate()
 			if proc.returncode != 0:
 				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
