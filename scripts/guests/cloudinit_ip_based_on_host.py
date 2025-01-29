@@ -30,19 +30,21 @@ def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
 	reserved_ip_addresses = []
 	network = None
+	cmd = None
 	if not argv_a.guest_id:
 		raise ValueError("Please input a Guest ID.")
 	assert get_guest_exists(argv_a.guest_id), f"Guest ID {argv_a.guest_id} does not exist."
 
-	PVE_NODE_LIST_CMD = "pvesh get /nodes --output-format json".split()
-	PVE_NODE_DATA = json.loads(subprocess.check_output(PVE_NODE_LIST_CMD))
+	PVE_NODE_LIST_CMD = "pvesh get /nodes --output-format json"
+	cmd = PVE_NODE_LIST_CMD.split()
+	PVE_NODE_DATA = json.loads(subprocess.check_output(cmd))
 	PVE_NODE_LIST = tuple([ d["node"] for d in PVE_NODE_DATA ])
 
 	PVE_NETWORK_CMD = "pvesh get /nodes/{0}/network/vmbr0 --output-format json"
+	cmd = PVE_NETWORK_CMD.format(node).split()
 	for node in PVE_NODE_LIST:
-		PVE_NETWORK_DATA = json.loads(
-			subprocess.check_output(PVE_NETWORK_CMD.format(node).split())
-		)
+		PVE_NETWORK_DATA = json.loads(subprocess.check_output(cmd))
+		print(PVE_NETWORK_DATA)
 		if network is None:
 			network = ipaddress.ip_network(PVE_NETWORK_DATA["cidr"], False)
 		reserved_ip_addresses.append(PVE_NETWORK_DATA["address"])
