@@ -12,10 +12,19 @@ from core.proxmox.guests import get_guest_exists, get_guest_cfg, get_guest_statu
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 
+argparser_descr = """
+This program is used for scripted network modifications, recommended for situations
+where you might want a Remote Access Server to auto-adjust it's network along with the
+hypervisor cluster, and you don't know what subnet they'll be placed in.
+
+CAUTION: It could use an IP of a host outside the Cluster Network and generate network
+issues.
+""".lstrip()
+
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
-		prog="Set IP Address through Cloud-Init based on Host Data",
-		description="This program is used for scripted network modifications.",
+		prog="Set a single hosts' IP Address through Cloud-Init based on Host Data",
+		description=argparser_descr,
 		**kwargs
 	)
 	parser.add_argument('guest_id', default=None, type=int)  # Bool
