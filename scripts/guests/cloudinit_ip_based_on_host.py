@@ -38,9 +38,11 @@ def main(argv_a, **kwargs):
 	PVE_NODE_DATA = json.loads(subprocess.check_output(PVE_NODE_LIST_CMD))
 	PVE_NODE_LIST = tuple([ d["node"] for d in PVE_NODE_DATA ])
 
-	PVE_NETWORK_CMD = "pvesh get /nodes/{0}/network/vmbr0 --output-format json".split()
+	PVE_NETWORK_CMD = "pvesh get /nodes/{0}/network/vmbr0 --output-format json"
 	for node in PVE_NODE_LIST:
-		PVE_NETWORK_DATA = json.loads(subprocess.check_output(PVE_NETWORK_CMD.format(node)))
+		PVE_NETWORK_DATA = json.loads(
+			subprocess.check_output(PVE_NETWORK_CMD.format(node).split())
+		)
 		if network is None:
 			network = ipaddress.ip_network(PVE_NETWORK_DATA["cidr"], False)
 		reserved_ip_addresses.append(PVE_NETWORK_DATA["address"])
