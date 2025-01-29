@@ -44,9 +44,10 @@ def apt_install(
 					already_installed.append(pkg)
 			except: pass
 
-		print(f"{bcolors.L_GREEN}The following packages are already installed:{bcolors.NC}")
-		for package in already_installed:
-			print(f"\t- {package}")
+		if len(already_installed) > 0:
+			print(f"{bcolors.L_GREEN}The following packages are already installed:{bcolors.NC}")
+			for package in already_installed:
+				print(f"\t- {package}")
 
 	print(f"{bcolors.L_YELLOW}The following packages will be installed:{bcolors.NC}")
 	for package in packages:
