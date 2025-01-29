@@ -1,12 +1,9 @@
-
-import os
-import signal
-script_path = os.path.realpath(__file__)
-script_dir = os.path.dirname(script_path)
+#!/usr/bin/env python3
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
 # IMPORTS
+import signal
 import subprocess
 import json
 import socket

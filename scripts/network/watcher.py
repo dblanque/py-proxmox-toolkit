@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
-if __name__ != "__main__":
-	raise ImportError("This python script cannot be imported.")
-
-import os
-import sys
-VENV_DIR = os.path.abspath(os.environ['VIRTUAL_ENV']) or None
-if not VENV_DIR:
-	print(VENV_DIR)
-	raise Exception('Could not append VENV_DIR to PATH')
-sys.path.append(VENV_DIR)
+if __name__ == "__main__":
+	raise Exception("This python script cannot be executed individually, please use main.py")
 
 # Imports
+import os
+import sys
 import subprocess
 from core.format.colors import print_c, bcolors
 from core.network.ping import ping
@@ -154,7 +148,6 @@ if __name__ == "__main__":
 	try:
 		main()
 	except KeyboardInterrupt:
-		sys.path.remove(VENV_DIR)
 		msg=f"{SCRIPT_NAME} stopped"
 		print_c(bcolors.BLUE, msg)
 		try:
