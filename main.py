@@ -16,7 +16,10 @@ is_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
 if is_interactive:
 	print("Interactive mode enabled.")
 
-parsed_filename = os.path.splitext(args.filename)[0].replace("/", ".")
+if args.filename.endswith(".py"):
+	parsed_filename = os.path.splitext(args.filename)[0].replace("/", ".")
+else:
+	parsed_filename = args.filename
 
 try:
 	# Import sub-script module
