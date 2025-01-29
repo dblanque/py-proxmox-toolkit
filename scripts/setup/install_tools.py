@@ -18,7 +18,6 @@ def argparser(**kwargs) -> ArgumentParser:
 
 def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
-	already_installed = []
 	tools = [
 		"sudo",
 		"net-tools",
