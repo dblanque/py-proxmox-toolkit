@@ -9,8 +9,9 @@ if __name__ == "__main__":
 # IMPORTS
 import subprocess
 import json
+import socket
 import ipaddress
-from core.proxmox.guests import get_guest_exists
+from core.proxmox.guests import get_guest_exists, get_guest_cfg
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 
@@ -28,6 +29,7 @@ def argparser(**kwargs) -> ArgumentParser:
 
 def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
+	hostname = socket.gethostname()
 	reserved_ip_addresses = []
 	network = None
 	gateway = None
@@ -40,9 +42,11 @@ def main(argv_a, **kwargs):
 	cmd = PVE_NODE_LIST_CMD.split()
 	PVE_NODE_DATA: list[dict] = json.loads(subprocess.check_output(cmd))
 	PVE_NODE_LIST = tuple([ d["node"] for d in PVE_NODE_DATA ])
+	print("Proxmox VE Cluster Node list fetched.")
 
 	PVE_NETWORK_CMD = "pvesh get /nodes/{0}/network --output-format json"
 	for node in PVE_NODE_LIST:
+		print(f"Fetching network data for {node}.")
 		cmd = PVE_NETWORK_CMD.format(node).split()
 		PVE_NETWORK_DATA: list[dict] = json.loads(subprocess.check_output(cmd))
 		for iface_dict in PVE_NETWORK_DATA:
@@ -65,5 +69,27 @@ def main(argv_a, **kwargs):
 		cloudinit_guest_address = reserved_ip_addresses[0] - 1
 
 	assert cloudinit_guest_address in network, "Could not find a valid contiguous IP within requested subnet."
+	print(f"Using {cloudinit_guest_address} for guest.")
 
-	print(f"qm set {argv_a.guest_id} --ipconfig0 ip={cloudinit_guest_address}/{network.prefixlen},gw={gateway}")
+	guest_cfg_details = get_guest_cfg(guest_id=argv_a.guest_id, get_as_dict=True)
+	guest_cfg_host = guest_cfg_details["host"]
+	guest_is_ct = (guest_cfg_details["type"] == "ct")
+	assert not guest_is_ct, "This script does not support LXC Guests."
+	
+	guest_on_remote_host = (hostname != guest_cfg_host)
+	args_ssh = None
+	if guest_on_remote_host:
+		args_ssh = ["/usr/bin/ssh", f"root@{guest_cfg_host}"]
+
+	args_qm = f"qm set {argv_a.guest_id} --ipconfig0 ip={cloudinit_guest_address}/{network.prefixlen},gw={gateway}".split()
+	if guest_on_remote_host:
+		args_qm = args_ssh + args_qm
+
+	# Rename Guest Configuration
+	if argv_a.dry_run:
+		print(args_qm)
+	else:
+		with subprocess.Popen(args_qm, stdout=subprocess.PIPE) as proc:
+			proc_o, proc_e = proc.communicate()
+			if proc.returncode != 0:
+				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
