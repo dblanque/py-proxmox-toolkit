@@ -30,7 +30,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument('-i', '--interval', default=30,
 				help='How often to check Gateway Availability')
 	parser.add_argument('-n', '--use-network-manager',
-				help='How often to check Gateway Availability',
+				help='Use Network Manager (nmcli) instead of SystemD',
 				action='store_true',
 				default=False)
 	parser.add_argument('-pa', '--ping-args',
