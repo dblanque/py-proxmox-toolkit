@@ -24,6 +24,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument('guest_id', default=None, type=int)  # Bool
 	parser.add_argument('-d', '--dry-run', action='store_true', default=False)  # Bool
 	parser.add_argument('--debug', action='store_true', default=False)  # Bool
+	parser.add_argument('-b', "--bridge", default="vmbr0", help="May also be a physical interface.")
 	parser.add_argument('-v', '--verbose', action='store_true', default=False)  # Bool
 	return parser
 
@@ -51,7 +52,7 @@ def main(argv_a, **kwargs):
 		PVE_NETWORK_DATA: list[dict] = json.loads(subprocess.check_output(cmd))
 		for iface_dict in PVE_NETWORK_DATA:
 			assert "iface" in iface_dict, f"Missing critical key in Interface Dictionary.\n{iface_dict}"
-			if not iface_dict["iface"].startswith("vmbr0"):
+			if not iface_dict["iface"].startswith(argv_a.bridge):
 				continue
 			if not "cidr" in iface_dict:
 				continue
