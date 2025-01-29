@@ -12,71 +12,74 @@ sys.path.append(VENV_DIR)
 
 # Imports
 import subprocess
-from core.parser import ColoredArgParser
 from core.format.colors import print_c, bcolors
 from core.network.ping import ping
-from controller import VPNController
+from core.automation.network.openvpn.controller import VPNController
 from time import sleep
+from core.parser import make_parser, ArgumentParser
 
-prog_name = "OpenVPN Watcher"
-parser = ColoredArgParser(
-	prog=prog_name,
-	description='This script allows for ping-based VPN Tunnel restoration',
-	epilog='If you use systemctl for OpenVPN, drop the certificate in\
-		/etc/openvpn and rename the suffix to *.conf')
-parser.add_argument('-g', '--gateway', required=True)
-parser.add_argument('-c', '--connection-name', required=True,
-		    help='OpenVPN Connection or Certificate Name')
-parser.add_argument('-pc', '--ping-count', default=3)
-parser.add_argument('-t', '--timeout', default=3,
-		    help='How long to wait until ping is considered a fail')
-parser.add_argument('-i', '--interval', default=30,
-			help='How often to check Gateway Availability')
-parser.add_argument('-n', '--use-network-manager',
-			help='How often to check Gateway Availability',
-			action='store_true',
-			default=False)
-parser.add_argument('-pa', '--ping-args',
-			default=None,
-			help='Extra Args to pass to Ping Command, separated by spaces.'
-)
-parser.add_argument('-s', '--script',
-			default=None,
-			help='Extra Script to execute after VPN Restart (Must be a file).'
-)
-parser.add_argument('-sa', '--script-args',
-			default=None,
-			help='Args to pass to Extra Script'
-)
-parser.add_argument('-sh', '--shell',
-			default='bash',
-			help='Shell to use for Extra Script.',
-			choices=['sh', 'bash', 'zsh', 'ksh', 'csh']
-)
-args = parser.parse_args()
+SCRIPT_NAME = "OpenVPN Watcher"
+def argparser(**kwargs) -> ArgumentParser:
+	parser = make_parser(
+		prog=SCRIPT_NAME,
+		description='This script allows for ping-based VPN Tunnel restoration',
+		epilog='If you use systemctl for OpenVPN, drop the certificate in \
+			/etc/openvpn and rename the suffix to *.conf',
+		**kwargs
+	)
+	parser.add_argument('-g', '--gateway', required=True)
+	parser.add_argument('-c', '--connection-name', required=True,
+				help='OpenVPN Connection or Certificate Name')
+	parser.add_argument('-pc', '--ping-count', default=3)
+	parser.add_argument('-t', '--timeout', default=3,
+				help='How long to wait until ping is considered a fail')
+	parser.add_argument('-i', '--interval', default=30,
+				help='How often to check Gateway Availability')
+	parser.add_argument('-n', '--use-network-manager',
+				help='How often to check Gateway Availability',
+				action='store_true',
+				default=False)
+	parser.add_argument('-pa', '--ping-args',
+				default=None,
+				help='Extra Args to pass to Ping Command, separated by spaces.'
+	)
+	parser.add_argument('-s', '--script',
+				default=None,
+				help='Extra Script to execute after VPN Restart (Must be a file).'
+	)
+	parser.add_argument('-sa', '--script-args',
+				default=None,
+				help='Args to pass to Extra Script'
+	)
+	parser.add_argument('-sh', '--shell',
+				default='bash',
+				help='Shell to use for Extra Script.',
+				choices=['sh', 'bash', 'zsh', 'ksh', 'csh']
+	)
+	return parser
 
-gateway=args.gateway
-connection=args.connection_name
-use_network_manager=args.use_network_manager
-ping_timeout=args.timeout
-ping_count=args.timeout
-interval=args.interval
-ping_args=args.ping_args
-script=args.script
-script_args=args.script_args
-shell=args.shell
+def main(argv_a, **kwargs):
+	gateway=argv_a.gateway
+	connection=argv_a.connection_name
+	use_network_manager=argv_a.use_network_manager
+	ping_timeout=argv_a.timeout
+	ping_count=argv_a.timeout
+	interval=argv_a.interval
+	ping_args=argv_a.ping_args
+	script=argv_a.script
+	script_args=argv_a.script_args
+	shell=argv_a.shell
 
-script_file_exists=os.path.isfile(script)
+	script_file_exists=os.path.isfile(script)
 
-if interval <= ping_timeout:
-	msg="The gateway check Interval cannot be shorter than the Ping Timeout"
-	print_c(bcolors.RED, msg)
-	raise ValueError(interval, ping_timeout)
-
-def main(**kwargs):
+	if interval <= ping_timeout:
+		msg="The gateway check Interval cannot be shorter than the Ping Timeout"
+		print_c(bcolors.RED, msg)
+		raise ValueError(interval, ping_timeout)
 	if len(gateway) < 1:
 		raise ValueError(gateway)
-	print_c(bcolors.L_GREEN, f"{prog_name} started")
+	print_c(bcolors.L_GREEN, f"{SCRIPT_NAME} started.")
+
 	if ping_args and len(ping_args) > 0: ping_args_array = ping_args.split(" ")
 	else: ping_args_array = []
 	while True:
@@ -152,7 +155,7 @@ if __name__ == "__main__":
 		main()
 	except KeyboardInterrupt:
 		sys.path.remove(VENV_DIR)
-		msg=f"{prog_name} stopped"
+		msg=f"{SCRIPT_NAME} stopped"
 		print_c(bcolors.BLUE, msg)
 		try:
 			sys.exit(130)
