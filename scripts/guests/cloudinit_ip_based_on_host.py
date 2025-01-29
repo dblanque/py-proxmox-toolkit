@@ -53,7 +53,7 @@ def main(argv_a, **kwargs):
 				continue
 			if network is None:
 				network = ipaddress.ip_network(iface_dict["cidr"], False)
-				gateway = ipaddress.ip_address(iface_dict["gateway"], False)
+				gateway = ipaddress.ip_address(iface_dict["gateway"])
 			_addr = ipaddress.ip_address(iface_dict["address"])
 			if _addr in network:
 				reserved_ip_addresses.append(_addr)
