@@ -45,12 +45,13 @@ def argparser(**kwargs) -> ArgumentParser:
 		description="This program is used for scripted network modifications that might imply a network cutout or require an automatic rollback.",
 		**kwargs
 	)
-	parser.add_argument('-l', '--remote-user', default="root")  # Bool
-	parser.add_argument('-i', '--origin-id', default=None)  # Bool
-	parser.add_argument('-t', '--target-id', default=None)  # Bool
-	parser.add_argument('-d', '--dry-run', action='store_true', default=False)  # Bool
-	parser.add_argument('--debug', action='store_true', default=False)  # Bool
-	parser.add_argument('-v', '--verbose', action='store_true', default=False)  # Bool
+	parser.add_argument('-l', '--remote-user', default="root")
+	parser.add_argument('-i', '--origin-id', default=None)
+	parser.add_argument('-t', '--target-id', default=None)
+	parser.add_argument('-y', '--yes', action='store_true', default=False)
+	parser.add_argument('-d', '--dry-run', action='store_true', default=False)
+	parser.add_argument('--debug', action='store_true', default=False)
+	parser.add_argument('-v', '--verbose', action='store_true', default=False)
 	return parser
 
 ## ERRORS
@@ -166,7 +167,8 @@ def main(argv_a, **kwargs):
 	if get_guest_exists(id_target):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
-	confirm_prompt(id_origin, id_target)
+	if not argv_a.yes:
+		confirm_prompt(id_origin, id_target)
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
 	guest_cfg_details = get_guest_cfg(guest_id=id_origin, get_as_dict=True)
