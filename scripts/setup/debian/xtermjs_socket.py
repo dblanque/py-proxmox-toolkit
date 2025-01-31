@@ -82,6 +82,5 @@ def main(argv_a, **kwargs):
 			"sed", "-i", r's#^\(GRUB_CMDLINE_LINUX=".*\)"$#\1 console=ttyS0,115200"#', GRUB_FILE
 		])
 
-
 	print_c(bcolors.L_YELLOW, f"Doing update-grub.")
 	subprocess.call(["update-grub"])
