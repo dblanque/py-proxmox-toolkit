@@ -382,8 +382,9 @@ def main(argv_a, **kwargs):
 				remote_args=args_ssh,
 				dry_run=argv_a.dry_run
 			)
-		except DiskReassignException:
+		except DiskReassignException as e:
 			logger.error(ERR_REASSIGN_MSG, d_name)
+			logger.exception(e)
 			pass
 
 	if replication_targets:
