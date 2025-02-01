@@ -155,7 +155,7 @@ def get_guest_replication_targets(old_id):
 					raise
 	return targets
 
-def retarget_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
+def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
 	logger = logging.getLogger()
 	backup_jobs = get_all_backup_jobs()
 	backup_change_errors = []
@@ -174,17 +174,39 @@ def retarget_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
 			job_vmids.append(new_id)
 			job_vmids_data = ",".join(job_vmids)
 
-			if not dry_run and set_backup_attrs(
-				job_id = job_id,
-				data = {"vmid": job_vmids_data},
-				raise_exception = False
-			):
-				backup_change_errors.append(job_id)
+			if not dry_run:
+				if set_backup_attrs(
+					job_id = job_id,
+					data = {"vmid": job_vmids_data},
+					raise_exception = False
+				):
+					backup_change_errors.append(job_id)
+				else:
+					logger.info("Modified backup job %s (%s).", job_id, job_description)
 			else:
-				logger.info("Modified backup job %s (%s).", job_id, job_description)
+				logger.info("Fake modified backup job %s (%s).", job_id, job_description)
 	if len(backup_change_errors) > 0:
 		logger.error("Unable to re-target some backup jobs, please fix them manually.")
 	return
+
+def parse_guest_disk(disk_name, disk_values):
+	logger = logging.getLogger()
+	if "raw_values" in disk_values:
+		if len(disk_values['raw_values']) != 1:
+			logger.error("Bad Parsing.")
+			logger.error("Disk %s has more than one path (%s).", disk_name, disk_values['raw_values'])
+			logger.error("Path Array Length: %s", len(disk_values['raw_values']))
+			raise ValueError(disk_values['raw_values'])
+		_raw_values = disk_values['raw_values'][0]
+		_split_values = _raw_values.split(":") 
+		logger.info("%s: %s", disk_name, _raw_values)
+		return {
+			"interface": disk_name,
+			"raw_values": _raw_values,
+			"storage": _split_values[0],
+			"name": _split_values[1]
+		}
+	return None
 
 def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -251,14 +273,12 @@ def main(argv_a, **kwargs):
 	args_ssh = None
 	if guest_on_remote_host:
 		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{guest_cfg_host}"]
-	try:
-		guest_cfg = parse_guest_cfg(
-			guest_id=id_origin,
-			remote=guest_on_remote_host,
-			remote_host=guest_cfg_host,
-			debug=debug_verbose,
-		)
-	except: raise
+	guest_cfg = parse_guest_cfg(
+		guest_id=id_origin,
+		remote=guest_on_remote_host,
+		remote_host=guest_cfg_host,
+		debug=debug_verbose,
+	)
 
 	if argv_a.verbose:
 		logger.info("Guest is on Host: %s", guest_cfg_host)
@@ -289,29 +309,31 @@ def main(argv_a, **kwargs):
 	disk_dicts: list[dict] = []
 	logger.info("The following disks will be migrated: ")
 	# For each discovered disk, do pre-checks
-	for i, d in guest_cfg.items():
-		if not valid_pve_disk_type(i, d): continue
-		if "raw_values" in d:
-			if len(d['raw_values']) != 1:
-				logger.error("Bad Parsing.")
-				logger.error("Disk %s has more than one path (%s).", i, d['raw_values'])
-				logger.error("Path Array Length: %s", len(d['raw_values']))
-				raise ValueError(d['raw_values'])
-			_raw_values = d['raw_values'][0]
-			_split_values = _raw_values.split(":") 
-			logger.info("%s: %s", i, _raw_values)
-			disk_dicts.append({
-				"interface": i,
-				"raw_values": _raw_values,
-				"storage": _split_values[0],
-				"name": _split_values[1]
-			})
+	for key, value in guest_cfg.items():
+		if not valid_pve_disk_type(key, value): continue
+		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
+		if parsed_disk:
+			disk_dicts.append(parsed_disk)
+	
+	for snapshot in guest_snapshots:
+		for key, value in parse_guest_cfg(
+			guest_id=id_origin,
+			remote=guest_on_remote_host,
+			remote_host=guest_cfg_host,
+			debug=debug_verbose,
+			snapshot_name=snapshot,
+			current=False
+		):
+			if key == "vmstate":
+				parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
+				if parsed_disk:
+					disk_dicts.append(parsed_disk)
 
 	# Move Disks
-	for d in disk_dicts:
-		d: DiskDict
-		d_storage = get_storage_cfg(d["storage"])
-		d_name: str = d["name"]
+	for disk in disk_dicts:
+		disk: DiskDict
+		d_storage = get_storage_cfg(disk["storage"])
+		d_name: str = disk["name"]
 		d_storage.reassign_disk(
 			disk_name=d_name,
 			new_guest_id=id_target,
@@ -329,10 +351,10 @@ def main(argv_a, **kwargs):
 		logger.info(f"Re-adjusting replicated disks in host {target}.")
 		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
 		# Move Disks
-		for d in disk_dicts:
-			d: DiskDict
-			d_storage = get_storage_cfg(d["storage"])
-			d_name: str = d["name"]
+		for disk in disk_dicts:
+			disk: DiskDict
+			d_storage = get_storage_cfg(disk["storage"])
+			d_name: str = disk["name"]
 			d_storage.reassign_disk(
 				disk_name=d_name,
 				new_guest_id=id_target,
@@ -345,4 +367,4 @@ def main(argv_a, **kwargs):
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
 	# pvesh get /cluster/backup --output-format json-pretty
 	# pvesh usage /cluster/backup --verbose
-	retarget_backup_jobs(old_id=id_origin, new_id=id_target, dry_run=argv_a.dry_run)
+	change_guest_id_on_backup_jobs(old_id=id_origin, new_id=id_target, dry_run=argv_a.dry_run)
