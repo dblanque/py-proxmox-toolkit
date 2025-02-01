@@ -34,6 +34,7 @@ import subprocess
 import re
 from core.proxmox.guests import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
 from core.proxmox.storage import get_storage_cfg
+from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 from core.classes.ColoredFormatter import set_logger
 from core.signal_handlers.sigint import graceful_exit
@@ -123,6 +124,47 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
 			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+	return
+
+def get_guest_replication_targets(old_id):
+	jobs = []
+	targets = []
+	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
+		replication_job = None
+		replication_data = None
+		for line in replication_cfg.readlines():
+			if line.startswith("local:"):
+				replication_job = line.split(": ")[1]
+				vmid = int(replication_job.split("-")[0])
+			elif vmid == old_id:
+				_key, _value = line.lstrip().split(sep=None, maxsplit=1)
+				if _key == "target": targets.append(_value)
+	return targets
+
+def retarget_backup_jobs(old_id: int, new_id: int) -> None:
+	logger = logging.getLogger()
+	backup_jobs = get_all_backup_jobs()
+	backup_change_errors = []
+	for job in backup_jobs:
+		if "vmid" in job:
+			job_vmids_data: str = job["vmid"]
+			job_vmids: list = job_vmids_data.split(",")
+			if not old_id in job_vmids:
+				continue
+
+			job_vmids.remove(old_id)
+			job_vmids.append(new_id)
+			job_vmids_data = ",".join(job_vmids)
+
+			job_id: str = job["id"]
+			if set_backup_attrs(
+				job_id = job_id,
+				data = {"vmid": job_vmids_data},
+				raise_exception = False
+			):
+				backup_change_errors.append(job_id)
+	if len(backup_change_errors) > 0:
+		logger.error("Unable to re-target some backup jobs, please fix them manually.")
 	return
 
 def main(argv_a, **kwargs):
@@ -256,8 +298,10 @@ def main(argv_a, **kwargs):
 		rename_guest_replication(old_id=id_origin, new_id=id_target)
 
 	# TODO - Alter Remote Replicated Volumes
+	# print(get_guest_replication_targets(old_id=id_origin))
 
-	# TODO - Alter Backup Jobs
+	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
 	# pvesh get /cluster/backup --output-format json-pretty
 	# pvesh usage /cluster/backup --verbose
+	retarget_backup_jobs(old_id=id_origin, new_id=id_target)
