@@ -119,10 +119,11 @@ def get_guest_snapshots(guest_id: int) -> list:
 		.decode(
 			getdefaultencoding()
 		)
-	print(output.splitlines())
 	for line in output.splitlines():
 		try:
 			snapshot_name = line.strip().split()[1]
+			if snapshot_name == "current":
+				continue
 			snapshots.append(snapshot_name)
 		except:
 			print(line)
