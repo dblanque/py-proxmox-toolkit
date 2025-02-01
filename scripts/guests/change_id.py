@@ -209,7 +209,7 @@ def parse_guest_disk(disk_name, disk_values, vmstate=False):
 		}
 	elif vmstate:
 		_split_values = disk_values.split(":") 
-		logger.info("%s: %s", disk_name, _raw_values)
+		logger.info("%s: %s", disk_name, disk_values)
 		return {
 			"interface": disk_name,
 			"storage": _split_values[0],
