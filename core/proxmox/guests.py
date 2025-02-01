@@ -163,6 +163,8 @@ def parse_guest_cfg(
 		cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
 	if debug:
 		logger.debug(cmd_args)
+	logger.debug("Getting guest config with command: ")
+	logger.debug(" ".join(cmd_args))
 	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
