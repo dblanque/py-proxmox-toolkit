@@ -54,7 +54,8 @@ def argparser(**kwargs) -> ArgumentParser:
 def main(argv_a, **kwargs):
 	OS_RELEASE_DATA = get_data()
 	OS_RELEASE = OS_RELEASE_DATA["version_codename"]
-	assert OS_RELEASE in SUPPORTED_RELEASES, f"OS Release unsupported ({OS_RELEASE})."
+	if not OS_RELEASE in SUPPORTED_RELEASES:
+		raise Exception(f"OS Release unsupported ({OS_RELEASE}).")
 	PROFILE_PATH = "/etc/profile.d"
 	PROFILE_FIX = os.path.join(PROFILE_PATH, "xterm_resize.sh")
 

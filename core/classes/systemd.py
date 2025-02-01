@@ -48,7 +48,8 @@ class Unit():
 	def __init__(self, name: str, service_type: UNIT_TYPES, **kwargs):
 		self.name = name
 		self.status: UNIT_STATUSES = "UNKNOWN"
-		assert service_type in UNIT_TYPES, f"{service_type} is not in {UNIT_TYPES}"
+		if not service_type in UNIT_TYPES:
+			raise ValueError(f"{service_type} is not in {UNIT_TYPES}")
 		self.service_type = service_type
 
 	def exists(self):
@@ -67,7 +68,8 @@ class Unit():
 		return not self.is_enabled()
 
 	def _stat_command(self, action: UNIT_STATE_COMMANDS, extra_args=None) -> str:
-		assert action in UNIT_STATE_COMMANDS, f"{action} not in {UNIT_STATE_COMMANDS}"
+		if not action in UNIT_STATE_COMMANDS:
+			raise ValueError(f"{action} not in {UNIT_STATE_COMMANDS}")
 		cmd = f"systemctl {action}"
 		if extra_args:
 			cmd = cmd + " " + " ".join(extra_args)
@@ -75,7 +77,8 @@ class Unit():
 		return subprocess.check_output(args=cmd).decode(getdefaultencoding()).strip()
 
 	def _command(self, action: UNIT_COMMANDS, extra_args=None) -> int:
-		assert action in UNIT_COMMANDS, f"{action} not in {UNIT_COMMANDS}"
+		if not action in UNIT_COMMANDS:
+			raise ValueError(f"{action} not in {UNIT_COMMANDS}")
 		cmd = f"systemctl {action}"
 		if extra_args:
 			cmd = cmd + " " + " ".join(extra_args)

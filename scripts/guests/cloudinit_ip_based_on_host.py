@@ -27,11 +27,11 @@ def argparser(**kwargs) -> ArgumentParser:
 		description=argparser_descr,
 		**kwargs
 	)
-	parser.add_argument('guest_id', default=None, type=int)  # Bool
-	parser.add_argument('-d', '--dry-run', action='store_true', default=False)  # Bool
-	parser.add_argument('--debug', action='store_true', default=False)  # Bool
+	parser.add_argument('guest_id', default=None, type=int)
+	parser.add_argument('-d', '--dry-run', action='store_true', default=False)
+	parser.add_argument('--debug', action='store_true', default=False)
 	parser.add_argument('-b', "--bridge", default="vmbr0", help="May also be a physical interface.")
-	parser.add_argument('-v', '--verbose', action='store_true', default=False)  # Bool
+	parser.add_argument('-v', '--verbose', action='store_true', default=False)
 	return parser
 
 def main(argv_a, **kwargs):
@@ -43,7 +43,8 @@ def main(argv_a, **kwargs):
 	cmd = None
 	if not argv_a.guest_id:
 		raise ValueError("Please input a Guest ID.")
-	assert get_guest_exists(argv_a.guest_id), f"Guest ID {argv_a.guest_id} does not exist."
+	if not get_guest_exists(argv_a.guest_id):
+		raise Exception(f"Guest ID {argv_a.guest_id} does not exist.")
 
 	PVE_NODE_LIST_CMD = "pvesh get /nodes --output-format json"
 	cmd = PVE_NODE_LIST_CMD.split()
@@ -57,7 +58,8 @@ def main(argv_a, **kwargs):
 		cmd = PVE_NETWORK_CMD.format(node).split()
 		PVE_NETWORK_DATA: list[dict] = json.loads(subprocess.check_output(cmd))
 		for iface_dict in PVE_NETWORK_DATA:
-			assert "iface" in iface_dict, f"Missing critical key in Interface Dictionary.\n{iface_dict}"
+			if not "iface" in iface_dict:
+				raise ValueError(f"Missing critical key in Interface Dictionary.\n{iface_dict}")
 			if not iface_dict["iface"].startswith(argv_a.bridge):
 				continue
 			if not "cidr" in iface_dict:
@@ -75,13 +77,15 @@ def main(argv_a, **kwargs):
 		print("Cannot increment IP Address bits, attempting to use a lower address.")
 		cloudinit_guest_address = reserved_ip_addresses[0] - 1
 
-	assert cloudinit_guest_address in network, "Could not find a valid contiguous IP within requested subnet."
+	if not cloudinit_guest_address in network:
+		raise Exception("Could not find a valid contiguous IP within requested subnet.")
 	print(f"Using {cloudinit_guest_address} for guest.")
 
 	guest_cfg_details = get_guest_cfg(guest_id=argv_a.guest_id, get_as_dict=True)
 	guest_cfg_host = guest_cfg_details["host"]
 	guest_is_ct = (guest_cfg_details["type"] == "ct")
-	assert not guest_is_ct, "This script does not support LXC Guests."
+	if guest_is_ct:
+		raise Exception("This script does not support LXC Guests.")
 	
 	guest_on_remote_host = (hostname != guest_cfg_host)
 	args_ssh = None
