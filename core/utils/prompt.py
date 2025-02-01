@@ -16,9 +16,9 @@ def yes_no_input(
 	):
 	choices_str = '|'.join(input_choices)
 	choices_str = f"({choices_str})"
-	if input_default != None:
+	if input_default is not None:
 		if (
-			input_default in input_choices["yes"] or 
+			input_default in input_choices["yes"] or
 			input_default in input_choices["no"]
 		):
 			default_str = f" [{input_default}]"
