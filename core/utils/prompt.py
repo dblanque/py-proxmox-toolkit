@@ -14,7 +14,7 @@ def yes_no_input(
 		yes_msg: str = None,
 		no_msg: str = None
 	):
-	choices_str = '|'.join(input_choices)
+	choices_str = ' | '.join(input_choices)
 	choices_str = f"({choices_str})"
 	if input_default is not None:
 		if (
