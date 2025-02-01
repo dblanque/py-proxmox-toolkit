@@ -1,8 +1,13 @@
 import os
 from core.format.colors import print_c, bcolors
 from core.debian.apt import apt_dist_upgrade, apt_update
+from typing import TypedDict, Required
 
-DEFAULT_CHOICES = {
+class YesNoChoicesDict(TypedDict):
+	yes: Required[ list[str] ]
+	no: Required[ list[str] ]
+
+DEFAULT_CHOICES: YesNoChoicesDict = {
 	"yes":["yes","y"],
 	"no":["no","n"]
 }
@@ -10,12 +15,16 @@ DEFAULT_CHOICES = {
 def yes_no_input(
 		msg: str,
 		input_default: str = None,
-		input_choices = DEFAULT_CHOICES,
+		input_choices: YesNoChoicesDict = DEFAULT_CHOICES,
 		yes_msg: str = None,
-		no_msg: str = None
+		no_msg: str = None,
+		show_choices = True
 	):
-	choices_str = ' | '.join(input_choices)
-	choices_str = f"({choices_str})"
+	if show_choices:
+		choices_str = ','.join(input_choices["yes"]) + "|" + ','.join(input_choices["no"])
+		choices_str = f"({choices_str})"
+	else:
+		choices_str = ""
 	if input_default is not None:
 		if (
 			input_default.lower() in input_choices["yes"] or
