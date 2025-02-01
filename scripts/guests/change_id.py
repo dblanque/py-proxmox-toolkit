@@ -140,17 +140,16 @@ def get_guest_replication_targets(old_id) -> None | list:
 	targets = []
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
 		replication_job = None
-		logger.debug("PVE_CFG_REPLICATION - Stripped Lines")
 		for line in replication_cfg.readlines():
 			line = line.strip()
-			logger.debug(line)
 			if len(line) < 1:
 				continue
 
 			if line.startswith("local:"):
 				replication_job = line.split(": ")[1]
 				vmid = int(replication_job.split("-")[0])
-			elif vmid == old_id:
+
+			if vmid == old_id:
 				try:
 					_key, _value = line.split(sep=None, maxsplit=1)
 					if _key == "target": targets.append(_value)
