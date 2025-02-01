@@ -115,7 +115,7 @@ def get_guest_snapshots(guest_id: int) -> list:
 	snapshots = []
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
-	with subprocess.check_output(f"{proc_cmd} listsnapshot {guest_id}") as output:
+	with subprocess.check_output(f"{proc_cmd} listsnapshot {guest_id}".split()) as output:
 		output: bytes
 		for l in output.decode(getdefaultencoding()).split("\n"):
 			snapshot_name = l.strip().split()[1]
