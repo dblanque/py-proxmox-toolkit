@@ -394,7 +394,7 @@ def main(argv_a, **kwargs):
 					logger.info(" ".join(job_delete_cmd))
 				else:
 					subprocess.call(job_delete_cmd)
-				new_job_name = job_name.replace(id_origin, id_target)
+				new_job_name = job_name.replace(str(id_origin), str(id_target))
 				new_job_cmd = f"pvesr create-local-job {new_job_name}".split()
 				for arg in ["rate", "schedule", "comment"]:
 					if arg in job:
