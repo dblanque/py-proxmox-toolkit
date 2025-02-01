@@ -6,7 +6,7 @@ import logging
 import subprocess
 from .constants import PVE_CFG_NODES_DIR
 from sys import getdefaultencoding
-from typing import TypedDict, Required, NotRequired, Literal
+from typing import TypedDict, Literal
 
 logger = logging.getLogger()
 
