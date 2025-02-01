@@ -283,6 +283,8 @@ def main(argv_a, **kwargs):
 	while _current_status_len > 0:
 		if _timer != 0 and _timer % 10 == 0:
 			replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
+			_previous_status_len = _current_status_len
+			_current_status_len = len(replication_statuses)
 			logger.info("Waiting for replication jobs...")
 		if _previous_status_len != _current_status_len and _current_status_len > 0:
 			logger.info("A job finished, awaiting further.")
@@ -293,17 +295,6 @@ def main(argv_a, **kwargs):
 			if _current_status_len > 0:
 				logger.info("Timeout reached, cannot wait any longer.")
 			break
-
-	# Add new Replication Jobs
-	for job_name, job in replication_jobs.items():
-		new_job_name = job_name.replace(str(id_origin), str(id_target))
-		new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
-		for arg in ["rate", "schedule", "comment"]:
-			if arg in job:
-				new_job_cmd = new_job_cmd + [ f"--{arg}", f'{job[arg]}' ]
-		logger.debug(" ".join(new_job_cmd))
-		if not argv_a.dry_run:
-			subprocess.call(new_job_cmd)
 
 	# Rename Guest Config File
 	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
@@ -341,6 +332,17 @@ def main(argv_a, **kwargs):
 			logger.error(ERR_REASSIGN_MSG, d_name)
 			logger.exception(e)
 			pass
+
+	# Add new Replication Jobs
+	for job_name, job in replication_jobs.items():
+		new_job_name = job_name.replace(str(id_origin), str(id_target))
+		new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
+		for arg in ["rate", "schedule", "comment"]:
+			if arg in job:
+				new_job_cmd = new_job_cmd + [ f"--{arg}", f'{job[arg]}' ]
+		logger.debug(" ".join(new_job_cmd))
+		if not argv_a.dry_run:
+			subprocess.call(new_job_cmd)
 
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
