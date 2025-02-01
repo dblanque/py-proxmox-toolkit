@@ -137,8 +137,12 @@ def get_guest_replication_targets(old_id):
 				replication_job = line.split(": ")[1]
 				vmid = int(replication_job.split("-")[0])
 			elif vmid == old_id:
-				_key, _value = line.lstrip().split(sep=None, maxsplit=1)
-				if _key == "target": targets.append(_value)
+				try:
+					_key, _value = line.lstrip().split(sep=None, maxsplit=1)
+					if _key == "target": targets.append(_value)
+				except:
+					print(line)
+					raise
 	return targets
 
 def retarget_backup_jobs(old_id: int, new_id: int) -> None:
@@ -310,6 +314,7 @@ def main(argv_a, **kwargs):
 		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
 		# Move Disks
 		for d in disk_dicts:
+			d: DiskDict
 			d_storage = get_storage_cfg(d["storage"])
 			d_name: str = d["name"]
 			d_storage.reassign_disk(
