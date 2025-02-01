@@ -192,6 +192,12 @@ def main(argv_a, **kwargs):
 	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
 	guest_cfg_host = guest_cfg_details["host"]
 	guest_on_remote_host = (hostname != guest_cfg_host)
+
+	# Set SSH Args if necessary
+	args_ssh = None
+	if guest_on_remote_host:
+		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{guest_cfg_host}"]
+
 	guest_cfg = parse_guest_cfg(
 		guest_id=id_origin,
 		remote_args=args_ssh,
@@ -205,11 +211,6 @@ def main(argv_a, **kwargs):
 		logger.info("Selected Origin ID: %s", id_origin)
 		logger.info("Selected Target ID: %s", id_target)
 	logger.debug("Guest Configuration: %s", guest_cfg)
-
-	# Set SSH Args if necessary
-	args_ssh = None
-	if guest_on_remote_host:
-		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{guest_cfg_host}"]
 
 	# Get Guest State
 	guest_state = get_guest_status(guest_id=id_origin, remote_args=args_ssh)
