@@ -307,7 +307,7 @@ def main(argv_a, **kwargs):
 				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 
 	disk_dicts: list[dict] = []
-	logger.info("The following disks will be migrated: ")
+	logger.info("The following disks will be renamed: ")
 	# For each discovered disk, do pre-checks
 	for key, value in guest_cfg.items():
 		if not valid_pve_disk_type(key, value): continue
