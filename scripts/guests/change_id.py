@@ -48,6 +48,7 @@ from core.classes.ColoredFormatter import set_logger
 from core.utils.prompt import yes_no_input
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
+from time import sleep
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -133,7 +134,10 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 	with subprocess.Popen(rpl_cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+			raise Exception(f"Bad command return code ({proc.returncode}).",
+			proc_o.decode(),
+			proc_e.decode()
+		)
 	return
 
 def get_guest_replication_jobs(old_id: int) -> dict | None:
@@ -202,6 +206,18 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 	if len(backup_change_errors) > 0:
 		logger.error("Unable to re-target some backup jobs, please fix them manually.")
 	return
+
+def get_guest_replication_job_statuses(guest_id: int) -> dict | None:
+	cmd = f"pvesr status --guest {guest_id}"
+	data = {}
+	job_statuses = subprocess.check_output(cmd.split())
+	for line in job_statuses.decode("utf-8").splitlines():
+		job_idx = 0
+		status_idx = -1
+		parsed_line = line.split()
+		data[parsed_line[job_idx]] = parsed_line[status_idx]
+	if len(data.keys()) < 1: return None
+	return data
 
 def parse_guest_disk(disk_name, disk_values, vmstate=False):
 	logger = logging.getLogger()
@@ -363,7 +379,11 @@ def main(argv_a, **kwargs):
 		with subprocess.Popen(args_mv, stdout=subprocess.PIPE) as proc:
 			proc_o, proc_e = proc.communicate()
 			if proc.returncode != 0:
-				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+				raise Exception(
+					f"Bad command return code ({proc.returncode}).",
+					proc_o.decode(),
+					proc_e.decode()
+				)
 
 	replication_targets = get_guest_replication_jobs(old_id=id_origin)
 	if replication_targets:
@@ -387,16 +407,33 @@ def main(argv_a, **kwargs):
 			pass
 
 	if replication_targets:
-		# Alter Remote Replicated Disks
+		# Remove old Replication Jobs
 		for job_name, job in replication_targets.items():
 			job_name: str
 			job: ReplicationJobDict
 			target = job["target"]
-			logger.info(f"Re-adjusting replication jobs in host {target}.")
+			logger.info(f"Deleting job {job_name}")
 			job_delete_cmd = f"pvesr delete {job_name}".split()
 			logger.debug(" ".join(job_delete_cmd))
 			if not argv_a.dry_run:
 				subprocess.call(job_delete_cmd)
+
+		_TIMEOUT = 30
+		_timer = 0
+		logger.info(
+			"Waiting for replication jobs to finish deletion (Timeout: %s seconds).",
+			_TIMEOUT
+		)
+		while get_guest_replication_job_statuses(guest_id=id_origin):
+			if _timer != 0 and _timer % 10:
+				logger.info("Waiting for replication jobs...")
+			sleep(1)
+			_timer += 1
+			if _timer >= _TIMEOUT:
+				break
+
+		# Add new Replication Jobs
+		for job_name, job in replication_targets.items():
 			new_job_name = job_name.replace(str(id_origin), str(id_target))
 			new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
 			for arg in ["rate", "schedule", "comment"]:
