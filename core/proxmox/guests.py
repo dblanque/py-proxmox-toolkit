@@ -119,8 +119,8 @@ def get_guest_snapshots(guest_id: int) -> list:
 		.decode(
 			getdefaultencoding()
 		)
-	print(output)
-	for line in output:
+	print(output.splitlines())
+	for line in output.splitlines():
 		try:
 			snapshot_name = line.strip().split()[1]
 			snapshots.append(snapshot_name)
