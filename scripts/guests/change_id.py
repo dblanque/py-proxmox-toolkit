@@ -135,7 +135,7 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 	return
 
-def get_guest_replication_targets(old_id: int) -> None | list:
+def get_guest_replication_jobs(old_id: int) -> dict | None:
 	if not isinstance(old_id, int) and not int(old_id):
 		raise ValueError("old_id must be of type int.")
 	else:
@@ -143,9 +143,12 @@ def get_guest_replication_targets(old_id: int) -> None | list:
 
 	logger = logging.getLogger()
 	targets = []
+	jobs = {}
 
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
 		replication_job = None
+		replication_data = None
+		vmid = None
 		logger.debug("PVE_CFG_REPLICATION - Stripped Lines")
 		for line in replication_cfg.readlines():
 			line = line.strip()
@@ -154,18 +157,21 @@ def get_guest_replication_targets(old_id: int) -> None | list:
 				continue
 
 			if line.startswith("local:"):
+				if replication_job and replication_data and vmid and vmid == old_id:
+					jobs[replication_job] = replication_data
 				replication_job = line.split(": ")[1]
+				replication_data = {}
 				vmid = int(replication_job.split("-")[0])
 
 			if vmid == old_id:
 				try:
 					_key, _value = line.split(sep=None, maxsplit=1)
-					if _key == "target": targets.append(_value)
+					replication_data[_key] = _value
 				except:
 					print(line)
 					raise
-	if len(targets) < 1: return None
-	return targets
+	if len(jobs.keys()) < 1: return None
+	return jobs
 
 def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
 	logger = logging.getLogger()
@@ -360,9 +366,9 @@ def main(argv_a, **kwargs):
 			guest_disks.append(parsed_disk)
 
 	# Move Disks
-	replication_targets = get_guest_replication_targets(old_id=id_origin)
+	replication_targets = get_guest_replication_jobs(old_id=id_origin)
 	if replication_targets:
-		logger.debug("Found replication targets: " + ", ".join(replication_targets))
+		logger.debug("Found replication targets: " + ", ".join(replication_targets.keys()))
 
 	for disk in guest_disks:
 		disk: DiskDict
@@ -381,7 +387,8 @@ def main(argv_a, **kwargs):
 			pass
 		if replication_targets:
 			# Alter Remote Replicated Disks
-			for target in replication_targets:
+			for job in replication_targets.values():
+				target = job["target"]
 				logger.info(f"Re-adjusting replicated disks in host {target}.")
 				args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
 				try:
