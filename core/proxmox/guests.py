@@ -128,7 +128,6 @@ def get_guest_snapshots(guest_id: int) -> list:
 		except:
 			print(line)
 			raise
-	if len(snapshots) < 1: return None
 	return snapshots
 
 def parse_guest_cfg(
@@ -278,7 +277,7 @@ def rename_guest_replication_jobs(old_id: int, new_id: int) -> None:
 		)
 	return
 
-def get_guest_replication_jobs(old_id: int) -> dict | None:
+def get_guest_replication_jobs(old_id: int) -> dict:
 	if not isinstance(old_id, int) and not int(old_id):
 		raise ValueError("old_id must be of type int.")
 	else:
@@ -308,13 +307,12 @@ def get_guest_replication_jobs(old_id: int) -> dict | None:
 				except:
 					print(line)
 					raise
-	if len(jobs) < 1: return None
 	return jobs
 
-def get_guest_replication_statuses(guest_id: int) -> dict | None:
+def get_guest_replication_statuses(guest_id: int) -> dict:
 	"""
 	:return: Dictionary with id:status pairs
-	:rtype: dict | None
+	:rtype: dict
 	"""
 	cmd = f"pvesr status --guest {guest_id}"
 	data = {}
@@ -326,7 +324,6 @@ def get_guest_replication_statuses(guest_id: int) -> dict | None:
 		_status_idx = -1
 		_parsed_line = line.split()
 		data[_parsed_line[_job_idx]] = _parsed_line[_status_idx]
-	if len(data) < 1: return None
 	return data
 
 def parse_guest_disk(disk_name, disk_values, vmstate=False):

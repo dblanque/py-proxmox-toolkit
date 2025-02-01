@@ -173,10 +173,9 @@ def main(argv_a, **kwargs):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
 	replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
-	if replication_statuses:
-		if any([v != "OK" for v in replication_statuses.values()]):
-			logger.error("Guest with Origin ID (%s) has a replication job in progress.", id_origin)
-			sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
+	if any([v != "OK" for v in replication_statuses.values()]):
+		logger.error("Guest with Origin ID (%s) has a replication job in progress.", id_origin)
+		sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 
 	if not argv_a.yes:
 		logger.info("This might break Replication and Backup Configurations.")
@@ -227,28 +226,27 @@ def main(argv_a, **kwargs):
 	)
 
 	# Add snapshot vmstate disks to configuration.
-	if guest_snapshots:
-		for snapshot in guest_snapshots:
-			snapshot_cfg = parse_guest_cfg(
-				guest_id=id_origin,
-				remote=guest_on_remote_host,
-				remote_host=guest_cfg_host,
-				debug=debug_verbose,
-				snapshot_name=snapshot,
-				current=False
-			)
-			logger.debug("Snapshot Keys: %s", snapshot_cfg.keys())
-			logger.debug("Snapshot Configuration: %s", snapshot_cfg)
-			for key, value in snapshot_cfg.items():
-				if key == "vmstate":
-					parsed_disk = parse_guest_disk(
-						disk_name=key,
-						disk_values=value,
-						vmstate=True
-					)
-					if parsed_disk:
-						logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
-						guest_disks.append(parsed_disk)
+	for snapshot in guest_snapshots:
+		snapshot_cfg = parse_guest_cfg(
+			guest_id=id_origin,
+			remote=guest_on_remote_host,
+			remote_host=guest_cfg_host,
+			debug=debug_verbose,
+			snapshot_name=snapshot,
+			current=False
+		)
+		logger.debug("Snapshot Keys: %s", snapshot_cfg.keys())
+		logger.debug("Snapshot Configuration: %s", snapshot_cfg)
+		for key, value in snapshot_cfg.items():
+			if key == "vmstate":
+				parsed_disk = parse_guest_disk(
+					disk_name=key,
+					disk_values=value,
+					vmstate=True
+				)
+				if parsed_disk:
+					logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
+					guest_disks.append(parsed_disk)
 
 	# Second prompt if snapshots present
 	if not argv_a.yes and guest_snapshots:
@@ -261,44 +259,43 @@ def main(argv_a, **kwargs):
 
 	# Remove old Replication Jobs
 	replication_jobs = get_guest_replication_jobs(old_id=id_origin)
-	if replication_jobs:
+	if len(replication_jobs) > 0:
 		logger.debug("Found replication targets: " + ", ".join(replication_jobs.keys()))
 
-	if replication_jobs:
-		for job_name, job in replication_jobs.items():
-			job_name: str
-			job: ReplicationJobDict
-			target = job["target"]
-			logger.info(f"Deleting job {job_name}")
-			job_delete_cmd = f"pvesr delete {job_name}".split()
-			logger.debug(" ".join(job_delete_cmd))
-			if not argv_a.dry_run:
-				subprocess.call(job_delete_cmd)
+	for job_name, job in replication_jobs.items():
+		job_name: str
+		job: ReplicationJobDict
+		target = job["target"]
+		logger.info(f"Deleting job {job_name}")
+		job_delete_cmd = f"pvesr delete {job_name}".split()
+		logger.debug(" ".join(job_delete_cmd))
+		if not argv_a.dry_run:
+			subprocess.call(job_delete_cmd)
 
-		_TIMEOUT = 60
-		_timer = 0
-		logger.info(
-			"Waiting for replication jobs to finish deletion (Timeout: %s seconds).",
-			_TIMEOUT
-		)
-		while get_guest_replication_statuses(guest_id=id_origin):
-			if _timer != 0 and _timer % 5 == 0:
-				logger.info("Waiting for replication jobs...")
-			sleep(1)
-			_timer += 1
-			if _timer >= _TIMEOUT:
-				break
+	_TIMEOUT = 60
+	_timer = 0
+	logger.info(
+		"Waiting for replication jobs to finish deletion (Timeout: %s seconds).",
+		_TIMEOUT
+	)
+	while len(get_guest_replication_statuses(guest_id=id_origin)) > 0:
+		if _timer != 0 and _timer % 5 == 0:
+			logger.info("Waiting for replication jobs...")
+		sleep(1)
+		_timer += 1
+		if _timer >= _TIMEOUT:
+			break
 
-		# Add new Replication Jobs
-		for job_name, job in replication_jobs.items():
-			new_job_name = job_name.replace(str(id_origin), str(id_target))
-			new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
-			for arg in ["rate", "schedule", "comment"]:
-				if arg in job:
-					new_job_cmd = new_job_cmd + [ f"--{arg}", f'{job[arg]}' ]
-			logger.debug(" ".join(new_job_cmd))
-			if not argv_a.dry_run:
-				subprocess.call(new_job_cmd)
+	# Add new Replication Jobs
+	for job_name, job in replication_jobs.items():
+		new_job_name = job_name.replace(str(id_origin), str(id_target))
+		new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
+		for arg in ["rate", "schedule", "comment"]:
+			if arg in job:
+				new_job_cmd = new_job_cmd + [ f"--{arg}", f'{job[arg]}' ]
+		logger.debug(" ".join(new_job_cmd))
+		if not argv_a.dry_run:
+			subprocess.call(new_job_cmd)
 
 	# Rename Guest Config File
 	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
