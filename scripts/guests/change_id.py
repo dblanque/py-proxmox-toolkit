@@ -272,10 +272,10 @@ def main(argv_a, **kwargs):
 		if not argv_a.dry_run:
 			subprocess.call(job_delete_cmd)
 
-	_TIMEOUT = 90
+	_TIMEOUT = 120
 	_timer = 0
 	logger.info(
-		"Waiting for replication jobs to finish deletion (Timeout: %s seconds).",
+		"Waiting for replication jobs to finish deletion (Timeout per job: %s seconds).",
 		_TIMEOUT
 	)
 	_previous_status_len = len(replication_statuses)
@@ -290,6 +290,8 @@ def main(argv_a, **kwargs):
 		sleep(1)
 		_timer += 1
 		if _timer >= _TIMEOUT:
+			if _current_status_len > 0:
+				logger.info("Timeout reached, cannot wait any longer.")
 			break
 
 	# Add new Replication Jobs
