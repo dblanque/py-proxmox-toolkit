@@ -5,8 +5,15 @@ import re
 import logging
 import subprocess
 from .constants import PVE_CFG_NODES_DIR
+from typing import TypedDict, Required, NotRequired, Literal
 
 logger = logging.getLogger()
+
+class DiskDict(TypedDict):
+	interface: str
+	raw_values: str
+	storage: str
+	name: str
 
 def get_guest_exists(guest_id: int):
 	guest_id = int(guest_id)
@@ -14,7 +21,7 @@ def get_guest_exists(guest_id: int):
 	guest_list = get_all_guests()
 	return guest_id in guest_list["vm"] or guest_id in guest_list["ct"]
 
-def get_guest_cfg(
+def get_guest_cfg_path(
 		guest_id,
 		get_host=False,
 		get_type=False,
@@ -47,7 +54,7 @@ def get_guest_cfg(
 				return p
 
 def get_guest_is_ct(guest_id):
-	guest_type = get_guest_cfg(guest_id=guest_id, get_host=False, get_type=True)
+	guest_type = get_guest_cfg_path(guest_id=guest_id, get_host=False, get_type=True)
 	if guest_type == "qemu-server":
 		return False
 	return True
@@ -97,7 +104,9 @@ def parse_net_opts_to_string(net_opts: dict):
 		else: r = f"{r},{k}={v},"
 	return r.rstrip(",").replace(",,",",")
 
-def parse_guest_cfg(guest_id, remote=False, remote_user="root", remote_host=None, debug=False) -> dict:
+def parse_guest_cfg(guest_id: int, remote=False, remote_user="root", remote_host=None, debug=False) -> dict:
+	if not isinstance(guest_id, int):
+		raise ValueError("guest_id must be of type int.")
 	logger.info("Collecting Config for Guest %s", guest_id)
 	if remote and not remote_host:
 		raise ValueError("remote_host is required when calling as remote function")

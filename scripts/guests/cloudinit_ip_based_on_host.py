@@ -8,7 +8,7 @@ import subprocess
 import json
 import socket
 import ipaddress
-from core.proxmox.guests import get_guest_exists, get_guest_cfg, get_guest_status
+from core.proxmox.guests import get_guest_exists, get_guest_cfg_path, get_guest_status
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 
@@ -81,7 +81,7 @@ def main(argv_a, **kwargs):
 		raise Exception("Could not find a valid contiguous IP within requested subnet.")
 	print(f"Using {cloudinit_guest_address} for guest.")
 
-	guest_cfg_details = get_guest_cfg(guest_id=argv_a.guest_id, get_as_dict=True)
+	guest_cfg_details = get_guest_cfg_path(guest_id=argv_a.guest_id, get_as_dict=True)
 	guest_cfg_host = guest_cfg_details["host"]
 	guest_is_ct = (guest_cfg_details["type"] == "ct")
 	if guest_is_ct:

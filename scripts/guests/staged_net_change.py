@@ -14,7 +14,7 @@ from copy import deepcopy
 from core.signal_handlers.sigint import graceful_exit
 from core.proxmox.constants import PVE_CFG_NODES_DIR
 from core.proxmox.guests import (
-	get_guest_cfg,
+	get_guest_cfg_path,
 	get_all_guests,
 	get_guest_is_ct,
 	parse_guest_netcfg,
@@ -128,7 +128,7 @@ def main(argv_a, **kwargs):
 	guest_net_orig = {}
 	for guest_type in all_guests:
 		for guest_id in all_guests[guest_type]:
-			guest_host = get_guest_cfg(guest_id=guest_id, get_host=True)
+			guest_host = get_guest_cfg_path(guest_id=guest_id, get_host=True)
 			if guest_host != hostname:
 				guest_net_orig[int(guest_id)] = parse_guest_netcfg(guest_id, remote=True, remote_host=guest_host, debug=argv_a.debug)
 			else:
@@ -148,7 +148,7 @@ def main(argv_a, **kwargs):
 	for guest_id in guest_net_map:
 		logger.info("Making changes to %s", guest_id)
 		guest_is_ct = get_guest_is_ct(guest_id)
-		guest_host = get_guest_cfg(guest_id=guest_id, get_host=True)
+		guest_host = get_guest_cfg_path(guest_id=guest_id, get_host=True)
 		guest_is_remote = guest_host != hostname
 		net_cfg = deepcopy(guest_net_orig[int(guest_id)])
 
@@ -202,9 +202,9 @@ def main(argv_a, **kwargs):
 	logger.debug("Guest Net Map: %s", guest_net_map)
 	for guest_id in guest_net_map:
 		logger.info("Rolling back changes for %s.", guest_id)
-		guest_cfg = get_guest_cfg(guest_id)
+		guest_cfg = get_guest_cfg_path(guest_id)
 		guest_is_ct = get_guest_is_ct(guest_id)
-		guest_host = get_guest_cfg(guest_id=guest_id, get_host=True)
+		guest_host = get_guest_cfg_path(guest_id=guest_id, get_host=True)
 		guest_is_remote = guest_host != hostname
 		net_cfg = deepcopy(guest_net_orig[int(guest_id)])
 

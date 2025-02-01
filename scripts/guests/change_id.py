@@ -32,7 +32,7 @@ import logging
 import socket
 import subprocess
 import re
-from core.proxmox.guests import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
+from core.proxmox.guests import get_guest_cfg_path, get_guest_status, get_guest_exists, parse_guest_cfg, DiskDict
 from core.proxmox.storage import get_storage_cfg
 from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
@@ -219,7 +219,7 @@ def main(argv_a, **kwargs):
 		confirm_prompt(id_origin, id_target)
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
-	guest_cfg_details = get_guest_cfg(guest_id=id_origin, get_as_dict=True)
+	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
 	guest_cfg_host = guest_cfg_details["host"]
 	guest_is_ct = (guest_cfg_details["type"] == "ct")
 	# Set command based on Guest Type
@@ -277,17 +277,19 @@ def main(argv_a, **kwargs):
 				logger.error("Disk %s has more than one path (%s).", i, d['raw_values'])
 				logger.error("Path Array Length: %s", len(d['raw_values']))
 				raise ValueError(d['raw_values'])
-			logger.info("%s: %s", i, d['raw_values'][0])
+			_raw_values = d['raw_values'][0]
+			_split_values = _raw_values.split(":") 
+			logger.info("%s: %s", i, _raw_values)
 			disk_dicts.append({
 				"interface": i,
-				"raw_values": d['raw_values'][0],
-				"storage": d['raw_values'][0].split(":")[0],
-				"name": d['raw_values'][0].split(":")[1]
+				"raw_values": _raw_values,
+				"storage": _split_values[0],
+				"name": _split_values[1]
 			})
 
 	# Move Disks
 	for d in disk_dicts:
-		d_interface: str = d["interface"]
+		d: DiskDict
 		d_storage = get_storage_cfg(d["storage"])
 		d_name: str = d["name"]
 		d_storage.reassign_disk(
@@ -303,7 +305,20 @@ def main(argv_a, **kwargs):
 		rename_guest_replication(old_id=id_origin, new_id=id_target)
 
 	# TODO - Alter Remote Replicated Volumes
-	print(get_guest_replication_targets(old_id=id_origin))
+	for target in get_guest_replication_targets(old_id=id_origin):
+		logger.info(f"Re-adjusting replicated disks in host {target}.")
+		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
+		# Move Disks
+		for d in disk_dicts:
+			d_storage = get_storage_cfg(d["storage"])
+			d_name: str = d["name"]
+			d_storage.reassign_disk(
+				disk_name=d_name,
+				new_guest_id=id_target,
+				new_guest_cfg=new_cfg_path,
+				remote_args=args_ssh,
+				dry_run=argv_a.dry_run
+			)
 
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/

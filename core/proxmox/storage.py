@@ -3,7 +3,7 @@
 import logging
 import subprocess
 from .constants import PVE_CFG_STORAGE
-from .guests import get_guest_cfg
+from .guests import get_guest_cfg_path
 from dataclasses import dataclass
 
 logger = logging.getLogger()
@@ -105,7 +105,7 @@ class PVEStorage:
 
 		# ! Rename disk in Guest Configuration
   		# Does not require SSH
-		guest_cfg_path = new_guest_cfg if new_guest_cfg else get_guest_cfg(guest_id=guest_id)
+		guest_cfg_path = new_guest_cfg if new_guest_cfg else get_guest_cfg_path(guest_id=guest_id)
 		sed_regex = None
 		# LXC ID Prefix on Diskname
 		if id_prefix:
