@@ -155,8 +155,9 @@ def get_guest_replication_jobs(old_id: int) -> dict | None:
 
 			if line.startswith("local:"):
 				replication_job = line.split(": ")[1]
-				jobs[replication_job] = {}
 				vmid = int(replication_job.split("-")[0])
+				if vmid == old_id:
+					jobs[replication_job] = {}
 
 			if vmid == old_id:
 				try:
