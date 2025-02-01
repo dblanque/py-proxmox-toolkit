@@ -296,7 +296,7 @@ def main(argv_a, **kwargs):
 	replication_statuses = get_guest_replication_job_statuses(guest_id=id_origin)
 	if replication_statuses:
 		if any([v != "OK" for v in replication_statuses.values()]):
-			logger.error("Guest with Target ID (%s) has a replication job in progress.", id_target)
+			logger.error("Guest with Origin ID (%s) has a replication job in progress.", id_origin)
 			sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 
 	if not argv_a.yes:
