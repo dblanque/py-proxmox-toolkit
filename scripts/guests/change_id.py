@@ -211,7 +211,9 @@ def get_guest_replication_job_statuses(guest_id: int) -> dict | None:
 	cmd = f"pvesr status --guest {guest_id}"
 	data = {}
 	job_statuses = subprocess.check_output(cmd.split())
-	for line in job_statuses.decode("utf-8").splitlines():
+	job_statuses = job_statuses.decode("utf-8").splitlines()
+	job_statuses.pop(0)
+	for line in job_statuses:
 		job_idx = 0
 		status_idx = -1
 		parsed_line = line.split()
