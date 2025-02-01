@@ -189,7 +189,7 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 		logger.error("Unable to re-target some backup jobs, please fix them manually.")
 	return
 
-def parse_guest_disk(disk_name, disk_values):
+def parse_guest_disk(disk_name, disk_values, vmstate=False):
 	logger = logging.getLogger()
 	logging.debug(f"Parsing disk {disk_name}")
 	if "raw_values" in disk_values:
@@ -204,6 +204,14 @@ def parse_guest_disk(disk_name, disk_values):
 		return {
 			"interface": disk_name,
 			"raw_values": _raw_values,
+			"storage": _split_values[0],
+			"name": _split_values[1]
+		}
+	elif vmstate:
+		_split_values = disk_values.split(":") 
+		logger.info("%s: %s", disk_name, _raw_values)
+		return {
+			"interface": disk_name,
 			"storage": _split_values[0],
 			"name": _split_values[1]
 		}
@@ -329,7 +337,11 @@ def main(argv_a, **kwargs):
 		logger.debug("Snapshot Configuration: %s", snapshot_cfg)
 		for key, value in snapshot_cfg.items():
 			if key == "vmstate":
-				parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
+				parsed_disk = parse_guest_disk(
+					disk_name=key,
+					disk_values=value,
+					vmstate=True
+				)
 				if parsed_disk:
 					logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
 					disks_list.append(parsed_disk)
