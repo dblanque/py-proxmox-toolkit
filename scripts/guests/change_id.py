@@ -40,7 +40,7 @@ from core.proxmox.guests import (
 	parse_guest_cfg,
 	DiskDict
 )
-from core.proxmox.storage import get_storage_cfg
+from core.proxmox.storage import get_storage_cfg, DiskReassignException
 from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 from core.classes.ColoredFormatter import set_logger
@@ -67,6 +67,7 @@ def argparser(**kwargs) -> ArgumentParser:
 ERR_GUEST_EXISTS=1
 ERR_GUEST_NOT_EXISTS=2
 ERR_GUEST_NOT_STOPPED=3
+ERR_REASSIGN_MSG = "Could not re-assign disk %s, please check manually"
 
 def validate_vmid(vmid) -> bool:
 	try: int(vmid)
@@ -362,29 +363,38 @@ def main(argv_a, **kwargs):
 	replication_targets = get_guest_replication_targets(old_id=id_origin)
 	if replication_targets:
 		logger.debug("Found replication targets: " + ", ".join(replication_targets))
+
 	for disk in guest_disks:
 		disk: DiskDict
 		d_storage = get_storage_cfg(disk["storage"])
 		d_name: str = disk["name"]
-		d_storage.reassign_disk(
-			disk_name=d_name,
-			new_guest_id=id_target,
-			new_guest_cfg=new_cfg_path,
-			remote_args=args_ssh,
-			dry_run=argv_a.dry_run
-		)
+		try:
+			d_storage.reassign_disk(
+				disk_name=d_name,
+				new_guest_id=id_target,
+				new_guest_cfg=new_cfg_path,
+				remote_args=args_ssh,
+				dry_run=argv_a.dry_run
+			)
+		except DiskReassignException:
+			logger.error(ERR_REASSIGN_MSG, d_name)
+			pass
 		if replication_targets:
 			# Alter Remote Replicated Disks
 			for target in replication_targets:
 				logger.info(f"Re-adjusting replicated disks in host {target}.")
 				args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
-				d_storage.reassign_disk(
-					disk_name=d_name,
-					new_guest_id=id_target,
-					new_guest_cfg=new_cfg_path,
-					remote_args=args_ssh,
-					dry_run=argv_a.dry_run
-				)
+				try:
+					d_storage.reassign_disk(
+						disk_name=d_name,
+						new_guest_id=id_target,
+						new_guest_cfg=new_cfg_path,
+						remote_args=args_ssh,
+						dry_run=argv_a.dry_run
+					)
+				except DiskReassignException:
+					logger.error(ERR_REASSIGN_MSG, d_name)
+					pass
 
 	# Alter Replication Jobs
 	if not argv_a.dry_run:
