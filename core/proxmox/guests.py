@@ -172,7 +172,11 @@ def parse_guest_cfg(
 	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+			raise Exception(
+				f"Bad command return code ({proc.returncode}).",
+				proc_o.decode() if hasattr("decode", proc_o) else proc_o,
+				proc_e.decode() if hasattr("decode", proc_e) else proc_e
+			)
 		if debug: logger.debug("Showing parsed Guest config lines:")
 		for line in proc_o.decode("utf-8").split("\n"):
 			line = line.rstrip()
