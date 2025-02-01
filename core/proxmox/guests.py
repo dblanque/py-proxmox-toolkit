@@ -322,11 +322,11 @@ def get_guest_replication_statuses(guest_id: int) -> dict | None:
 	job_statuses = job_statuses.decode("utf-8").splitlines()
 	job_statuses.pop(0)
 	for line in job_statuses:
-		job_idx = 0
-		status_idx = -1
-		parsed_line = line.split()
-		data[parsed_line[job_idx]] = parsed_line[status_idx]
-	if len(data.keys()) < 1: return None
+		_job_idx = 0
+		_status_idx = -1
+		_parsed_line = line.split()
+		data[_parsed_line[_job_idx]] = _parsed_line[_status_idx]
+	if len(data) < 1: return None
 	return data
 
 def parse_guest_disk(disk_name, disk_values, vmstate=False):

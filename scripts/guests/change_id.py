@@ -320,7 +320,7 @@ def main(argv_a, **kwargs):
 			"Waiting for replication jobs to finish deletion (Timeout: %s seconds).",
 			_TIMEOUT
 		)
-		while get_guest_replication_statuses(guest_id=id_origin) is not None:
+		while get_guest_replication_statuses(guest_id=id_origin):
 			if _timer != 0 and _timer % 5 == 0:
 				logger.info("Waiting for replication jobs...")
 			sleep(1)
