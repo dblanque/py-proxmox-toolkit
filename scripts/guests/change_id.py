@@ -147,7 +147,6 @@ def get_guest_replication_jobs(old_id: int) -> dict | None:
 
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
 		replication_job = None
-		replication_data = None
 		vmid = None
 		for line in replication_cfg.readlines():
 			line = line.strip()
@@ -155,16 +154,14 @@ def get_guest_replication_jobs(old_id: int) -> dict | None:
 				continue
 
 			if line.startswith("local:"):
-				if replication_job and replication_data and vmid and vmid == old_id:
-					jobs[replication_job] = replication_data
 				replication_job = line.split(": ")[1]
-				replication_data = {}
+				jobs[replication_job] = {}
 				vmid = int(replication_job.split("-")[0])
 
 			if vmid == old_id:
 				try:
 					_key, _value = line.split(sep=None, maxsplit=1)
-					replication_data[_key] = _value
+					jobs[replication_job][_key] = _value
 				except:
 					print(line)
 					raise
