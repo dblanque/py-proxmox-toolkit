@@ -272,24 +272,12 @@ def main(argv_a, **kwargs):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
 
-	guest_snapshots = get_guest_snapshots(id_origin)
 	if not argv_a.yes:
 		confirm_prompt(id_origin, id_target)
-		if guest_snapshots:
-			print(f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "+
-		 	"irreversibly affected if the process does not finish correctly.")
-			if not yes_no_input("Are you SURE you wish to continue?", input_default="N"):
-				sys.exit(0)
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
 	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
 	guest_cfg_host = guest_cfg_details["host"]
-	guest_is_ct = (guest_cfg_details["type"] == "ct")
-	# Set command based on Guest Type
-	if guest_is_ct:
-		proc_cmd = "pct"
-	else:
-		proc_cmd = "qm"
 	guest_on_remote_host = (hostname != guest_cfg_host)
 	guest_cfg = parse_guest_cfg(
 		guest_id=id_origin,
@@ -297,6 +285,8 @@ def main(argv_a, **kwargs):
 		remote_host=guest_cfg_host,
 		debug=debug_verbose,
 	)
+	guest_disks: list[dict] = []
+	guest_snapshots = get_guest_snapshots(id_origin)
 
 	if argv_a.verbose:
 		logger.info("Guest is on Host: %s", guest_cfg_host)
@@ -315,31 +305,7 @@ def main(argv_a, **kwargs):
 		logger.error("Guest must be in stopped state (Currently %s)", guest_state)
 		sys.exit(ERR_GUEST_NOT_STOPPED)
 
-	# Change Config ID - Move config file
-	old_cfg_path = guest_cfg_details['path']
-	new_cfg_path = guest_cfg_details['path'].replace(f"{id_origin}.conf", f"{id_target}.conf")
-	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
-	if guest_on_remote_host:
-		args_mv = args_ssh + args_mv
-
-	# Rename Guest Configuration
-	if argv_a.dry_run:
-		logger.info(args_mv)
-	else:
-		with subprocess.Popen(args_mv, stdout=subprocess.PIPE) as proc:
-			proc_o, proc_e = proc.communicate()
-			if proc.returncode != 0:
-				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
-
-	disks_list: list[dict] = []
-	logger.info("The following disks will be renamed: ")
-	# For each discovered disk, do pre-checks
-	for key, value in guest_cfg.items():
-		if not valid_pve_disk_type(key, value): continue
-		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
-		if parsed_disk:
-			disks_list.append(parsed_disk)
-	
+	# Add vmstate disks to configuration.
 	for snapshot in guest_snapshots:
 		snapshot_cfg = parse_guest_cfg(
 			guest_id=id_origin,
@@ -360,13 +326,43 @@ def main(argv_a, **kwargs):
 				)
 				if parsed_disk:
 					logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
-					disks_list.append(parsed_disk)
+					guest_disks.append(parsed_disk)
+
+	if not argv_a.yes and guest_snapshots:
+		print(f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "+
+		"irreversibly affected if the process does not finish correctly.")
+		if not yes_no_input("Are you SURE you wish to continue?", input_default="N"):
+			sys.exit(0)
+
+	# Change Config ID - Move config file
+	old_cfg_path = guest_cfg_details['path']
+	new_cfg_path = guest_cfg_details['path'].replace(f"{id_origin}.conf", f"{id_target}.conf")
+	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
+	if guest_on_remote_host:
+		args_mv = args_ssh + args_mv
+
+	# Rename Guest Configuration
+	if argv_a.dry_run:
+		logger.info(args_mv)
+	else:
+		with subprocess.Popen(args_mv, stdout=subprocess.PIPE) as proc:
+			proc_o, proc_e = proc.communicate()
+			if proc.returncode != 0:
+				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+
+	logger.info("The following disks will be renamed: ")
+	# For each discovered disk, do pre-checks
+	for key, value in guest_cfg.items():
+		if not valid_pve_disk_type(key, value): continue
+		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
+		if parsed_disk:
+			guest_disks.append(parsed_disk)
 
 	# Move Disks
 	replication_targets = get_guest_replication_targets(old_id=id_origin)
 	if replication_targets:
 		logger.debug("Found replication targets: " + ", ".join(replication_targets))
-	for disk in disks_list:
+	for disk in guest_disks:
 		disk: DiskDict
 		d_storage = get_storage_cfg(disk["storage"])
 		d_name: str = disk["name"]
