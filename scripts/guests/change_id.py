@@ -43,6 +43,7 @@ from core.proxmox.guests import (
 from core.proxmox.storage import get_storage_cfg, DiskReassignException
 from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
+from core.proxmox.replication import ReplicationJobDict
 from core.classes.ColoredFormatter import set_logger
 from core.utils.prompt import yes_no_input
 from core.signal_handlers.sigint import graceful_exit
@@ -142,7 +143,6 @@ def get_guest_replication_jobs(old_id: int) -> dict | None:
 		old_id = int(old_id)
 
 	logger = logging.getLogger()
-	targets = []
 	jobs = {}
 
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
@@ -388,6 +388,7 @@ def main(argv_a, **kwargs):
 		if replication_targets:
 			# Alter Remote Replicated Disks
 			for job in replication_targets.values():
+				job: ReplicationJobDict
 				target = job["target"]
 				logger.info(f"Re-adjusting replicated disks in host {target}.")
 				args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
