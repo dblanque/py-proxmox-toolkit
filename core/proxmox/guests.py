@@ -116,9 +116,13 @@ def get_guest_snapshots(guest_id: int) -> list:
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
 	output = subprocess.check_output(f"{proc_cmd} listsnapshot {guest_id}".split())
-	for l in output.decode(getdefaultencoding()).split("\n"):
-		snapshot_name = l.strip().split()[1]
-		snapshots.append(snapshot_name)
+	for line in output.decode(getdefaultencoding()).split("\n"):
+		try:
+			snapshot_name = line.strip().split()[1]
+			snapshots.append(snapshot_name)
+		except:
+			print(line)
+			raise
 	if len(snapshots) < 1: return None
 	return snapshots
 
