@@ -348,6 +348,7 @@ def main(argv_a, **kwargs):
 
 	# Move Disks
 	replication_targets = get_guest_replication_targets(old_id=id_origin)
+	logger.debug("Found replication targets: " + replication_targets)
 	for disk in disks_list:
 		disk: DiskDict
 		d_storage = get_storage_cfg(disk["storage"])
