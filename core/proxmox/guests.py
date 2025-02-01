@@ -155,8 +155,8 @@ def parse_guest_cfg(
 	if current and snapshot_name:
 		raise ValueError("The current and snapshot args cannot be used at the same time.")
 	if snapshot_name:
-		cmd_args.insert(len(cmd_args), "--snapshot")
-		cmd_args.insert(len(cmd_args), snapshot_name)
+		cmd_args.insert(len(cmd_args)-1, "--snapshot")
+		cmd_args.insert(len(cmd_args)-1, snapshot_name)
 	if current:
 		cmd_args.append("--current")
 	if remote:
