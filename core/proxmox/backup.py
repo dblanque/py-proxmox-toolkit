@@ -25,7 +25,7 @@ def set_backup_attrs(job_id: str, data: dict, raise_exception=False) -> None | l
 	"""
 	errors = []
 	for k, v in data.items():
-		with subprocess.call(f"pvesh set /cluster/backup/{job_id} -{k} {v}") as attr_call:
+		with subprocess.call(f"pvesh set /cluster/backup/{job_id} -{k} {v}".split()) as attr_call:
 			if not raise_exception and attr_call > 0:
 				errors.append(k)
 	if len(errors) < 1:
