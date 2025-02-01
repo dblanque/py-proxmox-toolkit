@@ -101,7 +101,11 @@ class PVEStorage:
 			with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
 				proc_o, proc_e = proc.communicate()
 				if proc.returncode != 0:
-					raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+					raise Exception(
+						f"Bad command return code ({proc.returncode}).",
+						proc_o.decode(),
+						proc_e.decode()
+					)
 
 		# ! Rename disk in Guest Configuration
   		# Does not require SSH
