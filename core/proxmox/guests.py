@@ -105,8 +105,10 @@ def parse_net_opts_to_string(net_opts: dict):
 	return r.rstrip(",").replace(",,",",")
 
 def parse_guest_cfg(guest_id: int, remote=False, remote_user="root", remote_host=None, debug=False) -> dict:
-	if not isinstance(guest_id, int):
+	if not isinstance(guest_id, int) and not int(guest_id):
 		raise ValueError("guest_id must be of type int.")
+	else:
+		guest_id = int(guest_id)
 	logger.info("Collecting Config for Guest %s", guest_id)
 	if remote and not remote_host:
 		raise ValueError("remote_host is required when calling as remote function")
