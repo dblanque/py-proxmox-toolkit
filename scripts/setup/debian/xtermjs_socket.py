@@ -85,3 +85,6 @@ def main(argv_a, **kwargs):
 
 	print_c(bcolors.L_YELLOW, f"Doing update-grub.")
 	subprocess.call(["update-grub"])
+
+	print_c(bcolors.L_BLUE, "Do not forget to add the serial socket onto the VM Hardware Section in Proxmox.")
+	print_c(bcolors.L_GREEN, "Done!")
