@@ -308,7 +308,7 @@ def get_guest_replication_jobs(old_id: int) -> dict | None:
 				except:
 					print(line)
 					raise
-	if len(jobs.keys()) < 1: return None
+	if len(jobs) < 1: return None
 	return jobs
 
 def get_guest_replication_statuses(guest_id: int) -> dict | None:

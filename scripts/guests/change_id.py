@@ -220,27 +220,28 @@ def main(argv_a, **kwargs):
 		sys.exit(ERR_GUEST_NOT_STOPPED)
 
 	# Add vmstate disks to configuration.
-	for snapshot in guest_snapshots:
-		snapshot_cfg = parse_guest_cfg(
-			guest_id=id_origin,
-			remote=guest_on_remote_host,
-			remote_host=guest_cfg_host,
-			debug=debug_verbose,
-			snapshot_name=snapshot,
-			current=False
-		)
-		logger.debug("Snapshot Keys: %s", snapshot_cfg.keys())
-		logger.debug("Snapshot Configuration: %s", snapshot_cfg)
-		for key, value in snapshot_cfg.items():
-			if key == "vmstate":
-				parsed_disk = parse_guest_disk(
-					disk_name=key,
-					disk_values=value,
-					vmstate=True
-				)
-				if parsed_disk:
-					logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
-					guest_disks.append(parsed_disk)
+	if guest_snapshots:
+		for snapshot in guest_snapshots:
+			snapshot_cfg = parse_guest_cfg(
+				guest_id=id_origin,
+				remote=guest_on_remote_host,
+				remote_host=guest_cfg_host,
+				debug=debug_verbose,
+				snapshot_name=snapshot,
+				current=False
+			)
+			logger.debug("Snapshot Keys: %s", snapshot_cfg.keys())
+			logger.debug("Snapshot Configuration: %s", snapshot_cfg)
+			for key, value in snapshot_cfg.items():
+				if key == "vmstate":
+					parsed_disk = parse_guest_disk(
+						disk_name=key,
+						disk_values=value,
+						vmstate=True
+					)
+					if parsed_disk:
+						logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
+						guest_disks.append(parsed_disk)
 
 	if not argv_a.yes and guest_snapshots:
 		print(f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "+
