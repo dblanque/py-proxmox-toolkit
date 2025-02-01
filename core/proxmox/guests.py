@@ -107,7 +107,7 @@ def parse_net_opts_to_string(net_opts: dict):
 		else: r = f"{r},{k}={v},"
 	return r.rstrip(",").replace(",,",",")
 
-def get_guest_snapshots(guest_id: int) -> list:
+def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
 	if not isinstance(guest_id, int) and not int(guest_id):
 		raise ValueError("guest_id must be of type int.")
 	else:
@@ -115,6 +115,8 @@ def get_guest_snapshots(guest_id: int) -> list:
 	snapshots = []
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
+	if remote_args and len(remote_args) > 0:
+		proc_cmd = remote_args + proc_cmd
 	output = subprocess.check_output(f"{proc_cmd} listsnapshot {guest_id}".split())\
 		.decode(
 			getdefaultencoding()

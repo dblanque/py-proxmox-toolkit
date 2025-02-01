@@ -204,7 +204,7 @@ def main(argv_a, **kwargs):
 		debug=debug_verbose,
 	)
 	guest_disks: list[dict] = []
-	guest_snapshots = get_guest_snapshots(id_origin)
+	guest_snapshots = get_guest_snapshots(guest_id=id_origin, remote_args=args_ssh)
 
 	if argv_a.verbose:
 		logger.info("Guest is on Host: %s", guest_cfg_host)
