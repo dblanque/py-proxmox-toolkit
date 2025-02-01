@@ -164,6 +164,8 @@ def retarget_backup_jobs(old_id: int, new_id: int) -> None:
 				raise_exception = False
 			):
 				backup_change_errors.append(job_id)
+			else:
+				logger.info("Modified backup job %s.", job_id)
 	if len(backup_change_errors) > 0:
 		logger.error("Unable to re-target some backup jobs, please fix them manually.")
 	return
