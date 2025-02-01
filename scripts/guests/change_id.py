@@ -135,9 +135,14 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 	return
 
 def get_guest_replication_targets(old_id: int) -> None | list:
+	if not isinstance(old_id, int) and not int(old_id):
+		raise ValueError("old_id must be of type int.")
+	else:
+		old_id = int(old_id)
+
 	logger = logging.getLogger()
-	jobs = []
 	targets = []
+
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
 		replication_job = None
 		logger.debug("PVE_CFG_REPLICATION - Stripped Lines")
