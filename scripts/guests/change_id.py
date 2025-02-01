@@ -194,8 +194,7 @@ def main(argv_a, **kwargs):
 	guest_on_remote_host = (hostname != guest_cfg_host)
 	guest_cfg = parse_guest_cfg(
 		guest_id=id_origin,
-		remote=guest_on_remote_host,
-		remote_host=guest_cfg_host,
+		remote_args=args_ssh,
 		debug=debug_verbose,
 	)
 	guest_disks: list[dict] = []
@@ -229,8 +228,7 @@ def main(argv_a, **kwargs):
 	for snapshot in guest_snapshots:
 		snapshot_cfg = parse_guest_cfg(
 			guest_id=id_origin,
-			remote=guest_on_remote_host,
-			remote_host=guest_cfg_host,
+			remote_args=args_ssh,
 			debug=debug_verbose,
 			snapshot_name=snapshot,
 			current=False
@@ -268,6 +266,8 @@ def main(argv_a, **kwargs):
 		target = job["target"]
 		logger.info(f"Deleting job {job_name}")
 		job_delete_cmd = f"pvesr delete {job_name}".split()
+		if guest_on_remote_host:
+			job_delete_cmd = args_ssh + job_delete_cmd
 		logger.debug(" ".join(job_delete_cmd))
 		if not argv_a.dry_run:
 			subprocess.call(job_delete_cmd)
@@ -340,6 +340,8 @@ def main(argv_a, **kwargs):
 		for arg in ["rate", "schedule", "comment"]:
 			if arg in job:
 				new_job_cmd = new_job_cmd + [ f"--{arg}", f'{job[arg]}' ]
+		if guest_on_remote_host:
+			new_job_cmd = args_ssh + new_job_cmd
 		logger.debug(" ".join(new_job_cmd))
 		if not argv_a.dry_run:
 			subprocess.call(new_job_cmd)

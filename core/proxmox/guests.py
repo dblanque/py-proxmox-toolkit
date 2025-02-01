@@ -132,12 +132,10 @@ def get_guest_snapshots(guest_id: int) -> list:
 
 def parse_guest_cfg(
 		guest_id: int,
-		remote=False,
-		remote_user="root",
-		remote_host=None,
-		debug=False,
-		current=True,
-		snapshot_name: str=None
+		remote_args: list = None,
+		debug = False,
+		current = True,
+		snapshot_name: str = None
 	) -> dict:
 	if not isinstance(guest_id, int) and not int(guest_id):
 		raise ValueError("guest_id must be of type int.")
@@ -148,8 +146,6 @@ def parse_guest_cfg(
 		logger.info("Collecting Config for Guest %s", guest_id)
 	else: 
 		logger.info("Collecting Config for Guest %s (Snapshot %s)", guest_id, snapshot_name)
-	if remote and not remote_host:
-		raise ValueError("remote_host is required when calling as remote function")
 
 	guest_cfg = {}
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
@@ -163,8 +159,8 @@ def parse_guest_cfg(
 		cmd_args.insert(len(cmd_args)-1, snapshot_name)
 	if current:
 		cmd_args.append("--current")
-	if remote:
-		cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
+	if remote_args and len(remote_args) > 0:
+		cmd_args = remote_args + cmd_args
 	if debug:
 		logger.debug(cmd_args)
 
