@@ -134,7 +134,7 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 	return
 
-def get_guest_replication_targets(old_id):
+def get_guest_replication_targets(old_id) -> None | list:
 	jobs = []
 	targets = []
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
@@ -143,16 +143,19 @@ def get_guest_replication_targets(old_id):
 			line = line.strip()
 			if len(line) < 1:
 				continue
+
 			if line.startswith("local:"):
 				replication_job = line.split(": ")[1]
 				vmid = int(replication_job.split("-")[0])
 			elif vmid == old_id:
+				print(line)
 				try:
 					_key, _value = line.split(sep=None, maxsplit=1)
 					if _key == "target": targets.append(_value)
 				except:
 					print(line)
 					raise
+	if len(targets) < 1: return None
 	return targets
 
 def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
@@ -348,7 +351,8 @@ def main(argv_a, **kwargs):
 
 	# Move Disks
 	replication_targets = get_guest_replication_targets(old_id=id_origin)
-	logger.debug("Found replication targets: " + ", ".join(replication_targets))
+	if replication_targets:
+		logger.debug("Found replication targets: " + ", ".join(replication_targets))
 	for disk in disks_list:
 		disk: DiskDict
 		d_storage = get_storage_cfg(disk["storage"])
@@ -360,17 +364,18 @@ def main(argv_a, **kwargs):
 			remote_args=args_ssh,
 			dry_run=argv_a.dry_run
 		)
-		# Alter Remote Replicated Disks
-		for target in replication_targets:
-			logger.info(f"Re-adjusting replicated disks in host {target}.")
-			args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
-			d_storage.reassign_disk(
-				disk_name=d_name,
-				new_guest_id=id_target,
-				new_guest_cfg=new_cfg_path,
-				remote_args=args_ssh,
-				dry_run=argv_a.dry_run
-			)
+		if replication_targets:
+			# Alter Remote Replicated Disks
+			for target in replication_targets:
+				logger.info(f"Re-adjusting replicated disks in host {target}.")
+				args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
+				d_storage.reassign_disk(
+					disk_name=d_name,
+					new_guest_id=id_target,
+					new_guest_cfg=new_cfg_path,
+					remote_args=args_ssh,
+					dry_run=argv_a.dry_run
+				)
 
 	# Alter Replication Jobs
 	if not argv_a.dry_run:
