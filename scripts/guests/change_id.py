@@ -385,25 +385,26 @@ def main(argv_a, **kwargs):
 		except DiskReassignException:
 			logger.error(ERR_REASSIGN_MSG, d_name)
 			pass
-		if replication_targets:
-			# Alter Remote Replicated Disks
-			for job_name, job in replication_targets.items():
-				job_name: str
-				job: ReplicationJobDict
-				target = job["target"]
-				logger.info(f"Re-adjusting replication jobs in host {target}.")
-				job_delete_cmd = f"pvesr delete {job_name}".split()
-				logger.debug(" ".join(job_delete_cmd))
-				if not argv_a.dry_run:
-					subprocess.call(job_delete_cmd)
-				new_job_name = job_name.replace(str(id_origin), str(id_target))
-				new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
-				for arg in ["rate", "schedule", "comment"]:
-					if arg in job:
-						new_job_cmd = new_job_cmd + [ f"--{arg}", f'"{job[arg]}"' ]
-				logger.debug(" ".join(new_job_cmd))
-				if not argv_a.dry_run:
-					subprocess.call(new_job_cmd)
+
+	if replication_targets:
+		# Alter Remote Replicated Disks
+		for job_name, job in replication_targets.items():
+			job_name: str
+			job: ReplicationJobDict
+			target = job["target"]
+			logger.info(f"Re-adjusting replication jobs in host {target}.")
+			job_delete_cmd = f"pvesr delete {job_name}".split()
+			logger.debug(" ".join(job_delete_cmd))
+			if not argv_a.dry_run:
+				subprocess.call(job_delete_cmd)
+			new_job_name = job_name.replace(str(id_origin), str(id_target))
+			new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
+			for arg in ["rate", "schedule", "comment"]:
+				if arg in job:
+					new_job_cmd = new_job_cmd + [ f"--{arg}", f'"{job[arg]}"' ]
+			logger.debug(" ".join(new_job_cmd))
+			if not argv_a.dry_run:
+				subprocess.call(new_job_cmd)
 
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
