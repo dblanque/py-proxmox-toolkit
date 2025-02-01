@@ -191,6 +191,7 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 
 def parse_guest_disk(disk_name, disk_values):
 	logger = logging.getLogger()
+	logging.debug(f"Parsing disk {disk_name}")
 	if "raw_values" in disk_values:
 		if len(disk_values['raw_values']) != 1:
 			logger.error("Bad Parsing.")
