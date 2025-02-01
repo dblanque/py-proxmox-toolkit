@@ -55,8 +55,8 @@ def argparser(**kwargs) -> ArgumentParser:
 		**kwargs
 	)
 	parser.add_argument('-l', '--remote-user', default="root")
-	parser.add_argument('-i', '--origin-id', default=None)
-	parser.add_argument('-t', '--target-id', default=None)
+	parser.add_argument('-i', '--origin-id', default=None, type=int)
+	parser.add_argument('-t', '--target-id', default=None, type=int)
 	parser.add_argument('-y', '--yes', action='store_true', default=False)
 	parser.add_argument('-d', '--dry-run', action='store_true', default=False)
 	parser.add_argument('--debug', action='store_true', default=False)
@@ -134,7 +134,7 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 	return
 
-def get_guest_replication_targets(old_id) -> None | list:
+def get_guest_replication_targets(old_id: int) -> None | list:
 	logger = logging.getLogger()
 	jobs = []
 	targets = []
