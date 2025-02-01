@@ -115,8 +115,12 @@ def get_guest_snapshots(guest_id: int) -> list:
 	snapshots = []
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
-	output = subprocess.check_output(f"{proc_cmd} listsnapshot {guest_id}".split())
-	for line in output.decode(getdefaultencoding()).split("\n"):
+	output = subprocess.check_output(f"{proc_cmd} listsnapshot {guest_id}".split())\
+		.decode(
+			getdefaultencoding()
+		)
+	print(output)
+	for line in output:
 		try:
 			snapshot_name = line.strip().split()[1]
 			snapshots.append(snapshot_name)
