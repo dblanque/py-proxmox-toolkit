@@ -94,10 +94,10 @@ class PVEStorage:
 			cmd_args = remote_args + cmd_args
 		# ! Rename disk in Storage
 		logger.debug("Changing disk name in storage.")
-		logger.debug(cmd_args)
 		if dry_run:
-			logger.info(cmd_args)
+			logger.info(" ".join(cmd_args))
 		else:
+			logger.debug(" ".join(cmd_args))
 			with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
 				proc_o, proc_e = proc.communicate()
 				if proc.returncode != 0:
@@ -122,10 +122,10 @@ class PVEStorage:
 		sed_cmd_args = sed_cmd_args
 		logger.debug("Changing disk in Guest Configuration ({%s}) from {%s} to {%s}.",
 			   		guest_cfg_path, disk_name, new_disk_name)
-		logger.debug(sed_cmd_args)
 		if dry_run:
-			logger.info(sed_cmd_args)
+			logger.info(" ".join(sed_cmd_args))
 		else:
+			logger.debug(" ".join(sed_cmd_args))
 			with subprocess.Popen(sed_cmd_args, stdout=subprocess.PIPE) as proc:
 				proc_o, proc_e = proc.communicate()
 				if proc.returncode != 0:
