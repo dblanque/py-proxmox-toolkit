@@ -291,9 +291,6 @@ def main(argv_a, **kwargs):
 	else:
 		proc_cmd = "qm"
 	guest_on_remote_host = (hostname != guest_cfg_host)
-	args_ssh = None
-	if guest_on_remote_host:
-		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{guest_cfg_host}"]
 	guest_cfg = parse_guest_cfg(
 		guest_id=id_origin,
 		remote=guest_on_remote_host,
@@ -307,10 +304,17 @@ def main(argv_a, **kwargs):
 		logger.info("Selected Target ID: %s", id_target)
 	logger.debug("Guest Configuration: %s", guest_cfg)
 
+	# Set SSH Args if necessary
+	args_ssh = None
+	if guest_on_remote_host:
+		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{guest_cfg_host}"]
+
+	# Get Guest State
 	guest_state = get_guest_status(guest_id=id_origin, remote_args=args_ssh)
 	if guest_state != "stopped":
 		logger.error("Guest must be in stopped state (Currently %s)", guest_state)
 		sys.exit(ERR_GUEST_NOT_STOPPED)
+
 	# Change Config ID - Move config file
 	old_cfg_path = guest_cfg_details['path']
 	new_cfg_path = guest_cfg_details['path'].replace(f"{id_origin}.conf", f"{id_target}.conf")
