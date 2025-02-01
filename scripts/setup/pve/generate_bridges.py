@@ -124,11 +124,14 @@ def main(argv_a, **kwargs):
 				print_c(bcolors.L_YELLOW, f"Configuring Interface {iface}")
 				is_mapped = iface in vmbr_map
 				parent_bridge = None
+
+				# Find VMBR Parent if it has one
 				if iface in configured_ifaces:
 					iface_config: dict = configured_ifaces[iface]
 					if "parent" in iface_config:
 						parent_bridge = iface_config.pop("parent")
 
+				# Increment bridge index
 				if not is_mapped and not parent_bridge:
 					while f"vmbr{vmbr_index}" in configured_ifaces:
 						vmbr_index += 1
@@ -150,6 +153,7 @@ def main(argv_a, **kwargs):
 				else:
 					print_c(bcolors.L_BLUE, f"{INDENT}{iface} already has a bridge configured ({parent_bridge})")
 
+				# Add offloading if necessary
 				if argv_a.keep_offloading is not True and iface in configured_ifaces:
 					if not "post-up" in configured_ifaces[iface]:
 						print_c(bcolors.L_YELLOW, f"{INDENT}Adding offloading to Interface {iface}.")
