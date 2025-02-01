@@ -34,7 +34,7 @@ def get_interfaces(
 		override_patterns: tuple | list=False,
 		verbose: bool=False,
 		exclude_patterns: tuple | list=None
-	) -> tuple:
+	) -> list:
 	"""
 	Fetches physical interface names and returns them as a list.
 	If override_patterns is set to True then only the patterns passed will be matched.
@@ -68,4 +68,4 @@ def get_interfaces(
 
 		if not match and verbose:
 			print_c(bcolors.L_BLUE, f"[DEBUG] - Skipping {iface} (did not match regex).")
-	return tuple(filtered_interfaces)
+	return filtered_interfaces
