@@ -168,9 +168,10 @@ def parse_guest_cfg(
 		if proc.returncode != 0:
 			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 		if debug: logger.debug("Showing parsed Guest config lines:")
-		for line in proc_o.decode().split("\n"):
+		for line in proc_o.decode("utf-8").split("\n"):
 			line = line.rstrip()
 			if debug: logger.debug(line)
+			if len(line.strip()) == 0: continue
 			line_split = line.split(": ")
 			option_k = line_split[0]
 			option_v = line_split[-1]
