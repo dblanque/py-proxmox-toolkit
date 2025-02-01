@@ -69,6 +69,7 @@ def argparser(**kwargs) -> ArgumentParser:
 ERR_GUEST_EXISTS=1
 ERR_GUEST_NOT_EXISTS=2
 ERR_GUEST_NOT_STOPPED=3
+ERR_GUEST_REPLICATION_IN_PROGRESS=4
 ERR_REASSIGN_MSG = "Could not re-assign disk %s, please check manually"
 
 def validate_vmid(vmid) -> bool:
@@ -292,6 +293,9 @@ def main(argv_a, **kwargs):
 	if get_guest_exists(id_target):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
+	if any([v != "OK" for v in get_guest_replication_job_statuses(guest_id=id_origin).values()]):
+		logger.error("Guest with Target ID (%s) has a replication job in progress.", id_target)
+		sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 
 	if not argv_a.yes:
 		confirm_prompt(id_origin, id_target)
@@ -420,14 +424,14 @@ def main(argv_a, **kwargs):
 			if not argv_a.dry_run:
 				subprocess.call(job_delete_cmd)
 
-		_TIMEOUT = 30
+		_TIMEOUT = 60
 		_timer = 0
 		logger.info(
 			"Waiting for replication jobs to finish deletion (Timeout: %s seconds).",
 			_TIMEOUT
 		)
 		while get_guest_replication_job_statuses(guest_id=id_origin):
-			if _timer != 0 and _timer % 10:
+			if _timer != 0 and _timer % 5 == 0:
 				logger.info("Waiting for replication jobs...")
 			sleep(1)
 			_timer += 1
