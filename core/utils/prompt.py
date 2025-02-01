@@ -23,7 +23,7 @@ def yes_no_input(
 			default_str = f" [{input_choices['no'][0].upper()}]"
 	else: default_str = ""
 	while True:
-		r = input(f"{msg} {choices_str}{default_str}:")
+		r = input(f"{msg} {choices_str}{default_str}: ")
 		if r.lower() in input_choices["yes"]:
 			if yes_msg: print(yes_msg)
 			return True
