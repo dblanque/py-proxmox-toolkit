@@ -324,6 +324,7 @@ def main(argv_a, **kwargs):
 			snapshot_name=snapshot,
 			current=False
 		)
+		logger.debug("Snapshot Keys: %s", snapshot_cfg.keys())
 		logger.debug("Snapshot Configuration: %s", snapshot_cfg)
 		for key, value in snapshot_cfg.items():
 			if key == "vmstate":
