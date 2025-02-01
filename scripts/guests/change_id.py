@@ -328,8 +328,8 @@ def main(argv_a, **kwargs):
 		for key, value in snapshot_cfg.items():
 			if key == "vmstate":
 				parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
-				logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
 				if parsed_disk:
+					logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
 					disks_list.append(parsed_disk)
 
 	# Move Disks
