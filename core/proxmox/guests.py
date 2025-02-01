@@ -5,9 +5,12 @@ import re
 import logging
 import subprocess
 from .constants import PVE_CFG_NODES_DIR
+from sys import getdefaultencoding
 from typing import TypedDict, Required, NotRequired, Literal
 
 logger = logging.getLogger()
+
+PVEGuestCommand = Literal["pct", "qm"]
 
 class DiskDict(TypedDict):
 	interface: str
@@ -104,7 +107,29 @@ def parse_net_opts_to_string(net_opts: dict):
 		else: r = f"{r},{k}={v},"
 	return r.rstrip(",").replace(",,",",")
 
-def parse_guest_cfg(guest_id: int, remote=False, remote_user="root", remote_host=None, debug=False) -> dict:
+def get_guest_snapshots(guest_id: int, proc_cmd: PVEGuestCommand) -> list:
+	if not isinstance(guest_id, int) and not int(guest_id):
+		raise ValueError("guest_id must be of type int.")
+	else:
+		guest_id = int(guest_id)
+	snapshots = []
+	with subprocess.check_output(f"{proc_cmd} listsnapshot {guest_id}") as output:
+		output: bytes
+		for l in output.decode(getdefaultencoding()).split("\n"):
+			snapshot_name = l.strip().split()[1]
+			snapshots.append(snapshot_name)
+	if len(snapshots) < 1: return None
+	return snapshots
+
+def parse_guest_cfg(
+		guest_id: int,
+		remote=False,
+		remote_user="root",
+		remote_host=None,
+		debug=False,
+		current=True,
+		snapshot_name: str=None
+	) -> dict:
 	if not isinstance(guest_id, int) and not int(guest_id):
 		raise ValueError("guest_id must be of type int.")
 	else:
@@ -116,9 +141,18 @@ def parse_guest_cfg(guest_id: int, remote=False, remote_user="root", remote_host
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
 
-	cmd_args = [f'/usr/sbin/{proc_cmd}', "config", str(guest_id), "--current"]
-	if remote: cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
-	if debug: logger.debug(cmd_args)
+	cmd_args = [f'/usr/sbin/{proc_cmd}', "config", str(guest_id)]
+	if current and snapshot_name:
+		raise ValueError("The current and snapshot args cannot be used at the same time.")
+	if snapshot_name:
+		cmd_args.insert(len(cmd_args), "--snapshot")
+		cmd_args.insert(len(cmd_args), snapshot_name)
+	if current:
+		cmd_args.append("--current")
+	if remote:
+		cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
+	if debug:
+		logger.debug(cmd_args)
 	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:

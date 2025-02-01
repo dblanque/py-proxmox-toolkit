@@ -32,11 +32,19 @@ import logging
 import socket
 import subprocess
 import re
-from core.proxmox.guests import get_guest_cfg_path, get_guest_status, get_guest_exists, parse_guest_cfg, DiskDict
+from core.proxmox.guests import (
+	get_guest_cfg_path,
+	get_guest_status,
+	get_guest_snapshots,
+	get_guest_exists,
+	parse_guest_cfg,
+	DiskDict
+)
 from core.proxmox.storage import get_storage_cfg
 from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 from core.classes.ColoredFormatter import set_logger
+from core.utils.prompt import yes_no_input
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 
@@ -147,7 +155,7 @@ def get_guest_replication_targets(old_id):
 					raise
 	return targets
 
-def retarget_backup_jobs(old_id: int, new_id: int) -> None:
+def retarget_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
 	logger = logging.getLogger()
 	backup_jobs = get_all_backup_jobs()
 	backup_change_errors = []
@@ -166,7 +174,7 @@ def retarget_backup_jobs(old_id: int, new_id: int) -> None:
 			job_vmids.append(new_id)
 			job_vmids_data = ",".join(job_vmids)
 
-			if set_backup_attrs(
+			if not dry_run and set_backup_attrs(
 				job_id = job_id,
 				data = {"vmid": job_vmids_data},
 				raise_exception = False
@@ -221,8 +229,14 @@ def main(argv_a, **kwargs):
 	if get_guest_exists(id_target):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
+
+	guest_snapshots = get_guest_snapshots(id_origin)
 	if not argv_a.yes:
 		confirm_prompt(id_origin, id_target)
+		if guest_snapshots:
+			print(f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "+
+		 	"irreversibly affected if the process does not finish correctly.")
+			yes_no_input("Do you wish to continue?")
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
 	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
@@ -331,4 +345,4 @@ def main(argv_a, **kwargs):
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
 	# pvesh get /cluster/backup --output-format json-pretty
 	# pvesh usage /cluster/backup --verbose
-	retarget_backup_jobs(old_id=id_origin, new_id=id_target)
+	retarget_backup_jobs(old_id=id_origin, new_id=id_target, dry_run=argv_a.dry_run)
