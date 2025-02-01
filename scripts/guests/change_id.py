@@ -148,10 +148,11 @@ def retarget_backup_jobs(old_id: int, new_id: int) -> None:
 	for job in backup_jobs:
 		if "vmid" in job:
 			job_id: str = job["id"]
+			job_description: str = job["comment"]
 			job_vmids_data: str = job["vmid"]
 			job_vmids: list = job_vmids_data.split(",")
 			if not old_id in job_vmids:
-				logger.info("VM not in Backup Job %s, skipping.", job_id)
+				logger.info("VM not in Backup Job %s (%s), skipping.", job_id, job_description)
 				continue
 
 			job_vmids.remove(old_id)
@@ -165,7 +166,7 @@ def retarget_backup_jobs(old_id: int, new_id: int) -> None:
 			):
 				backup_change_errors.append(job_id)
 			else:
-				logger.info("Modified backup job %s.", job_id)
+				logger.info("Modified backup job %s (%s).", job_id, job_description)
 	if len(backup_change_errors) > 0:
 		logger.error("Unable to re-target some backup jobs, please fix them manually.")
 	return
