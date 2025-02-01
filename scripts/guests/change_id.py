@@ -336,6 +336,7 @@ def main(argv_a, **kwargs):
 	if not argv_a.yes and guest_snapshots:
 		print(f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "+
 		"irreversibly affected if the process does not finish correctly.")
+		print("If there are any replication jobs they will be deleted and re-added.")
 		if not yes_no_input("Are you SURE you wish to continue?", input_default="N"):
 			sys.exit(0)
 
@@ -385,26 +386,18 @@ def main(argv_a, **kwargs):
 			pass
 		if replication_targets:
 			# Alter Remote Replicated Disks
-			for job in replication_targets.values():
+			for job_name, job in replication_targets.items():
+				job_name: str
 				job: ReplicationJobDict
 				target = job["target"]
-				logger.info(f"Re-adjusting replicated disks in host {target}.")
-				args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
-				try:
-					d_storage.reassign_disk(
-						disk_name=d_name,
-						new_guest_id=id_target,
-						new_guest_cfg=new_cfg_path,
-						remote_args=args_ssh,
-						dry_run=argv_a.dry_run
-					)
-				except DiskReassignException:
-					logger.error(ERR_REASSIGN_MSG, d_name)
-					pass
-
-	# Alter Replication Jobs
-	if not argv_a.dry_run:
-		rename_guest_replication(old_id=id_origin, new_id=id_target)
+				logger.info(f"Re-adjusting replication jobs in host {target}.")
+				subprocess.call(f"pvesr delete {job_name}".split())
+				new_job_name = job_name.replace(id_origin, id_target)
+				new_job_cmd = f"pvesr create-local-job {new_job_name}".split()
+				for arg in ["rate", "schedule", "comment"]:
+					if arg in job:
+						new_job_cmd.append(f"--{arg}", job[arg])
+				subprocess.call(new_job_cmd)
 
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
