@@ -86,7 +86,7 @@ def main(argv_a, **kwargs):
 		if any([re.match(regex, iface) for regex in VIRTUAL_BRIDGE_PATTERNS]):
 			bridge = configured_ifaces[iface]
 			if "bridge-ports" in bridge:
-				if bridge["bridge-ports"][0] == "none":
+				if "none" in bridge["bridge-ports"]:
 					continue
 				for sub_iface in bridge["bridge-ports"]:
 					configured_ifaces[sub_iface]["parent"] = iface
