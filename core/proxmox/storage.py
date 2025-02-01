@@ -120,7 +120,7 @@ class PVEStorage:
 			guest_cfg_path
 		]
 		sed_cmd_args = sed_cmd_args
-		logger.debug("Changing disk in Guest Configuration ({%s}) from {%s} to {%s}.",
+		logger.debug("Changing disk in Guest Configuration (%s) from %s to %s.",
 			   		guest_cfg_path, disk_name, new_disk_name)
 		if dry_run:
 			logger.info(" ".join(sed_cmd_args))
