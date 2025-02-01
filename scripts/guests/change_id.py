@@ -148,7 +148,6 @@ def get_guest_replication_targets(old_id) -> None | list:
 				replication_job = line.split(": ")[1]
 				vmid = int(replication_job.split("-")[0])
 			elif vmid == old_id:
-				print(line)
 				try:
 					_key, _value = line.split(sep=None, maxsplit=1)
 					if _key == "target": targets.append(_value)
