@@ -267,7 +267,7 @@ def main(argv_a, **kwargs):
 		if guest_snapshots:
 			print(f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "+
 		 	"irreversibly affected if the process does not finish correctly.")
-			yes_no_input("Do you wish to continue?", input_default=False)
+			yes_no_input("Do you wish to continue?", input_default="N")
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
 	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
@@ -347,6 +347,7 @@ def main(argv_a, **kwargs):
 					disks_list.append(parsed_disk)
 
 	# Move Disks
+	replication_targets = get_guest_replication_targets(old_id=id_origin)
 	for disk in disks_list:
 		disk: DiskDict
 		d_storage = get_storage_cfg(disk["storage"])
@@ -358,20 +359,10 @@ def main(argv_a, **kwargs):
 			remote_args=args_ssh,
 			dry_run=argv_a.dry_run
 		)
-
-	# Alter Replication Jobs
-	if not argv_a.dry_run:
-		rename_guest_replication(old_id=id_origin, new_id=id_target)
-
-	# TODO - Alter Remote Replicated Volumes
-	for target in get_guest_replication_targets(old_id=id_origin):
-		logger.info(f"Re-adjusting replicated disks in host {target}.")
-		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
-		# Move Disks
-		for disk in disks_list:
-			disk: DiskDict
-			d_storage = get_storage_cfg(disk["storage"])
-			d_name: str = disk["name"]
+		# Alter Remote Replicated Disks
+		for target in replication_targets:
+			logger.info(f"Re-adjusting replicated disks in host {target}.")
+			args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
 			d_storage.reassign_disk(
 				disk_name=d_name,
 				new_guest_id=id_target,
@@ -380,8 +371,16 @@ def main(argv_a, **kwargs):
 				dry_run=argv_a.dry_run
 			)
 
+	# Alter Replication Jobs
+	if not argv_a.dry_run:
+		rename_guest_replication(old_id=id_origin, new_id=id_target)
+
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
 	# pvesh get /cluster/backup --output-format json-pretty
 	# pvesh usage /cluster/backup --verbose
-	change_guest_id_on_backup_jobs(old_id=id_origin, new_id=id_target, dry_run=argv_a.dry_run)
+	change_guest_id_on_backup_jobs(
+		old_id=id_origin,
+		new_id=id_target,
+		dry_run=argv_a.dry_run
+	)
