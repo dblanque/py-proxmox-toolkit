@@ -20,4 +20,5 @@ DISK_TYPES = [
 	"unused",
 	"mp",
 	"rootfs",
+	"vmstate"
 ]
