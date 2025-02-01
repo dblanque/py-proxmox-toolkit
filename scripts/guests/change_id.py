@@ -135,12 +135,15 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 	return
 
 def get_guest_replication_targets(old_id) -> None | list:
+	logger = logging.getLogger()
 	jobs = []
 	targets = []
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
 		replication_job = None
+		logger.debug("PVE_CFG_REPLICATION - Stripped Lines")
 		for line in replication_cfg.readlines():
 			line = line.strip()
+			logger.debug(line)
 			if len(line) < 1:
 				continue
 
