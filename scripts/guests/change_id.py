@@ -325,7 +325,7 @@ def main(argv_a, **kwargs):
 			current=False
 		)
 		logger.debug("Snapshot Configuration: %s", snapshot_cfg)
-		for key, value in snapshot_cfg:
+		for key, value in snapshot_cfg.items():
 			if key == "vmstate":
 				parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
 				if parsed_disk:
