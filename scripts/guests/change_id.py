@@ -147,16 +147,17 @@ def retarget_backup_jobs(old_id: int, new_id: int) -> None:
 	backup_change_errors = []
 	for job in backup_jobs:
 		if "vmid" in job:
+			job_id: str = job["id"]
 			job_vmids_data: str = job["vmid"]
 			job_vmids: list = job_vmids_data.split(",")
 			if not old_id in job_vmids:
+				logger.info("VM not in Backup Job %s, skipping.", job_id)
 				continue
 
 			job_vmids.remove(old_id)
 			job_vmids.append(new_id)
 			job_vmids_data = ",".join(job_vmids)
 
-			job_id: str = job["id"]
 			if set_backup_attrs(
 				job_id = job_id,
 				data = {"vmid": job_vmids_data},
