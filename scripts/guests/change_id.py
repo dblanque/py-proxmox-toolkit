@@ -93,25 +93,6 @@ def vmid_prompt(target=False):
 		else:
 			sys.stdout.write(f"Please enter a valid VM/CT ID {hint}:")
 
-def confirm_prompt(id_origin, id_target):
-	logger = logging.getLogger()
-	hint = "(Y|N) [N]"
-	question = f"Are you sure you wish to change Guest {id_origin}'s ID to {id_target}? {hint}: "
-	logger.info("This might break Replication and Backup Configurations.")
-	logger.info("Please ensure such tasks are reconfigured after script completion.")
-	sys.stdout.write(question)
-	y_choices = [ "y", "yes"]
-	n_choices = [ "n", "no" ]
-	valid_choices = y_choices + n_choices
-	while True:
-		response = input().lower()
-		if any(response.startswith(v) for v in valid_choices) or len(response) < 1:
-			if len(response) < 1: sys.exit(0)
-			if any(response.startswith(v) for v in n_choices): sys.exit(0)
-			return
-		else:
-			sys.stdout.write(f"Please enter a valid response {hint}:")
-
 def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
 	logger = logging.getLogger()
 	backup_jobs = get_all_backup_jobs()
@@ -196,7 +177,13 @@ def main(argv_a, **kwargs):
 			sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 
 	if not argv_a.yes:
-		confirm_prompt(id_origin, id_target)
+		confirm = yes_no_input(
+			f"Are you sure you wish to change Guest {id_origin}'s ID to {id_target}?",
+			input_default="N"
+		)
+		logger.info("This might break Replication and Backup Configurations.")
+		logger.info("Please ensure such tasks are reconfigured after script completion.")
+		if not confirm: sys.exit(0)
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
 	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
