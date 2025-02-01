@@ -133,12 +133,15 @@ def get_guest_replication_targets(old_id):
 		replication_job = None
 		replication_data = None
 		for line in replication_cfg.readlines():
+			line = line.strip()
+			if len(line) < 1:
+				continue
 			if line.startswith("local:"):
 				replication_job = line.split(": ")[1]
 				vmid = int(replication_job.split("-")[0])
 			elif vmid == old_id:
 				try:
-					_key, _value = line.lstrip().split(sep=None, maxsplit=1)
+					_key, _value = line.split(sep=None, maxsplit=1)
 					if _key == "target": targets.append(_value)
 				except:
 					print(line)
