@@ -338,6 +338,14 @@ def main(argv_a, **kwargs):
 		if not yes_no_input("Are you SURE you wish to continue?", input_default="N"):
 			sys.exit(0)
 
+	logger.info("The following disks will be renamed: ")
+	# For each discovered disk, do pre-checks
+	for key, value in guest_cfg.items():
+		if not valid_pve_disk_type(key, value): continue
+		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
+		if parsed_disk:
+			guest_disks.append(parsed_disk)
+
 	# Change Config ID - Move config file
 	old_cfg_path = guest_cfg_details['path']
 	new_cfg_path = guest_cfg_details['path'].replace(
@@ -357,15 +365,6 @@ def main(argv_a, **kwargs):
 			if proc.returncode != 0:
 				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 
-	logger.info("The following disks will be renamed: ")
-	# For each discovered disk, do pre-checks
-	for key, value in guest_cfg.items():
-		if not valid_pve_disk_type(key, value): continue
-		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
-		if parsed_disk:
-			guest_disks.append(parsed_disk)
-
-	# Move Disks
 	replication_targets = get_guest_replication_jobs(old_id=id_origin)
 	if replication_targets:
 		logger.debug("Found replication targets: " + ", ".join(replication_targets.keys()))
