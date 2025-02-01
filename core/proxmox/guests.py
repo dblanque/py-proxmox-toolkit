@@ -62,7 +62,6 @@ def get_guest_is_ct(guest_id):
 		return False
 	return True
 
-
 def get_guest_status(guest_id: int, remote_args=None):
 	# CT
 	if get_guest_is_ct(guest_id):
