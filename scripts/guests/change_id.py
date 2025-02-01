@@ -316,14 +316,16 @@ def main(argv_a, **kwargs):
 			disk_dicts.append(parsed_disk)
 	
 	for snapshot in guest_snapshots:
-		for key, value in parse_guest_cfg(
+		snapshot_cfg = parse_guest_cfg(
 			guest_id=id_origin,
 			remote=guest_on_remote_host,
 			remote_host=guest_cfg_host,
 			debug=debug_verbose,
 			snapshot_name=snapshot,
 			current=False
-		):
+		)
+		logger.debug("Snapshot Configuration: %s", snapshot_cfg)
+		for key, value in snapshot_cfg:
 			if key == "vmstate":
 				parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
 				if parsed_disk:
