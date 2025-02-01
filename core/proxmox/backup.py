@@ -1,5 +1,22 @@
 import subprocess
 import json
+from typing import TypedDict, Required, NotRequired, Literal
+
+# See https://pve.proxmox.com/pve-docs/api-viewer/#/cluster/backup/{id} for more arguments
+BackupJob = TypedDict(
+    "BackupJob",
+    {
+		"id": Required[str],
+		"comment": NotRequired[str],
+		"vmid": NotRequired[str],
+		"all": NotRequired[bool],
+		"mode": NotRequired[
+			Literal["snapshot", "suspend", "stop"]
+		],
+		"bwlimit": NotRequired[int],
+		"compress": NotRequired[Literal[0, 1, "gzip", "lzo", "zstd"]],
+    },
+)
 
 def get_all_backup_jobs() -> list[dict]:
 	jobs = subprocess.check_output(
