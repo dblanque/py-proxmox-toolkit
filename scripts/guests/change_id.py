@@ -131,7 +131,6 @@ def get_guest_replication_targets(old_id):
 	targets = []
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
 		replication_job = None
-		replication_data = None
 		for line in replication_cfg.readlines():
 			line = line.strip()
 			if len(line) < 1:
