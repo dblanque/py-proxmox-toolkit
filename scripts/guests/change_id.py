@@ -177,12 +177,12 @@ def main(argv_a, **kwargs):
 			sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 
 	if not argv_a.yes:
+		logger.info("This might break Replication and Backup Configurations.")
+		logger.info("Please ensure such tasks are reconfigured after script completion.")
 		confirm = yes_no_input(
 			f"Are you sure you wish to change Guest {id_origin}'s ID to {id_target}?",
 			input_default="N"
 		)
-		logger.info("This might break Replication and Backup Configurations.")
-		logger.info("Please ensure such tasks are reconfigured after script completion.")
 		if not confirm: sys.exit(0)
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
