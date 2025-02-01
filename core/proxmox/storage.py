@@ -18,6 +18,15 @@ PATH_ASSOC = {
 	"rbd":"pool",
 }
 
+class DiskReassignException(Exception):
+	pass
+
+class DiskDirectoryException(Exception):
+	pass
+
+class UnsupportedStorageType(Exception):
+	pass
+
 @dataclass
 class PVEStorage:
 	"""PVE Storage Class."""
@@ -79,7 +88,11 @@ class PVEStorage:
 				with subprocess.Popen(mkdir_args, stdout=subprocess.PIPE) as proc:
 					proc_o, proc_e = proc.communicate()
 					if proc.returncode != 0:
-						raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+						raise DiskDirectoryException(
+							f"Bad command return code ({proc.returncode}).",
+							proc_o.decode(),
+							proc_e.decode()
+						)
 		elif self.type == "rbd":
 			cmd_args = [
 				"/usr/bin/rbd",
@@ -88,7 +101,7 @@ class PVEStorage:
 				f"{self.path}/{new_disk_name}",
 			]
 		else:
-			raise Exception(f"Unsupported Storage Type {self.type}")
+			raise UnsupportedStorageType(f"Unsupported Storage Type {self.type}")
 
 		if remote_args:
 			cmd_args = remote_args + cmd_args
@@ -101,7 +114,7 @@ class PVEStorage:
 			with subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
 				proc_o, proc_e = proc.communicate()
 				if proc.returncode != 0:
-					raise Exception(
+					raise DiskReassignException(
 						f"Bad command return code ({proc.returncode}).",
 						proc_o.decode(),
 						proc_e.decode()
