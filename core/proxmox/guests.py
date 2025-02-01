@@ -7,6 +7,7 @@ import subprocess
 from .constants import PVE_CFG_NODES_DIR
 from sys import getdefaultencoding
 from typing import TypedDict, Literal
+from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 
 logger = logging.getLogger()
 
@@ -213,7 +214,7 @@ def parse_guest_cfg(
 				guest_cfg[option_k] = option_v
 		return guest_cfg
 
-def parse_guest_netcfg(guest_id, remote=False, remote_user="root", remote_host=None, debug=False):
+def parse_guest_net_cfg(guest_id, remote=False, remote_user="root", remote_host=None, debug=False):
 	logger.info("Collecting Network Config for Guest %s", guest_id)
 	if remote and not remote_host:
 		raise ValueError("remote_host is required when calling as remote function")
@@ -240,3 +241,118 @@ def parse_guest_netcfg(guest_id, remote=False, remote_user="root", remote_host=N
 					net_opts_parsed[k] = v
 				net_cfg[int(net_index)] = net_opts_parsed
 		return net_cfg
+
+def is_valid_guest_disk_type(label: str, disk_data: str, exclude_media=True) -> bool:
+	if not re.sub(r"[0-9]+", "", label) in DISK_TYPES:
+		return False
+	if "raw_values" in disk_data:
+		is_cloudinit = "cloudinit" in " ".join(disk_data["raw_values"])
+	else: is_cloudinit = False
+	if exclude_media and "media" in disk_data and not is_cloudinit:
+		return False
+	return True
+
+def rename_guest_replication_jobs(old_id: int, new_id: int) -> None:
+	"""
+	Renames Replication Jobs in the default PVE Replication Config File
+	This function is NOT RECOMMENDED as it does not modify remote replicated disks.
+	"""
+	logger = logging.getLogger()
+	# Rename disk in Guest Configuration
+	logger.info("Changing replication jobs for Guest %s to %s in %s",
+													old_id, new_id, PVE_CFG_REPLICATION)
+	sed_regex = rf"s/^local: {old_id}-\(.*\)$/local: {new_id}-\1/g"
+	rpl_cmd_args = [
+		"/usr/bin/sed",
+		"-i",
+		sed_regex, # Sed F String Regex
+		PVE_CFG_REPLICATION
+	]
+	logger.debug("Executing command:" + " ".join(rpl_cmd_args))
+	with subprocess.Popen(rpl_cmd_args, stdout=subprocess.PIPE) as proc:
+		proc_o, proc_e = proc.communicate()
+		if proc.returncode != 0:
+			raise Exception(f"Bad command return code ({proc.returncode}).",
+			proc_o.decode(),
+			proc_e.decode()
+		)
+	return
+
+def get_guest_replication_jobs(old_id: int) -> dict | None:
+	if not isinstance(old_id, int) and not int(old_id):
+		raise ValueError("old_id must be of type int.")
+	else:
+		old_id = int(old_id)
+
+	logger = logging.getLogger()
+	jobs = {}
+
+	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
+		replication_job = None
+		vmid = None
+		for line in replication_cfg.readlines():
+			line = line.strip()
+			if len(line) < 1:
+				continue
+
+			if line.startswith("local:"):
+				replication_job = line.split(": ")[1]
+				vmid = int(replication_job.split("-")[0])
+				if vmid == old_id:
+					jobs[replication_job] = {}
+
+			if vmid == old_id:
+				try:
+					_key, _value = line.split(sep=None, maxsplit=1)
+					jobs[replication_job][_key] = _value
+				except:
+					print(line)
+					raise
+	if len(jobs.keys()) < 1: return None
+	return jobs
+
+def get_guest_replication_statuses(guest_id: int) -> dict | None:
+	"""
+	:return: Dictionary with id:status pairs
+	:rtype: dict | None
+	"""
+	cmd = f"pvesr status --guest {guest_id}"
+	data = {}
+	job_statuses = subprocess.check_output(cmd.split())
+	job_statuses = job_statuses.decode("utf-8").splitlines()
+	job_statuses.pop(0)
+	for line in job_statuses:
+		job_idx = 0
+		status_idx = -1
+		parsed_line = line.split()
+		data[parsed_line[job_idx]] = parsed_line[status_idx]
+	if len(data.keys()) < 1: return None
+	return data
+
+def parse_guest_disk(disk_name, disk_values, vmstate=False):
+	logger = logging.getLogger()
+	logging.info(f"Parsing disk {disk_name}")
+	if "raw_values" in disk_values:
+		if len(disk_values['raw_values']) != 1:
+			logger.error("Bad Parsing.")
+			logger.error("Disk %s has more than one path (%s).", disk_name, disk_values['raw_values'])
+			logger.error("Path Array Length: %s", len(disk_values['raw_values']))
+			raise ValueError(disk_values['raw_values'])
+		_raw_values = disk_values['raw_values'][0]
+		_split_values = _raw_values.split(":") 
+		logger.info("%s: %s", disk_name, _raw_values)
+		return {
+			"interface": disk_name,
+			"raw_values": _raw_values,
+			"storage": _split_values[0],
+			"name": _split_values[1]
+		}
+	elif vmstate:
+		_split_values = disk_values.split(":") 
+		logger.info("%s: %s", disk_name, disk_values)
+		return {
+			"interface": disk_name,
+			"storage": _split_values[0],
+			"name": _split_values[1]
+		}
+	return None

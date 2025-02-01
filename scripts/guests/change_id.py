@@ -38,11 +38,14 @@ from core.proxmox.guests import (
 	get_guest_snapshots,
 	get_guest_exists,
 	parse_guest_cfg,
-	DiskDict
+	DiskDict,
+	get_guest_replication_statuses,
+	parse_guest_disk,
+	is_valid_guest_disk_type,
+	get_guest_replication_jobs
 )
-from core.proxmox.storage import get_storage_cfg, DiskReassignException
 from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
-from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
+from core.proxmox.storage import get_storage_cfg, DiskReassignException
 from core.proxmox.replication import ReplicationJobDict
 from core.classes.ColoredFormatter import set_logger
 from core.utils.prompt import yes_no_input
@@ -109,71 +112,6 @@ def confirm_prompt(id_origin, id_target):
 		else:
 			sys.stdout.write(f"Please enter a valid response {hint}:")
 
-def valid_pve_disk_type(label: str, disk_data: str, exclude_media=True) -> bool:
-	if not re.sub(r"[0-9]+", "", label) in DISK_TYPES:
-		return False
-	if "raw_values" in disk_data:
-		is_cloudinit = "cloudinit" in " ".join(disk_data["raw_values"])
-	else: is_cloudinit = False
-	if exclude_media and "media" in disk_data and not is_cloudinit:
-		return False
-	return True
-
-def rename_guest_replication(old_id: int, new_id: int) -> None:
-	logger = logging.getLogger()
-	# Rename disk in Guest Configuration
-	logger.info("Changing replication jobs for Guest %s to %s in %s",
-													old_id, new_id, PVE_CFG_REPLICATION)
-	sed_regex = rf"s/^local: {old_id}-\(.*\)$/local: {new_id}-\1/g"
-	rpl_cmd_args = [
-		"/usr/bin/sed",
-		"-i",
-		sed_regex, # Sed F String Regex
-		PVE_CFG_REPLICATION
-	]
-	logger.debug("Executing command:" + " ".join(rpl_cmd_args))
-	with subprocess.Popen(rpl_cmd_args, stdout=subprocess.PIPE) as proc:
-		proc_o, proc_e = proc.communicate()
-		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).",
-			proc_o.decode(),
-			proc_e.decode()
-		)
-	return
-
-def get_guest_replication_jobs(old_id: int) -> dict | None:
-	if not isinstance(old_id, int) and not int(old_id):
-		raise ValueError("old_id must be of type int.")
-	else:
-		old_id = int(old_id)
-
-	logger = logging.getLogger()
-	jobs = {}
-
-	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
-		replication_job = None
-		vmid = None
-		for line in replication_cfg.readlines():
-			line = line.strip()
-			if len(line) < 1:
-				continue
-
-			if line.startswith("local:"):
-				replication_job = line.split(": ")[1]
-				vmid = int(replication_job.split("-")[0])
-				if vmid == old_id:
-					jobs[replication_job] = {}
-
-			if vmid == old_id:
-				try:
-					_key, _value = line.split(sep=None, maxsplit=1)
-					jobs[replication_job][_key] = _value
-				except:
-					print(line)
-					raise
-	if len(jobs.keys()) < 1: return None
-	return jobs
-
 def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
 	logger = logging.getLogger()
 	backup_jobs = get_all_backup_jobs()
@@ -186,7 +124,7 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 			job_vmids_data = job["vmid"]
 			job_vmids: list = job_vmids_data.split(",")
 			if not old_id in job_vmids:
-				logger.info("VM not in Backup Job %s (%s), skipping.", job_id, job_description)
+				logger.debug("VM not in Backup Job %s (%s), skipping.", job_id, job_description)
 				continue
 
 			job_vmids.remove(old_id)
@@ -207,48 +145,6 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 	if len(backup_change_errors) > 0:
 		logger.error("Unable to re-target some backup jobs, please fix them manually.")
 	return
-
-def get_guest_replication_job_statuses(guest_id: int) -> dict | None:
-	cmd = f"pvesr status --guest {guest_id}"
-	data = {}
-	job_statuses = subprocess.check_output(cmd.split())
-	job_statuses = job_statuses.decode("utf-8").splitlines()
-	job_statuses.pop(0)
-	for line in job_statuses:
-		job_idx = 0
-		status_idx = -1
-		parsed_line = line.split()
-		data[parsed_line[job_idx]] = parsed_line[status_idx]
-	if len(data.keys()) < 1: return None
-	return data
-
-def parse_guest_disk(disk_name, disk_values, vmstate=False):
-	logger = logging.getLogger()
-	logging.info(f"Parsing disk {disk_name}")
-	if "raw_values" in disk_values:
-		if len(disk_values['raw_values']) != 1:
-			logger.error("Bad Parsing.")
-			logger.error("Disk %s has more than one path (%s).", disk_name, disk_values['raw_values'])
-			logger.error("Path Array Length: %s", len(disk_values['raw_values']))
-			raise ValueError(disk_values['raw_values'])
-		_raw_values = disk_values['raw_values'][0]
-		_split_values = _raw_values.split(":") 
-		logger.info("%s: %s", disk_name, _raw_values)
-		return {
-			"interface": disk_name,
-			"raw_values": _raw_values,
-			"storage": _split_values[0],
-			"name": _split_values[1]
-		}
-	elif vmstate:
-		_split_values = disk_values.split(":") 
-		logger.info("%s: %s", disk_name, disk_values)
-		return {
-			"interface": disk_name,
-			"storage": _split_values[0],
-			"name": _split_values[1]
-		}
-	return None
 
 def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -293,7 +189,7 @@ def main(argv_a, **kwargs):
 	if get_guest_exists(id_target):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
-	replication_statuses = get_guest_replication_job_statuses(guest_id=id_origin)
+	replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
 	if replication_statuses:
 		if any([v != "OK" for v in replication_statuses.values()]):
 			logger.error("Guest with Origin ID (%s) has a replication job in progress.", id_origin)
@@ -365,7 +261,7 @@ def main(argv_a, **kwargs):
 	logger.info("The following disks will be renamed: ")
 	# For each discovered disk, do pre-checks
 	for key, value in guest_cfg.items():
-		if not valid_pve_disk_type(key, value): continue
+		if not is_valid_guest_disk_type(key, value): continue
 		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
 		if parsed_disk:
 			guest_disks.append(parsed_disk)
@@ -432,7 +328,7 @@ def main(argv_a, **kwargs):
 			"Waiting for replication jobs to finish deletion (Timeout: %s seconds).",
 			_TIMEOUT
 		)
-		while get_guest_replication_job_statuses(guest_id=id_origin) is not None:
+		while get_guest_replication_statuses(guest_id=id_origin) is not None:
 			if _timer != 0 and _timer % 5 == 0:
 				logger.info("Waiting for replication jobs...")
 			sleep(1)

@@ -17,7 +17,7 @@ from core.proxmox.guests import (
 	get_guest_cfg_path,
 	get_all_guests,
 	get_guest_is_ct,
-	parse_guest_netcfg,
+	parse_guest_net_cfg,
 	parse_net_opts_to_string
 )
 from core.utils.prompt import yes_no_input
@@ -130,9 +130,9 @@ def main(argv_a, **kwargs):
 		for guest_id in all_guests[guest_type]:
 			guest_host = get_guest_cfg_path(guest_id=guest_id, get_host=True)
 			if guest_host != hostname:
-				guest_net_orig[int(guest_id)] = parse_guest_netcfg(guest_id, remote=True, remote_host=guest_host, debug=argv_a.debug)
+				guest_net_orig[int(guest_id)] = parse_guest_net_cfg(guest_id, remote=True, remote_host=guest_host, debug=argv_a.debug)
 			else:
-				guest_net_orig[int(guest_id)] = parse_guest_netcfg(guest_id, debug=argv_a.debug)
+				guest_net_orig[int(guest_id)] = parse_guest_net_cfg(guest_id, debug=argv_a.debug)
 
 	if argv_a.print_original:
 		logger.info("If you need to restore the config manually, here's the output to use in the cfg python file.")
