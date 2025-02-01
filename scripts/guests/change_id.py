@@ -340,7 +340,10 @@ def main(argv_a, **kwargs):
 
 	# Change Config ID - Move config file
 	old_cfg_path = guest_cfg_details['path']
-	new_cfg_path = guest_cfg_details['path'].replace(f"{id_origin}.conf", f"{id_target}.conf")
+	new_cfg_path = guest_cfg_details['path'].replace(
+		f"{id_origin}.conf",
+		f"{id_target}.conf"
+	)
 	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
 	if guest_on_remote_host:
 		args_mv = args_ssh + args_mv
@@ -394,7 +397,7 @@ def main(argv_a, **kwargs):
 				if not argv_a.dry_run:
 					subprocess.call(job_delete_cmd)
 				new_job_name = job_name.replace(str(id_origin), str(id_target))
-				new_job_cmd = f"pvesr create-local-job {new_job_name}".split()
+				new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
 				for arg in ["rate", "schedule", "comment"]:
 					if arg in job:
 						new_job_cmd = new_job_cmd + [ f"--{arg}", f'"{job[arg]}"' ]
