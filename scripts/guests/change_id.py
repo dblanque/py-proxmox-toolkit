@@ -306,14 +306,14 @@ def main(argv_a, **kwargs):
 			if proc.returncode != 0:
 				raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
 
-	disk_dicts: list[dict] = []
+	disks_list: list[dict] = []
 	logger.info("The following disks will be renamed: ")
 	# For each discovered disk, do pre-checks
 	for key, value in guest_cfg.items():
 		if not valid_pve_disk_type(key, value): continue
 		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
 		if parsed_disk:
-			disk_dicts.append(parsed_disk)
+			disks_list.append(parsed_disk)
 	
 	for snapshot in guest_snapshots:
 		snapshot_cfg = parse_guest_cfg(
@@ -328,11 +328,12 @@ def main(argv_a, **kwargs):
 		for key, value in snapshot_cfg.items():
 			if key == "vmstate":
 				parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
+				logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
 				if parsed_disk:
-					disk_dicts.append(parsed_disk)
+					disks_list.append(parsed_disk)
 
 	# Move Disks
-	for disk in disk_dicts:
+	for disk in disks_list:
 		disk: DiskDict
 		d_storage = get_storage_cfg(disk["storage"])
 		d_name: str = disk["name"]
@@ -353,7 +354,7 @@ def main(argv_a, **kwargs):
 		logger.info(f"Re-adjusting replicated disks in host {target}.")
 		args_ssh = ["/usr/bin/ssh", f"{remote_user}@{target}"]
 		# Move Disks
-		for disk in disk_dicts:
+		for disk in disks_list:
 			disk: DiskDict
 			d_storage = get_storage_cfg(disk["storage"])
 			d_name: str = disk["name"]
