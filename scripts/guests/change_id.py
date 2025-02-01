@@ -303,7 +303,7 @@ def main(argv_a, **kwargs):
 		rename_guest_replication(old_id=id_origin, new_id=id_target)
 
 	# TODO - Alter Remote Replicated Volumes
-	# print(get_guest_replication_targets(old_id=id_origin))
+	print(get_guest_replication_targets(old_id=id_origin))
 
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
