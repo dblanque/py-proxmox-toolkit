@@ -335,7 +335,7 @@ def main(argv_a, **kwargs):
 			new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
 			for arg in ["rate", "schedule", "comment"]:
 				if arg in job:
-					new_job_cmd = new_job_cmd + [ f"--{arg}", f'"{job[arg]}"' ]
+					new_job_cmd = new_job_cmd + [ f"--{arg}", f'{job[arg]}' ]
 			logger.debug(" ".join(new_job_cmd))
 			if not argv_a.dry_run:
 				subprocess.call(new_job_cmd)
