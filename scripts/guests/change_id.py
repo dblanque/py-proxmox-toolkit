@@ -391,13 +391,20 @@ def main(argv_a, **kwargs):
 				job: ReplicationJobDict
 				target = job["target"]
 				logger.info(f"Re-adjusting replication jobs in host {target}.")
-				subprocess.call(f"pvesr delete {job_name}".split())
+				job_delete_cmd = f"pvesr delete {job_name}".split()
+				if argv_a.dry_run:
+					logger.info(" ".join(job_delete_cmd))
+				else:
+					subprocess.call(job_delete_cmd)
 				new_job_name = job_name.replace(id_origin, id_target)
 				new_job_cmd = f"pvesr create-local-job {new_job_name}".split()
 				for arg in ["rate", "schedule", "comment"]:
 					if arg in job:
 						new_job_cmd.append(f"--{arg}", job[arg])
-				subprocess.call(new_job_cmd)
+				if argv_a.dry_run:
+					logger.info(" ".join(new_job_cmd))
+				else:
+					subprocess.call(new_job_cmd)
 
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
