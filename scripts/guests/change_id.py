@@ -111,10 +111,11 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 	# Rename disk in Guest Configuration
 	logger.info("Changing replication jobs for Guest %s to %s in %s",
 													old_id, new_id, PVE_CFG_REPLICATION)
+	sed_regex = rf"s/^local: {old_id}-\(.*\)$/local: {new_id}-\1/g"
 	rpl_cmd_args = [
 		"/usr/bin/sed",
 		"-i",
-		f"s/^local: {old_id}-\(.*\)$/local: {new_id}-\\1/g", # Sed F String Regex
+		sed_regex, # Sed F String Regex
 		PVE_CFG_REPLICATION
 	]
 	logger.debug(rpl_cmd_args)

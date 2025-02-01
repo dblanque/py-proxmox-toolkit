@@ -72,15 +72,17 @@ def main(argv_a, **kwargs):
 	cmd_grep = "grep -q \"console=tty0\"".split()
 	cmd_grep.append(GRUB_FILE)
 	if subprocess.call(cmd_grep) > 0:
+		sed_regex = r's#^\(GRUB_CMDLINE_LINUX=".*\)"$#\1 console=tty0"#'
 		subprocess.call([
-			"sed", "-i", r's#^\(GRUB_CMDLINE_LINUX=".*\)"$#\1 console=tty0"#', GRUB_FILE
+			"/usr/bin/sed", "-i", sed_regex, GRUB_FILE
 		])
 
 	cmd_grep = "grep -q \"console=ttyS0,115200\"".split()
 	cmd_grep.append(GRUB_FILE)
 	if subprocess.call(cmd_grep) > 0:
+		sed_regex = r's#^\(GRUB_CMDLINE_LINUX=".*\)"$#\1 console=ttyS0,115200"#'
 		subprocess.call([
-			"sed", "-i", r's#^\(GRUB_CMDLINE_LINUX=".*\)"$#\1 console=ttyS0,115200"#', GRUB_FILE
+			"/usr/bin/sed", "-i", sed_regex, GRUB_FILE
 		])
 
 	print_c(bcolors.L_YELLOW, f"Doing update-grub.")

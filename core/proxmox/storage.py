@@ -109,10 +109,10 @@ class PVEStorage:
 		sed_regex = None
 		# LXC ID Prefix on Diskname
 		if id_prefix:
-			sed_regex = f"s@:{guest_id}/{disk_name}@:{new_guest_id}/{new_disk_name}@g"
+			sed_regex = rf"s@:{guest_id}/{disk_name}@:{new_guest_id}/{new_disk_name}@g"
 		# VM has no Prefix
 		else:
-			sed_regex = f"s@:{disk_name}@:{new_disk_name}@g"
+			sed_regex = rf"s@:{disk_name}@:{new_disk_name}@g"
 		sed_cmd_args = [
 			"/usr/bin/sed",
 			"-i",
@@ -165,8 +165,9 @@ class PVEStorage:
 		return
 
 def get_storage_cfg(storage_name: str) -> PVEStorage:
+	sed_regex = rf"/.*: {storage_name}$/,/^$/p"
 	cmd_args = [
-		"/usr/bin/sed", "-n", "/.*: " + storage_name + "$/,/^$/p", PVE_CFG_STORAGE,
+		"/usr/bin/sed", "-n", sed_regex, PVE_CFG_STORAGE,
 	]
 	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
