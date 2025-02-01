@@ -34,7 +34,7 @@ import subprocess
 import re
 from core.proxmox.guests import get_guest_cfg, get_guest_status, get_guest_exists, parse_guest_cfg
 from core.proxmox.storage import get_storage_cfg
-from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs
+from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 from core.classes.ColoredFormatter import set_logger
 from core.signal_handlers.sigint import graceful_exit
@@ -146,10 +146,11 @@ def retarget_backup_jobs(old_id: int, new_id: int) -> None:
 	backup_jobs = get_all_backup_jobs()
 	backup_change_errors = []
 	for job in backup_jobs:
+		job: BackupJob
 		if "vmid" in job:
-			job_id: str = job["id"]
-			job_description: str = job["comment"]
-			job_vmids_data: str = job["vmid"]
+			job_id = job["id"]
+			job_description = job["comment"]
+			job_vmids_data = job["vmid"]
 			job_vmids: list = job_vmids_data.split(",")
 			if not old_id in job_vmids:
 				logger.info("VM not in Backup Job %s (%s), skipping.", job_id, job_description)
