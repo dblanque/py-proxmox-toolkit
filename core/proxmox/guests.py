@@ -144,9 +144,14 @@ def parse_guest_cfg(
 		raise ValueError("guest_id must be of type int.")
 	else:
 		guest_id = int(guest_id)
-	logger.info("Collecting Config for Guest %s", guest_id)
+
+	if not snapshot_name:
+		logger.info("Collecting Config for Guest %s", guest_id)
+	else: 
+		logger.info("Collecting Config for Guest %s (Snapshot %s)", guest_id, snapshot_name)
 	if remote and not remote_host:
 		raise ValueError("remote_host is required when calling as remote function")
+
 	guest_cfg = {}
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
@@ -163,8 +168,7 @@ def parse_guest_cfg(
 		cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
 	if debug:
 		logger.debug(cmd_args)
-	logger.debug("Getting guest config with command: ")
-	logger.debug(" ".join(cmd_args))
+
 	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
