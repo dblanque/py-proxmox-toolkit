@@ -98,7 +98,7 @@ class PVEStorage:
 			logger.info(" ".join(cmd_args))
 		else:
 			logger.debug(" ".join(cmd_args))
-			with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
+			with subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
 				proc_o, proc_e = proc.communicate()
 				if proc.returncode != 0:
 					raise Exception(
