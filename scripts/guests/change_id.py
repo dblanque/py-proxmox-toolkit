@@ -293,9 +293,11 @@ def main(argv_a, **kwargs):
 	if get_guest_exists(id_target):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
-	if any([v != "OK" for v in get_guest_replication_job_statuses(guest_id=id_origin).values()]):
-		logger.error("Guest with Target ID (%s) has a replication job in progress.", id_target)
-		sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
+	replication_statuses = get_guest_replication_job_statuses(guest_id=id_origin)
+	if replication_statuses:
+		if any([v != "OK" for v in replication_statuses.values()]):
+			logger.error("Guest with Target ID (%s) has a replication job in progress.", id_target)
+			sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 
 	if not argv_a.yes:
 		confirm_prompt(id_origin, id_target)
@@ -391,9 +393,9 @@ def main(argv_a, **kwargs):
 					proc_e.decode()
 				)
 
-	replication_targets = get_guest_replication_jobs(old_id=id_origin)
-	if replication_targets:
-		logger.debug("Found replication targets: " + ", ".join(replication_targets.keys()))
+	replication_jobs = get_guest_replication_jobs(old_id=id_origin)
+	if replication_jobs:
+		logger.debug("Found replication targets: " + ", ".join(replication_jobs.keys()))
 
 	for disk in guest_disks:
 		disk: DiskDict
@@ -412,9 +414,9 @@ def main(argv_a, **kwargs):
 			logger.exception(e)
 			pass
 
-	if replication_targets:
+	if replication_jobs:
 		# Remove old Replication Jobs
-		for job_name, job in replication_targets.items():
+		for job_name, job in replication_jobs.items():
 			job_name: str
 			job: ReplicationJobDict
 			target = job["target"]
@@ -439,7 +441,7 @@ def main(argv_a, **kwargs):
 				break
 
 		# Add new Replication Jobs
-		for job_name, job in replication_targets.items():
+		for job_name, job in replication_jobs.items():
 			new_job_name = job_name.replace(str(id_origin), str(id_target))
 			new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
 			for arg in ["rate", "schedule", "comment"]:
