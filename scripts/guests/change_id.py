@@ -259,32 +259,6 @@ def main(argv_a, **kwargs):
 			print_c(bcolors.L_BLUE, NORMAL_PROMPT_EXIT_MSG)
 			sys.exit(0)
 
-	# For each discovered disk, do pre-checks
-	logger.info("The following disks will be renamed: ")
-	for key, value in guest_cfg.items():
-		if not is_valid_guest_disk_type(key, value): continue
-		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
-		if parsed_disk:
-			guest_disks.append(parsed_disk)
-
-	# Re-assign disks
-	for disk in guest_disks:
-		disk: DiskDict
-		d_storage = get_storage_cfg(disk["storage"])
-		d_name: str = disk["name"]
-		try:
-			d_storage.reassign_disk(
-				disk_name=d_name,
-				new_guest_id=id_target,
-				new_guest_cfg=new_cfg_path,
-				remote_args=args_ssh,
-				dry_run=argv_a.dry_run
-			)
-		except DiskReassignException as e:
-			logger.error(ERR_REASSIGN_MSG, d_name)
-			logger.exception(e)
-			pass
-
 	# Remove old Replication Jobs
 	replication_jobs = get_guest_replication_jobs(old_id=id_origin)
 	if replication_jobs:
@@ -336,6 +310,32 @@ def main(argv_a, **kwargs):
 		logger.info(args_mv)
 	else:
 		subprocess.call(args_mv, stdout=subprocess.PIPE)
+
+	# For each discovered disk, do pre-checks
+	logger.info("The following disks will be renamed: ")
+	for key, value in guest_cfg.items():
+		if not is_valid_guest_disk_type(key, value): continue
+		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
+		if parsed_disk:
+			guest_disks.append(parsed_disk)
+
+	# Re-assign disks
+	for disk in guest_disks:
+		disk: DiskDict
+		d_storage = get_storage_cfg(disk["storage"])
+		d_name: str = disk["name"]
+		try:
+			d_storage.reassign_disk(
+				disk_name=d_name,
+				new_guest_id=id_target,
+				new_guest_cfg=new_cfg_path,
+				remote_args=args_ssh,
+				dry_run=argv_a.dry_run
+			)
+		except DiskReassignException as e:
+			logger.error(ERR_REASSIGN_MSG, d_name)
+			logger.exception(e)
+			pass
 
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/

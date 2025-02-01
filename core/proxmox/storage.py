@@ -85,14 +85,10 @@ class PVEStorage:
 			else:
 				mkdir_args = ["/usr/bin/mkdir", "-p", new_disk_path]
 				if remote_args: mkdir_args = remote_args + mkdir_args
-				with subprocess.Popen(mkdir_args, stdout=subprocess.PIPE) as proc:
-					proc_o, proc_e = proc.communicate()
-					if proc.returncode != 0:
-						raise DiskDirectoryException(
-							f"Bad command return code ({proc.returncode}).",
-							proc_o.decode(),
-							proc_e.decode()
-						)
+				try:
+					subprocess.call(mkdir_args)
+				except:
+					raise DiskDirectoryException()
 		elif self.type == "rbd":
 			cmd_args = [
 				"/usr/bin/rbd",
@@ -111,14 +107,10 @@ class PVEStorage:
 			logger.info(" ".join(cmd_args))
 		else:
 			logger.debug(" ".join(cmd_args))
-			with subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
-				proc_o, proc_e = proc.communicate()
-				if proc.returncode != 0:
-					raise DiskReassignException(
-						f"Bad command return code ({proc.returncode}).",
-						proc_o.decode(),
-						proc_e.decode()
-					)
+			try:
+				subprocess.call(cmd_args)
+			except:
+				raise DiskReassignException()
 
 		# ! Rename disk in Guest Configuration
   		# Does not require SSH
