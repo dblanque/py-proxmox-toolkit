@@ -47,6 +47,7 @@ from core.proxmox.guests import (
 from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
 from core.proxmox.storage import get_storage_cfg, DiskReassignException
 from core.proxmox.replication import ReplicationJobDict
+from core.format.colors import bcolors, print_c
 from core.classes.ColoredFormatter import set_logger
 from core.utils.prompt import yes_no_input
 from core.signal_handlers.sigint import graceful_exit
@@ -74,6 +75,7 @@ ERR_GUEST_NOT_EXISTS=2
 ERR_GUEST_NOT_STOPPED=3
 ERR_GUEST_REPLICATION_IN_PROGRESS=4
 ERR_REASSIGN_MSG = "Could not re-assign disk %s, please check manually"
+NORMAL_PROMPT_EXIT_MSG = "Exiting script."
 
 def validate_vmid(vmid) -> bool:
 	try: int(vmid)
@@ -183,7 +185,9 @@ def main(argv_a, **kwargs):
 			f"Are you sure you wish to change Guest {id_origin}'s ID to {id_target}?",
 			input_default="N"
 		)
-		if not confirm: sys.exit(0)
+		if not confirm:
+			print_c(bcolors.L_BLUE, NORMAL_PROMPT_EXIT_MSG)
+			sys.exit(0)
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
 	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
@@ -243,6 +247,7 @@ def main(argv_a, **kwargs):
 		"irreversibly affected if the process does not finish correctly.")
 		print("If there are any replication jobs they will be deleted and re-added.")
 		if not yes_no_input("Are you SURE you wish to continue?", input_default="N"):
+			print_c(bcolors.L_BLUE, NORMAL_PROMPT_EXIT_MSG)
 			sys.exit(0)
 
 	logger.info("The following disks will be renamed: ")
