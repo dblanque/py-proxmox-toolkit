@@ -127,7 +127,7 @@ def rename_guest_replication(old_id: int, new_id: int) -> None:
 		sed_regex, # Sed F String Regex
 		PVE_CFG_REPLICATION
 	]
-	logger.debug("Executing command:" + rpl_cmd_args)
+	logger.debug("Executing command:" + " ".join(rpl_cmd_args))
 	with subprocess.Popen(rpl_cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
