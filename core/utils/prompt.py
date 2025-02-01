@@ -17,15 +17,15 @@ def yes_no_input(
 	choices_str = '|'.join(input_choices)
 	choices_str = f"({choices_str})"
 	if input_default != None:
-		if input_default == True:
-			default_str = f" [{input_choices['yes'][0].upper()}]"
-		elif not input_default:
-			default_str = f" [{input_choices['no'][0].upper()}]"
-		elif (
+		if (
 			input_default in input_choices["yes"] or 
 			input_default in input_choices["no"]
 		):
 			default_str = f" [{input_default}]"
+		elif input_default == True:
+			default_str = f" [{input_choices['yes'][0].upper()}]"
+		else:
+			default_str = f" [{input_choices['no'][0].upper()}]"
 	else: default_str = ""
 	while True:
 		r = input(f"{msg} {choices_str}{default_str}: ")
