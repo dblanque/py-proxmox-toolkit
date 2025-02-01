@@ -40,6 +40,11 @@ class NetworkInterfacesParseException(Exception):
 	pass
 
 def parse_interfaces(file=FILE_NETWORK_INTERFACES) -> tuple[ dict[dict], dict[list[list]] ]:
+	"""
+	Parses /etc/network/interfaces file.
+	:return: interfaces, top_level_arguments
+	:rtype: tuple
+	"""
 	ifaces = {}
 	top_level_args = {}
 	if not isfile(file):
