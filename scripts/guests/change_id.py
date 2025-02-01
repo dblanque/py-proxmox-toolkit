@@ -278,7 +278,8 @@ def main(argv_a, **kwargs):
 		if guest_snapshots:
 			print(f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "+
 		 	"irreversibly affected if the process does not finish correctly.")
-			yes_no_input("Do you wish to continue?", input_default="N")
+			if not yes_no_input("Do you wish to continue?", input_default="N"):
+				sys.exit(0)
 
 	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
 	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
