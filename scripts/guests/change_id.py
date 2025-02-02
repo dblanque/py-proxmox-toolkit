@@ -273,29 +273,30 @@ def main(argv_a, **kwargs):
 		if not argv_a.dry_run:
 			subprocess.call(job_delete_cmd)
 
-	_TIMEOUT = 120
-	_timer = 0
-	logger.info(
-		"Waiting for replication jobs to finish deletion (Timeout per job: %s seconds).",
-		_TIMEOUT
-	)
-	_previous_status_len = len(replication_statuses)
-	_current_status_len = len(replication_statuses)
-	while _current_status_len > 0:
-		if _timer != 0 and _timer % 10 == 0:
-			replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
-			_previous_status_len = _current_status_len
-			_current_status_len = len(replication_statuses)
-			logger.info("Waiting for replication jobs...")
-		if _previous_status_len != _current_status_len and _current_status_len > 0:
-			logger.info("A job finished, awaiting further.")
-			timer = 0
-		sleep(1)
-		_timer += 1
-		if _timer >= _TIMEOUT:
-			if _current_status_len > 0:
-				logger.info("Timeout reached, cannot wait any longer.")
-			break
+	_prev_repl_status_len = len(replication_statuses)
+	_curr_repl_status_len = len(replication_statuses)
+	if _curr_repl_status_len > 0:
+		_TIMEOUT = 120
+		_timer = 0
+		logger.info(
+			"Waiting for replication jobs to finish deletion (Timeout per job: %s seconds).",
+			_TIMEOUT
+		)
+		while _curr_repl_status_len > 0:
+			if _timer != 0 and _timer % 10 == 0:
+				replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
+				_prev_repl_status_len = _curr_repl_status_len
+				_curr_repl_status_len = len(replication_statuses)
+				logger.info("Waiting for replication jobs...")
+			if _prev_repl_status_len != _curr_repl_status_len and _curr_repl_status_len > 0:
+				logger.info("A job finished, awaiting further.")
+				_timer = 0
+			sleep(1)
+			_timer += 1
+			if _timer >= _TIMEOUT:
+				if _curr_repl_status_len > 0:
+					logger.info("Timeout reached, cannot wait any longer.")
+				break
 
 	# Rename Guest Config File
 	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
