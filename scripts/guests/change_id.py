@@ -172,10 +172,6 @@ def main(argv_a, **kwargs):
 	if get_guest_exists(id_target):
 		logger.error("Guest with Target ID (%s) already exists.", id_target)
 		sys.exit(ERR_GUEST_EXISTS)
-	replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
-	if any([v != "OK" for v in replication_statuses.values()]):
-		logger.error("Guest with Origin ID (%s) has a replication job in progress.", id_origin)
-		sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 
 	if not argv_a.yes:
 		logger.info("This might break Replication and Backup Configurations.")
@@ -279,12 +275,21 @@ def main(argv_a, **kwargs):
 		"Waiting for replication jobs to finish deletion (Timeout per job: %s seconds).",
 		_TIMEOUT
 	)
-	replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
+	replication_statuses = get_guest_replication_statuses(
+		guest_id=id_origin,
+		remote_args=args_ssh
+	)
+	if any([v != "OK" for v in replication_statuses.values()]):
+		logger.error("Guest with Origin ID (%s) has a replication job in progress.", id_origin)
+		sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 	_curr_repl_statuses_len = len(replication_statuses)
 	_prev_repl_statuses_len = len(replication_statuses)
 	while _curr_repl_statuses_len > 0:
 		_prev_repl_statuses_len = _curr_repl_statuses_len
-		replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
+		replication_statuses = get_guest_replication_statuses(
+			guest_id=id_origin,
+			remote_args=args_ssh
+		)
 		_curr_repl_statuses_len = len(replication_statuses)
 		if _timer != 0 and _timer % 10 == 0:
 			logger.info("Waiting for replication jobs...")
@@ -298,8 +303,6 @@ def main(argv_a, **kwargs):
 			if len(replication_statuses) > 0:
 				logger.info("Timeout reached, cannot wait any longer.")
 			break
-	else:
-		sleep(1)
 
 	# Rename Guest Config File
 	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
