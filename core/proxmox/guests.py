@@ -116,7 +116,7 @@ def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
 	proc_cmd = proc_cmd.split()
-	if remote_args and len(remote_args) > 0:
+	if remote_args:
 		proc_cmd = remote_args + proc_cmd
 	proc_cmd = proc_cmd + [ "listsnapshot", str(guest_id) ]
 	output = subprocess.check_output(proc_cmd)\
@@ -163,7 +163,7 @@ def parse_guest_cfg(
 		cmd_args.insert(len(cmd_args)-1, snapshot_name)
 	if current:
 		cmd_args.append("--current")
-	if remote_args and len(remote_args) > 0:
+	if remote_args:
 		cmd_args = remote_args + cmd_args
 	if debug:
 		logger.debug(cmd_args)
