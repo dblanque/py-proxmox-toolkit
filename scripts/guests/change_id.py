@@ -272,7 +272,8 @@ def main(argv_a, **kwargs):
 		logger.debug(" ".join(job_delete_cmd))
 		if not argv_a.dry_run:
 			subprocess.call(job_delete_cmd)
-
+	
+	replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
 	_prev_repl_status_len = len(replication_statuses)
 	_curr_repl_status_len = len(replication_statuses)
 	if _curr_repl_status_len > 0:
@@ -284,6 +285,9 @@ def main(argv_a, **kwargs):
 		)
 		while _curr_repl_status_len > 0:
 			if _timer != 0 and _timer % 10 == 0:
+				replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
+				_prev_repl_status_len = _curr_repl_status_len
+				_curr_repl_status_len = len(replication_statuses)
 				logger.info("Waiting for replication jobs...")
 			if _prev_repl_status_len != _curr_repl_status_len and _curr_repl_status_len > 0:
 				logger.info("A job finished, awaiting further.")
@@ -291,9 +295,6 @@ def main(argv_a, **kwargs):
 
 			sleep(1)
 			_timer += 1
-			replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
-			_prev_repl_status_len = _curr_repl_status_len
-			_curr_repl_status_len = len(replication_statuses)
 			if _timer >= _TIMEOUT:
 				if _curr_repl_status_len > 0:
 					logger.info("Timeout reached, cannot wait any longer.")
