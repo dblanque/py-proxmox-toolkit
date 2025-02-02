@@ -298,6 +298,8 @@ def main(argv_a, **kwargs):
 			if len(replication_statuses) > 0:
 				logger.info("Timeout reached, cannot wait any longer.")
 			break
+	else:
+		sleep(1)
 
 	# Rename Guest Config File
 	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
