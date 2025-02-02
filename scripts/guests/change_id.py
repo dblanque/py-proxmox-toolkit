@@ -280,15 +280,15 @@ def main(argv_a, **kwargs):
 		_TIMEOUT
 	)
 	replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
-	curr_repl_statuses_len = len(replication_statuses)
-	prev_repl_statuses_len = len(replication_statuses)
-	while curr_repl_statuses_len > 0:
-		prev_repl_statuses_len = curr_repl_statuses_len
+	_curr_repl_statuses_len = len(replication_statuses)
+	_prev_repl_statuses_len = len(replication_statuses)
+	while _curr_repl_statuses_len > 0:
+		_prev_repl_statuses_len = _curr_repl_statuses_len
 		replication_statuses = get_guest_replication_statuses(guest_id=id_origin)
-		curr_repl_statuses_len = len(replication_statuses)
+		_curr_repl_statuses_len = len(replication_statuses)
 		if _timer != 0 and _timer % 10 == 0:
 			logger.info("Waiting for replication jobs...")
-		if prev_repl_statuses_len != curr_repl_statuses_len and curr_repl_statuses_len > 0:
+		if _prev_repl_statuses_len != _curr_repl_statuses_len and _curr_repl_statuses_len > 0:
 			logger.info("A job finished, awaiting further.")
 			_timer = 0
 
