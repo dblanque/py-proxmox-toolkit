@@ -339,12 +339,14 @@ def main(argv_a, **kwargs):
 		new_job_name = job_name.replace(str(id_origin), str(id_target))
 		new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
 		for arg in ["rate", "schedule", "comment"]:
+			if not arg in job:
+				continue
+
 			if arg == "comment":
 				v = f'"{job[arg]}"'
 			else:
 				v = str(job[arg])
-			if arg in job:
-				new_job_cmd = new_job_cmd + [ f"--{arg}", v ]
+			new_job_cmd = new_job_cmd + [ f"--{arg}", v ]
 		if guest_on_remote_host:
 			new_job_cmd = args_ssh + new_job_cmd
 		logger.debug(" ".join(new_job_cmd))
