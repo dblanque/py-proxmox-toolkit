@@ -278,6 +278,9 @@ def rename_guest_replication_jobs(old_id: int, new_id: int) -> None:
 	return
 
 def get_guest_replication_jobs(old_id: int) -> dict:
+	"""
+	Uses Proxmox FUSE Volume data, does not require remote/ssh arguments.
+	"""
 	if not isinstance(old_id, int) and not int(old_id):
 		raise ValueError("old_id must be of type int.")
 	else:
