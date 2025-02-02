@@ -118,7 +118,7 @@ def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
 	proc_cmd = proc_cmd.split()
 	if remote_args and len(remote_args) > 0:
 		proc_cmd = remote_args + proc_cmd
-	proc_cmd = proc_cmd + [ "listsnapshot", guest_id ]
+	proc_cmd = proc_cmd + [ "listsnapshot", str(guest_id) ]
 	output = subprocess.check_output(proc_cmd)\
 		.decode(
 			getdefaultencoding()
