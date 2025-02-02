@@ -115,10 +115,9 @@ def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
 	snapshots = []
 	if get_guest_is_ct(guest_id): proc_cmd = "pct"
 	else: proc_cmd = "qm"
+	proc_cmd = proc_cmd.split()
 	if remote_args and len(remote_args) > 0:
-		proc_cmd = remote_args.append(proc_cmd)
-	else:
-		proc_cmd = [ proc_cmd ]
+		proc_cmd = remote_args + proc_cmd
 	proc_cmd = proc_cmd + [ "listsnapshot", guest_id ]
 	output = subprocess.check_output(proc_cmd)\
 		.decode(
