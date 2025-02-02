@@ -353,7 +353,14 @@ def main(argv_a, **kwargs):
 			new_job_cmd = args_ssh + new_job_cmd
 		logger.debug(" ".join(new_job_cmd))
 		if not argv_a.dry_run:
-			subprocess.call(new_job_cmd)
+			try:
+				subprocess.call(new_job_cmd)
+			except:
+				print_c(
+					bcolors.L_YELLOW, 
+					f"Replication job creation for {job_name} failed."
+				)
+				pass
 
 	# Alter Backup Jobs
 	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
