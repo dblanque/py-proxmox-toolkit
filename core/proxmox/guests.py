@@ -329,13 +329,14 @@ def get_guest_replication_statuses(guest_id: int, remote_args: list = None, rais
 			job_statuses = subprocess.check_output(cmd)
 		except:
 			pass
-	job_statuses = job_statuses.decode("utf-8").splitlines()
-	job_statuses.pop(0)
-	for line in job_statuses:
-		_job_idx = 0
-		_status_idx = -1
-		_parsed_line = line.split()
-		data[_parsed_line[_job_idx]] = _parsed_line[_status_idx]
+	if job_statuses:
+		job_statuses = job_statuses.decode("utf-8").splitlines()
+		job_statuses.pop(0)
+		for line in job_statuses:
+			_job_idx = 0
+			_status_idx = -1
+			_parsed_line = line.split()
+			data[_parsed_line[_job_idx]] = _parsed_line[_status_idx]
 	return data
 
 def parse_guest_disk(disk_name, disk_values, vmstate=False):
