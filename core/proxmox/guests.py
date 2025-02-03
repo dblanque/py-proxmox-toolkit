@@ -312,7 +312,7 @@ def get_guest_replication_jobs(old_id: int) -> dict:
 					raise
 	return jobs
 
-def get_guest_replication_statuses(guest_id: int, remote_args: list = None) -> dict:
+def get_guest_replication_statuses(guest_id: int, remote_args: list = None, raise_exception = False) -> dict:
 	"""
 	:return: Dictionary with id:status pairs
 	:rtype: dict
@@ -321,7 +321,14 @@ def get_guest_replication_statuses(guest_id: int, remote_args: list = None) -> d
 	if remote_args:
 		cmd = remote_args + cmd.split()
 	data = {}
-	job_statuses = subprocess.check_output(cmd)
+	job_statuses = None
+	if raise_exception:
+		job_statuses = subprocess.check_output(cmd)
+	else:
+		try:
+			job_statuses = subprocess.check_output(cmd)
+		except:
+			pass
 	job_statuses = job_statuses.decode("utf-8").splitlines()
 	job_statuses.pop(0)
 	for line in job_statuses:
