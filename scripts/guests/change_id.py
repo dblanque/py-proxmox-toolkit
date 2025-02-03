@@ -104,7 +104,10 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 		if "vmid" in job:
 			job_id = job["id"]
 			job_vmids_data = job["vmid"]
-			job_description = job["comment"] or ""
+			if "comment" in job:
+				job_description = job["comment"]
+			else:
+				job_description = ""
 			job_vmids: list = job_vmids_data.split(",")
 			if not old_id in job_vmids:
 				logger.debug("VM not in Backup Job %s (%s), skipping.", job_id, job_description)
