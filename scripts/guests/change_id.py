@@ -307,6 +307,16 @@ def main(argv_a, **kwargs):
 				logger.info("Timeout reached, cannot wait any longer.")
 			break
 
+	# Alter Backup Jobs
+	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
+	# pvesh get /cluster/backup --output-format json-pretty
+	# pvesh usage /cluster/backup --verbose
+	change_guest_id_on_backup_jobs(
+		old_id=id_origin,
+		new_id=id_target,
+		dry_run=argv_a.dry_run
+	)
+
 	# Rename Guest Config File
 	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
 	if guest_on_remote_host:
@@ -369,13 +379,3 @@ def main(argv_a, **kwargs):
 					f"Replication job creation for {job_name} failed."
 				)
 				pass
-
-	# Alter Backup Jobs
-	# see https://forum.proxmox.com/threads/create-backup-jobs-using-a-shell-command.110845/
-	# pvesh get /cluster/backup --output-format json-pretty
-	# pvesh usage /cluster/backup --verbose
-	change_guest_id_on_backup_jobs(
-		old_id=id_origin,
-		new_id=id_target,
-		dry_run=argv_a.dry_run
-	)
