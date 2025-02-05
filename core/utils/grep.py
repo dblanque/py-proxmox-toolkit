@@ -4,6 +4,8 @@ from re import Pattern, compile
 def grep_r (pattern: Pattern, dir, return_files=False):
 	if not isinstance(pattern, Pattern):
 		compiled_pattern = compile(pattern)
+	else:
+		compiled_pattern = pattern
 	for parent, dirs, files in walk(dir):
 		for base_name in files:
 			filename = path.join(parent, base_name)
