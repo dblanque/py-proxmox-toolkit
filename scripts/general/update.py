@@ -8,6 +8,7 @@ from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
 from core.parser import make_parser, ArgumentParser
 from core.debian.apt import apt_update, apt_dist_upgrade, apt_autoremove, apt_autoclean
+from core.utils.check_root import is_user_root
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -22,9 +23,7 @@ def argparser(**kwargs) -> ArgumentParser:
 
 def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
-	if os.geteuid() != 0:
-		print_c(bcolors.L_YELLOW, "Script must be executed as root.")
-		exit()
+	is_user_root(exit_on_fail=True)
 
 	apt_update()
 	if argv_a.download_only:
