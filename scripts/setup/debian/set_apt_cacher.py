@@ -62,8 +62,8 @@ def main(argv_a, **kwargs):
 	apt_conf_files = []
 	HTTP_CACHER_REGEX = re.compile(r'^\s*Acquire::http::Proxy \".*\";')
 	HTTPS_CACHER_REGEX = re.compile(r'^\s*Acquire::https::Proxy \".*\";')
-	HTTP_CACHER_TEMPLATE = "Acquire::http::Proxy \"{0}\";"
-	HTTPS_CACHER_TEMPLATE = "Acquire::https::Proxy \"{0}\";"
+	HTTP_CACHER_TEMPLATE = "Acquire::http::Proxy \"http://{0}\";"
+	HTTPS_CACHER_TEMPLATE = "Acquire::https::Proxy \"https://{0}\";"
 
 	for conf_file in grep_r(HTTP_CACHER_REGEX, APT_CONF_DIR, return_files=True):
 		apt_conf_files.append(conf_file)
