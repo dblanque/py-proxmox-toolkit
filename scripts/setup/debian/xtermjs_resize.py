@@ -2,9 +2,7 @@
 if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
-import subprocess
 import os
-import shutil
 from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
 from core.debian.os_release import get_data
