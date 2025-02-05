@@ -13,7 +13,6 @@ from core.validators.ipaddress import validate_ip
 from core.validators.port import validate_port
 from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import bcolors, print_c
-from core.utils.prompt import yes_no_input
 
 ERR_CACHER_ALREADY_SET = 1
 ERR_INVALID_CACHER_ADDRESS = 2
