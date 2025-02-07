@@ -3,14 +3,13 @@
 from argparse import ArgumentParser
 import sys
 import os
-import importlib.util
 from core.utils.path import path_as_module
 from core.parser import make_parser
 from core.utils.shell import is_completion_context
+from core.autocomplete import argcomplete_exists
 
 # Import and use argcomplete if available
-argcomplete_spec = importlib.util.find_spec("argcomplete")
-use_argcomplete = argcomplete_spec is not None and is_completion_context()
+use_argcomplete = argcomplete_exists() and is_completion_context()
 if use_argcomplete:
 	from argcomplete import autocomplete
 

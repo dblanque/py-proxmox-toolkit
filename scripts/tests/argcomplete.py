@@ -3,7 +3,6 @@ if __name__ == "__main__":
 	raise Exception("This python script cannot be executed individually, please use main.py")
 
 from core.parser import ArgumentParser, make_parser
-from argcomplete.completers import SuppressCompleter
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -11,7 +10,7 @@ def argparser(**kwargs) -> ArgumentParser:
 		description="This program is used to test argcomplete.",
 		**kwargs
 	)
-	parser.add_argument('-f', '--fruits', choices=["a","b"]).completer = SuppressCompleter()
+	parser.add_argument('-f', '--fruits', choices=["apple","banana"])
 	return parser
 
 def main(argv_a, **kwargs):
