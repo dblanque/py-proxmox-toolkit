@@ -8,7 +8,7 @@ from core.signal_handlers.sigint import graceful_exit
 from core.format.colors import print_c, bcolors
 from core.parser import make_parser, ArgumentParser
 from core.debian.apt import apt_update, apt_dist_upgrade, apt_autoremove, apt_autoclean
-from core.utils.check_root import is_user_root
+from core.utils.shell import is_user_root
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(

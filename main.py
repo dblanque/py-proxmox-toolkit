@@ -5,13 +5,14 @@ import sys
 import os
 import importlib.util
 from core.utils.path import path_as_module
+from core.utils.shell import is_completion_context
 
 # Import and use argcomplete if available
 argcomplete_spec = importlib.util.find_spec("argcomplete")
 use_argcomplete = argcomplete_spec is not None and is_completion_context()
 if use_argcomplete:
 	from argcomplete import autocomplete
-	from core.autocomplete import ToolkitCompleter, is_completion_context
+	from core.autocomplete import ToolkitCompleter
 
 TOOLKIT_PATH=os.path.dirname(__file__)
 main_parser = ArgumentParser(

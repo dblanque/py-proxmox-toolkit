@@ -6,7 +6,7 @@ import signal
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 from core.debian.apt import apt_install
-from core.utils.check_root import is_user_root
+from core.utils.shell import is_user_root
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
