@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-import os
+if __name__ == "__main__":
+	raise Exception("This python script cannot be executed individually, please use main.py")
+
 from core.parser import ArgumentParser, make_parser
 from argcomplete.completers import SuppressCompleter
 
