@@ -4,29 +4,34 @@ from argparse import ArgumentParser
 import sys
 import os
 import importlib.util
-argcomplete_spec = importlib.util.find_spec("argcomplete")
-use_argcomplete = argcomplete_spec is not None
+from core.utils.path import path_as_module
 
+# Import and use argcomplete if available
+argcomplete_spec = importlib.util.find_spec("argcomplete")
+use_argcomplete = argcomplete_spec is not None and is_completion_context()
 if use_argcomplete:
 	from argcomplete import autocomplete
-	from core.autocomplete import ToolkitCompleter
-	from core.utils.path import path_as_module
+	from core.autocomplete import ToolkitCompleter, is_completion_context
 
 TOOLKIT_PATH=os.path.dirname(__file__)
-
 main_parser = ArgumentParser(
 	prog='Python Proxmox Toolkit Parser',
 	description='Use this program to execute sub-scripts from the toolkit',
 	add_help=False
 )
-main_parser.add_argument(
-	'filename',
-	help="Script name or path to execute."
-).completer = ToolkitCompleter(TOOLKIT_PATH)
 
 if use_argcomplete:
+	main_parser.add_argument(
+		'filename',
+		help="Script name or path to execute."
+	).completer = ToolkitCompleter(TOOLKIT_PATH)
 	# Enable argcomplete
 	autocomplete(main_parser)
+else:
+	main_parser.add_argument(
+		'filename',
+		help="Script name or path to execute."
+	)
 
 args, unknown_args = main_parser.parse_known_args()
 
@@ -34,7 +39,7 @@ is_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
 if is_interactive:
 	print("Interactive mode enabled.")
 
-if args.filename.endswith(".py"):
+if args.filename.endswith(".py") or "/" in args.filename:
 	parsed_filename = path_as_module(args.filename)
 else:
 	parsed_filename = args.filename
