@@ -6,6 +6,7 @@ import signal
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 from core.debian.apt import apt_install
+from core.utils.check_root import is_user_root
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -18,6 +19,7 @@ def argparser(**kwargs) -> ArgumentParser:
 
 def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
+	is_user_root(exit_on_fail=True)
 	tools = [
 		"sudo",
 		"net-tools",
