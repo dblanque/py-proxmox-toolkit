@@ -58,7 +58,7 @@ except AttributeError:
 script_parser = getattr(module, "argparser", None)
 if script_parser:
 	# Initialize sub-script's parser (inheriting main_parser)
-	sub_parser = script_parser()
+	sub_parser: ArgumentParser = script_parser()
 	# Parse remaining arguments
 	sub_args = sub_parser.parse_args(unknown_args)
 	# Execute Script
