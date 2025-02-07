@@ -1,8 +1,13 @@
 # Proxmox Python Toolkit
 
+
 ## Installation and usage (Without PIP)
 All dependencies will work, pip packages are not required for any scripts for the moment.
-The standard APT Python3 package will suffice.
+The standard APT `python3` package will suffice.
+
+### Auto-complete
+If auto-complete is desired you'll also require `python3-argcomplete`, and always be
+in the python toolkit folder.
 
 ```bash
 # Update and ensure git and python3 are installed.
@@ -25,10 +30,10 @@ cd /opt/py-proxmox-toolkit
 sudo bash enable_autocomplete.sh
 
 # Using pve_repositories.py as an example.
-python3 main.py scripts/setup/microcode.py
+./main.py scripts/setup/microcode.py
 
 # OR
-python3 main.py scripts.post_install.pve_repositories
+./main.py scripts.post_install.pve_repositories
 ```
 
 ## Installation (With PIP)
