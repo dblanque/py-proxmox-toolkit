@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # Author: Dylan Blanqué
 # Date:
 # Description: Script for changing VM/CT ID in Proxmox VE
