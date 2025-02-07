@@ -17,6 +17,22 @@ EXCLUDED_FILES = [
 	"template.py",
 ]
 
+def get_allowed_paths(toolkit_path: str, subdirectory: str = None):
+	if not os.path.isdir(toolkit_path):
+		raise ValueError(toolkit_path, "Must be a path.")
+	if subdirectory:
+		if not os.path.isdir(subdirectory):
+			raise ValueError(subdirectory, "Must be a path.")
+	"""Precompute all valid script paths relative to toolkit directory"""
+	paths = []
+	for path in glob.glob(os.path.join(subdirectory, "**", "*.py"), recursive=True):
+		rel_path = os.path.relpath(path, toolkit_path)
+		basename = os.path.basename(rel_path)
+		if basename.startswith("__") or basename in EXCLUDED_FILES:
+			continue
+		paths.append(rel_path)
+	return paths
+
 class ToolkitCompleter:
 	def __init__(self, toolkit_path):
 		self.toolkit_path = toolkit_path
@@ -25,15 +41,10 @@ class ToolkitCompleter:
 		self.files_completer = FilesCompleter()
 
 	def _get_allowed_paths(self):
-		"""Precompute all valid script paths relative to toolkit directory"""
-		paths = []
-		for path in glob.glob(os.path.join(self.scripts_dir, "**", "*.py"), recursive=True):
-			rel_path = os.path.relpath(path, self.toolkit_path)
-			basename = os.path.basename(rel_path)
-			if basename.startswith("__") or basename in EXCLUDED_FILES:
-				continue
-			paths.append(rel_path)
-		return paths
+		return get_allowed_paths(
+			toolkit_path=self.toolkit_path,
+			subdirectory=self.scripts_dir
+		)
 
 	def _get_compline(self):
 		return os.environ.get("COMP_LINE", "")
