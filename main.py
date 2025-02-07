@@ -12,7 +12,7 @@ argcomplete_spec = importlib.util.find_spec("argcomplete")
 use_argcomplete = argcomplete_spec is not None and is_completion_context()
 if use_argcomplete:
 	from argcomplete import autocomplete
-	from core.autocomplete import ToolkitCompleter
+	from core.autocomplete import PathCompleter
 
 TOOLKIT_PATH=os.path.dirname(__file__)
 main_parser = ArgumentParser(
@@ -21,11 +21,11 @@ main_parser = ArgumentParser(
 	add_help=False
 )
 
-if use_argcomplete:
+if use_argcomplete and len(sys.argv) <= 2:
 	main_parser.add_argument(
 		'filename',
 		help="Script name or path to execute."
-	).completer = ToolkitCompleter(TOOLKIT_PATH)
+	).completer = PathCompleter(toolkit_path=TOOLKIT_PATH)
 	# Enable argcomplete
 	autocomplete(main_parser)
 else:
