@@ -5,6 +5,7 @@ import sys
 import os
 import importlib.util
 from core.utils.path import path_as_module
+from core.parser import make_parser
 from core.utils.shell import is_completion_context
 
 # Import and use argcomplete if available
@@ -15,6 +16,10 @@ if use_argcomplete:
 	from core.autocomplete import PathCompleter
 
 TOOLKIT_PATH=os.path.dirname(__file__)
+PARSER_ARGS = {
+	"use_argcomplete": use_argcomplete,
+	"toolkit_path": TOOLKIT_PATH
+}
 python_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
 if python_interactive:
 	print("Interactive mode enabled.")
@@ -40,13 +45,9 @@ else:
 def autocomplete_parser():
 	if not use_argcomplete:
 		return
-	main_parser = ArgumentParser(add_help=False)
-	main_parser.add_argument(
-		'filename',
-		help="Script name or path to execute."
-	).completer = PathCompleter(toolkit_path=TOOLKIT_PATH)
+	parser = make_parser(add_help=False, **PARSER_ARGS)
 	# Enable argcomplete
-	return autocomplete(main_parser)
+	return autocomplete(parser)
 
 if len(filename) == 0:
 	autocomplete_parser()
@@ -65,10 +66,7 @@ except AttributeError:
 script_parser = getattr(module, "argparser", None)
 if script_parser:
 	# Initialize sub-script's parser (inheriting main_parser)
-	sub_parser: ArgumentParser = script_parser(
-		use_argcomplete=use_argcomplete,
-		toolkit_path=TOOLKIT_PATH
-	)
+	sub_parser: ArgumentParser = script_parser(**PARSER_ARGS)
 	if use_argcomplete:
 		autocomplete(sub_parser)
 	# Parse remaining arguments
