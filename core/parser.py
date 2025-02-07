@@ -50,5 +50,22 @@ class ColoredArgParser(ArgumentParser):
 		self.exit(2, gettext('%(prog)s: Error: %(message)s\n') % args)
 
 def make_parser(**kwargs) -> ArgumentParser:
+	if "use_argcomplete" in kwargs:
+		_arc = kwargs.pop("use_argcomplete")
+	if not "toolkit_path" in kwargs:
+		raise Exception("Toolkit path missing in make_parser kwargs.")
+	else:
+		_toolkit_path = kwargs.pop("toolkit_path")
 	parser = ColoredArgParser(**kwargs)
+	if _arc:
+		from core.autocomplete import PathCompleter
+		parser.add_argument(
+			'filename',
+			help="Script name or path to execute."
+		).completer = PathCompleter(toolkit_path=_toolkit_path)
+	else:
+		parser.add_argument(
+			'filename',
+			help="Script name or path to execute."
+		)
 	return parser

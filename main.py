@@ -15,41 +15,48 @@ if use_argcomplete:
 	from core.autocomplete import PathCompleter
 
 TOOLKIT_PATH=os.path.dirname(__file__)
-main_parser = ArgumentParser(
-	prog='Python Proxmox Toolkit Parser',
-	description='Use this program to execute sub-scripts from the toolkit',
-	add_help=False
-)
+python_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
+if python_interactive:
+	print("Interactive mode enabled.")
 
-if use_argcomplete and len(sys.argv) <= 2:
+if len(sys.argv) <= 1 and not use_argcomplete:
+	print("Please enter a valid script path.")
+	sys.exit(1)
+
+if use_argcomplete:
+	COMP_LINE = os.environ.get("COMP_LINE").split()
+	if len(COMP_LINE) >= 2:
+		filename = COMP_LINE[1]
+	else:
+		filename = ""
+else:
+	filename = sys.argv[1]
+
+if filename.endswith(".py") or "/" in filename:
+	parsed_filename = path_as_module(filename)
+else:
+	parsed_filename = filename
+
+def autocomplete_parser():
+	if not use_argcomplete:
+		return
+	main_parser = ArgumentParser(add_help=False)
 	main_parser.add_argument(
 		'filename',
 		help="Script name or path to execute."
 	).completer = PathCompleter(toolkit_path=TOOLKIT_PATH)
 	# Enable argcomplete
-	autocomplete(main_parser)
-else:
-	main_parser.add_argument(
-		'filename',
-		help="Script name or path to execute."
-	)
+	return autocomplete(main_parser)
 
-args, unknown_args = main_parser.parse_known_args()
-
-is_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
-if is_interactive:
-	print("Interactive mode enabled.")
-
-if args.filename.endswith(".py") or "/" in args.filename:
-	parsed_filename = path_as_module(args.filename)
-else:
-	parsed_filename = args.filename
+if len(filename) == 0:
+	autocomplete_parser()
 
 try:
 	# Import sub-script module
 	module = __import__(parsed_filename, fromlist=["main", "argparser"])
 	script_func = getattr(module, "main")
 except ImportError:
+	autocomplete_parser()
 	sys.exit(f"Error: Sub-script '{parsed_filename}' not found.")
 except AttributeError:
 	sys.exit(f"Error: Sub-script '{parsed_filename}' has no 'main' function.")
@@ -58,14 +65,19 @@ except AttributeError:
 script_parser = getattr(module, "argparser", None)
 if script_parser:
 	# Initialize sub-script's parser (inheriting main_parser)
-	sub_parser: ArgumentParser = script_parser()
+	sub_parser: ArgumentParser = script_parser(
+		use_argcomplete=use_argcomplete,
+		toolkit_path=TOOLKIT_PATH
+	)
+	if use_argcomplete:
+		autocomplete(sub_parser)
 	# Parse remaining arguments
-	sub_args = sub_parser.parse_args(unknown_args)
+	sub_args = sub_parser.parse_args()
 	# Execute Script
 	script_func(sub_args, toolkit_path=TOOLKIT_PATH)
 else:
 	# Pass no arguments if no parser exists
 	script_func(toolkit_path=TOOLKIT_PATH)
 
-if not is_interactive:
+if not python_interactive:
 	sys.exit(0)
