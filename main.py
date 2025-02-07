@@ -1,15 +1,33 @@
 #!/usr/bin/python3
+# PYTHON_ARGCOMPLETE_OK
 from argparse import ArgumentParser
 import sys
 import os
+import importlib.util
+argcomplete_spec = importlib.util.find_spec("argcomplete")
+use_argcomplete = argcomplete_spec is not None
 
-toolkit_path=os.path.dirname(__file__)
+if use_argcomplete:
+	from argcomplete import autocomplete
+	from core.autocomplete import ToolkitCompleter
+	from core.utils.path import path_as_module
+
+TOOLKIT_PATH=os.path.dirname(__file__)
+
 main_parser = ArgumentParser(
 	prog='Python Proxmox Toolkit Parser',
 	description='Use this program to execute sub-scripts from the toolkit',
 	add_help=False
 )
-main_parser.add_argument('filename')
+main_parser.add_argument(
+	'filename',
+	help="Script name or path to execute."
+).completer = ToolkitCompleter(TOOLKIT_PATH)
+
+if use_argcomplete:
+	# Enable argcomplete
+	autocomplete(main_parser)
+
 args, unknown_args = main_parser.parse_known_args()
 
 is_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
@@ -17,7 +35,7 @@ if is_interactive:
 	print("Interactive mode enabled.")
 
 if args.filename.endswith(".py"):
-	parsed_filename = os.path.splitext(args.filename)[0].replace("/", ".")
+	parsed_filename = path_as_module(args.filename)
 else:
 	parsed_filename = args.filename
 
@@ -33,14 +51,15 @@ except AttributeError:
 # Check if sub-script provides an argparser
 script_parser = getattr(module, "argparser", None)
 if script_parser:
-	# Initialize sub-script's parser (without inheriting main_parser)
+	# Initialize sub-script's parser (inheriting main_parser)
 	sub_parser = script_parser()
 	# Parse remaining arguments
 	sub_args = sub_parser.parse_args(unknown_args)
-	script_func(sub_args, toolkit_path=toolkit_path)
+	# Execute Script
+	script_func(sub_args, toolkit_path=TOOLKIT_PATH)
 else:
 	# Pass no arguments if no parser exists
-	script_func(toolkit_path=toolkit_path)
+	script_func(toolkit_path=TOOLKIT_PATH)
 
 if not is_interactive:
 	sys.exit(0)

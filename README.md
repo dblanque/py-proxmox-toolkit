@@ -9,6 +9,9 @@ The standard APT Python3 package will suffice.
 apt update -y
 apt install git python3 -y
 
+# If auto-complete is desired
+apt install python3-argcomplete
+
 # Choose a preferred directory to clone the repo
 cd /opt/
 
@@ -17,6 +20,9 @@ git clone https://github.com/dblanque/py-proxmox-toolkit
 
 # Change Directory
 cd /opt/py-proxmox-toolkit
+
+# If auto-complete is desired
+sudo bash enable_autocomplete.sh
 
 # Using pve_repositories.py as an example.
 python3 main.py scripts/setup/microcode.py
