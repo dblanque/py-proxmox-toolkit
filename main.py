@@ -13,7 +13,6 @@ argcomplete_spec = importlib.util.find_spec("argcomplete")
 use_argcomplete = argcomplete_spec is not None and is_completion_context()
 if use_argcomplete:
 	from argcomplete import autocomplete
-	from core.autocomplete import PathCompleter
 
 TOOLKIT_PATH=os.path.dirname(__file__)
 PARSER_ARGS = {
@@ -42,22 +41,21 @@ if filename.endswith(".py") or "/" in filename:
 else:
 	parsed_filename = filename
 
-def autocomplete_parser():
-	if not use_argcomplete:
-		return
+def _autocomplete_parser():
 	parser = make_parser(add_help=False, **PARSER_ARGS)
 	# Enable argcomplete
 	return autocomplete(parser)
 
-if len(filename) == 0:
-	autocomplete_parser()
+if len(filename) == 0 and use_argcomplete:
+	_autocomplete_parser()
 
 try:
 	# Import sub-script module
 	module = __import__(parsed_filename, fromlist=["main", "argparser"])
 	script_func = getattr(module, "main")
 except ImportError:
-	autocomplete_parser()
+	if use_argcomplete:
+		_autocomplete_parser()
 	sys.exit(f"Error: Sub-script '{parsed_filename}' not found.")
 except AttributeError:
 	sys.exit(f"Error: Sub-script '{parsed_filename}' has no 'main' function.")
