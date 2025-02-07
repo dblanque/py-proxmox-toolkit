@@ -6,7 +6,7 @@ from .utils.path import get_allowed_paths
 class PathCompleter(object):
 	def __init__(self, toolkit_path, scripts_subdir="scripts", **kwargs):
 		self.choices = get_allowed_paths(
-			toolkit_path=toolkit_path,
+			project_root=toolkit_path,
 			subdirectory=scripts_subdir
 		)
 	def __call__(self, **kwargs):
