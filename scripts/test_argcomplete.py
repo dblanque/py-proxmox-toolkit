@@ -3,8 +3,6 @@ import os
 from core.parser import ArgumentParser, make_parser
 from argcomplete.completers import SuppressCompleter
 
-TOOLKIT_PATH=os.path.dirname(__file__).rstrip(".")
-
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="Auto-complete Testing Script",
