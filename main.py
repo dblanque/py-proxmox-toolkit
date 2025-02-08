@@ -13,7 +13,9 @@ use_argcomplete = argcomplete_exists() and is_completion_context()
 if use_argcomplete:
 	from argcomplete import autocomplete
 
-TOOLKIT_PATH=os.path.dirname(__file__)
+TOOLKIT_PATH = os.path.dirname(__file__)
+if TOOLKIT_PATH.endswith("/."):
+	TOOLKIT_PATH = TOOLKIT_PATH[0:-2]
 PARSER_ARGS = {
 	"use_argcomplete": use_argcomplete,
 	"toolkit_path": TOOLKIT_PATH
