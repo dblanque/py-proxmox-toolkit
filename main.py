@@ -59,6 +59,8 @@ except ImportError:
 		_autocomplete_parser()
 	sys.exit(f"Error: Sub-script '{parsed_filename}' not found.")
 except AttributeError:
+	if use_argcomplete:
+		_autocomplete_parser()
 	sys.exit(f"Error: Sub-script '{parsed_filename}' has no 'main' function.")
 
 # Check if sub-script provides an argparser
