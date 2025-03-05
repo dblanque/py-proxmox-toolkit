@@ -13,24 +13,30 @@ if [[ ! "$workpath" ]]; then
 	cd "$workpath"
 fi
 
-if	[ ! -d "$BASH_COMPLETION_DIR" ] ||
-	[ ! -f "$ARGCOMPLETE_FILE" ] ||
-	[[ $1 == "-f" ]]; then
-	activate-global-python-argcomplete
+apt update -y
+apt install python3-argcomplete bash-completion
+if [ $? -ne 0 ]; then
+	echo "Could not install required dependencies."
+	exit 1
 fi
 
-if [ ! -f "$BASH_COMPLETION_FILE" ] || [[ $1 == "-f" ]]; then
-	echo "Adding $BASH_COMPLETION_FILE file."
-	echo \
-"for file in $BASH_COMPLETION_DIR/* ; do
-	source \"\$file\"
-done" > "$BASH_COMPLETION_FILE"
-fi
-
+activate-global-python-argcomplete
 if [ $? -ne 0 ]; then
 	echo "Could not activate global argcomplete, is python3-argcomplete installed?"
 	exit 2
 fi
+
+echo "You may also add this to your .bashrc if it doesn't work...
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi"
 
 echo "If it doesn't work, please make sure your $BASH_COMPLETION_DIR directory is being sourced!"
 echo "To disable remove $ARGCOMPLETE_FILE"
