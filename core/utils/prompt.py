@@ -20,6 +20,10 @@ def yes_no_input(
 		no_msg: str = None,
 		show_choices = True
 	):
+	if input_default is True:
+		input_default = input_choices["yes"][0]
+	if input_default is False:
+		input_default = input_choices["no"][0]
 	if show_choices:
 		choices_str = ','.join(input_choices["yes"]) + "|" + ','.join(input_choices["no"])
 		choices_str = f"({choices_str})"
