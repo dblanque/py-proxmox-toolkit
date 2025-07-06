@@ -1,8 +1,10 @@
 import os
 from core.format.colors import bcolors, print_c
 
+
 def is_completion_context():
-    return "COMP_LINE" in os.environ and "COMP_POINT" in os.environ
+	return "COMP_LINE" in os.environ and "COMP_POINT" in os.environ
+
 
 def is_user_root(exit_on_fail=False):
 	_is_root = os.geteuid() == 0

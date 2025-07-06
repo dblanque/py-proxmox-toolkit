@@ -1,4 +1,3 @@
-
 TEMPLATE_ALIASES = """
 # some more ls aliases
 alias ll='ls -alF'

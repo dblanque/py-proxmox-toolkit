@@ -16,11 +16,8 @@ if use_argcomplete:
 TOOLKIT_PATH = os.path.dirname(__file__)
 if TOOLKIT_PATH.endswith("/."):
 	TOOLKIT_PATH = TOOLKIT_PATH[0:-2]
-PARSER_ARGS = {
-	"use_argcomplete": use_argcomplete,
-	"toolkit_path": TOOLKIT_PATH
-}
-python_interactive = bool(getattr(sys, 'ps1', sys.flags.interactive))
+PARSER_ARGS = {"use_argcomplete": use_argcomplete, "toolkit_path": TOOLKIT_PATH}
+python_interactive = bool(getattr(sys, "ps1", sys.flags.interactive))
 if python_interactive:
 	print("Interactive mode enabled.")
 
@@ -42,10 +39,12 @@ if filename.endswith(".py") or "/" in filename:
 else:
 	parsed_filename = filename
 
+
 def _autocomplete_parser():
 	parser = make_parser(add_help=False, **PARSER_ARGS)
 	# Enable argcomplete
 	return autocomplete(parser)
+
 
 if len(filename) == 0 and use_argcomplete:
 	_autocomplete_parser()

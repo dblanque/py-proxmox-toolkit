@@ -1,4 +1,3 @@
-
 def validate_port(value: int, raise_exception=False):
 	try:
 		port = int(value)

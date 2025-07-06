@@ -8,28 +8,33 @@ from dataclasses import dataclass
 
 logger = logging.getLogger()
 
-BASH_PIPE="|"
+BASH_PIPE = "|"
 PATH_ASSOC = {
-	"lvm":"vgname",
-	"lvmthin":"vgname",
-	"zfspool":"pool",
-	"dir":"path",
-	"cephfs":"path",
-	"rbd":"pool",
+	"lvm": "vgname",
+	"lvmthin": "vgname",
+	"zfspool": "pool",
+	"dir": "path",
+	"cephfs": "path",
+	"rbd": "pool",
 }
+
 
 class DiskReassignException(Exception):
 	pass
 
+
 class DiskDirectoryException(Exception):
 	pass
+
 
 class UnsupportedStorageType(Exception):
 	pass
 
+
 @dataclass
 class PVEStorage:
 	"""PVE Storage Class."""
+
 	name: str
 	type: str
 	path: str
@@ -38,13 +43,13 @@ class PVEStorage:
 		return self.name
 
 	def reassign_disk(
-			self,
-			disk_name: str,
-			new_guest_id: int,
-			new_guest_cfg: str=None,
-			remote_args=None,
-			dry_run=False
-		):
+		self,
+		disk_name: str,
+		new_guest_id: int,
+		new_guest_cfg: str = None,
+		remote_args=None,
+		dry_run=False,
+	):
 		cmd_args = None
 		lv_tags = False
 		guest_id = disk_name.split("-")[1]
@@ -60,12 +65,7 @@ class PVEStorage:
 		new_disk_name = disk_name.replace(f"-{guest_id}-", f"-{new_guest_id}-")
 		if self.type in ["lvm", "lvmthin"]:
 			# lvrename \"$storpath\" \"$diskname\" \"$diskname_new\"
-			cmd_args = [
-				"/usr/sbin/lvrename",
-				self.path,
-				disk_name,
-				new_disk_name
-			]
+			cmd_args = ["/usr/sbin/lvrename", self.path, disk_name, new_disk_name]
 			if hasattr(self, "tagged_only"):
 				lv_tags = True if self.tagged_only else False
 		elif self.type == "zfspool":
@@ -74,7 +74,7 @@ class PVEStorage:
 				"/usr/sbin/zfs",
 				"rename",
 				f"{self.path}/{disk_name}",
-				f"{self.path}/{new_disk_name}"
+				f"{self.path}/{new_disk_name}",
 			]
 		elif self.type in ["dir", "cephfs"]:
 			# mv "$storpath/images/${!1}/$diskname" "$storpath/images/${!2}/"
@@ -91,7 +91,8 @@ class PVEStorage:
 				logger.info("mkdir %s", new_disk_path)
 			else:
 				mkdir_args = ["/usr/bin/mkdir", "-p", new_disk_path]
-				if remote_args: mkdir_args = remote_args + mkdir_args
+				if remote_args:
+					mkdir_args = remote_args + mkdir_args
 				try:
 					subprocess.call(mkdir_args)
 				except:
@@ -120,8 +121,10 @@ class PVEStorage:
 				raise DiskReassignException()
 
 		# ! Rename disk in Guest Configuration
-  		# Does not require SSH
-		guest_cfg_path = new_guest_cfg if new_guest_cfg else get_guest_cfg_path(guest_id=guest_id)
+		# Does not require SSH
+		guest_cfg_path = (
+			new_guest_cfg if new_guest_cfg else get_guest_cfg_path(guest_id=guest_id)
+		)
 		sed_regex = None
 		# LXC ID Prefix on Diskname
 		if id_prefix:
@@ -129,15 +132,14 @@ class PVEStorage:
 		# VM has no Prefix
 		else:
 			sed_regex = rf"s@:{disk_name}@:{new_disk_name}@g"
-		sed_cmd_args = [
-			"/usr/bin/sed",
-			"-i",
-			sed_regex,
-			guest_cfg_path
-		]
+		sed_cmd_args = ["/usr/bin/sed", "-i", sed_regex, guest_cfg_path]
 		sed_cmd_args = sed_cmd_args
-		logger.debug("Changing disk in Guest Configuration (%s) from %s to %s.",
-			   		guest_cfg_path, disk_name, new_disk_name)
+		logger.debug(
+			"Changing disk in Guest Configuration (%s) from %s to %s.",
+			guest_cfg_path,
+			disk_name,
+			new_disk_name,
+		)
 		if dry_run:
 			logger.info(" ".join(sed_cmd_args))
 		else:
@@ -145,7 +147,11 @@ class PVEStorage:
 			with subprocess.Popen(sed_cmd_args, stdout=subprocess.PIPE) as proc:
 				proc_o, proc_e = proc.communicate()
 				if proc.returncode != 0:
-					raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+					raise Exception(
+						f"Bad command return code ({proc.returncode}).",
+						proc_o.decode(),
+						proc_e.decode(),
+					)
 
 		# ! Change LV Tags
 		if lv_tags:
@@ -156,7 +162,7 @@ class PVEStorage:
 				disk_name,
 				"--add-tag",
 				f"{self.name}-{new_disk_name.split(suffix)[0]}",
-				f"{self.name}/{new_disk_name}"
+				f"{self.name}/{new_disk_name}",
 			]
 			if remote_args:
 				lvtag_cmd_args = remote_args + lvtag_cmd_args
@@ -166,33 +172,53 @@ class PVEStorage:
 				with subprocess.Popen(lvtag_cmd_args, stdout=subprocess.PIPE) as proc:
 					proc_o, proc_e = proc.communicate()
 					if proc.returncode != 0:
-						logger.error("Could not change LV Tags properly, beware of checking them after the script finishes.")
+						logger.error(
+							"Could not change LV Tags properly, beware of checking them after the script finishes."
+						)
 		if old_disk_path:
 			logger.debug("Attempting to remove %s", old_disk_path)
 			try:
 				rmdir_args = ["/usr/bin/rmdir", old_disk_path]
-				if remote_args: rmdir_args = remote_args + rmdir_args
+				if remote_args:
+					rmdir_args = remote_args + rmdir_args
 				with subprocess.Popen(rmdir_args, stdout=subprocess.PIPE) as proc:
 					proc_o, proc_e = proc.communicate()
 					if proc.returncode != 0:
-						raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+						raise Exception(
+							f"Bad command return code ({proc.returncode}).",
+							proc_o.decode(),
+							proc_e.decode(),
+						)
 			except:
-				logger.error("Could not delete prior Guest ID Images Path (%s)", old_disk_path)
+				logger.error(
+					"Could not delete prior Guest ID Images Path (%s)", old_disk_path
+				)
 		return
+
 
 def get_storage_cfg(storage_name: str) -> PVEStorage:
 	sed_regex = rf"/.*: {storage_name}$/,/^$/p"
 	cmd_args = [
-		"/usr/bin/sed", "-n", sed_regex, PVE_CFG_STORAGE,
+		"/usr/bin/sed",
+		"-n",
+		sed_regex,
+		PVE_CFG_STORAGE,
 	]
-	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+	with subprocess.Popen(
+		cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+	) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+			raise Exception(
+				f"Bad command return code ({proc.returncode}).",
+				proc_o.decode(),
+				proc_e.decode(),
+			)
 		storage = {}
 		for line in proc_o.decode().split("\n"):
 			line = line.rstrip()
-			if len(line) < 1: continue
+			if len(line) < 1:
+				continue
 			# Path Definition
 			if ": " in line:
 				line = line.split(": ")
@@ -208,18 +234,21 @@ def get_storage_cfg(storage_name: str) -> PVEStorage:
 			raise Exception(f"Storage type unsupported ({storage['type']})")
 		path_def = PATH_ASSOC[storage["type"]]
 		if not path_def in storage:
-			raise Exception("Bad storage parameters, path definition not found.", storage)
+			raise Exception(
+				"Bad storage parameters, path definition not found.", storage
+			)
 		r = PVEStorage(
-			name=storage["name"],
-			type=storage["type"],
-			path=storage[path_def]
+			name=storage["name"], type=storage["type"], path=storage[path_def]
 		)
 		try:
 			for k, v in storage.items():
-				if k in ["name", "type", path_def]: continue
+				if k in ["name", "type", path_def]:
+					continue
 				setattr(r, k, v)
 		except:
-			try: print(storage.__dict__())
-			except: pass
+			try:
+				print(storage.__dict__())
+			except:
+				pass
 			raise
 		return r

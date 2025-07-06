@@ -1,0 +1,27 @@
+[project]
+name = "py-proxmox-toolkit"
+version = "0.1.0"
+description = "Python Toolkit for Proxmox and Debian based Linux Distributions."
+authors = [
+    {name = "Dylan Blanque",email = "dylan.blanque@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.12.2"
+pytest = "^8.4.1"
+pytest-cov = "^6.2.1"
+pytest-mock = "^3.14.1"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.format]
+indent-style = "tab"

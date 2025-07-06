@@ -1,13 +1,15 @@
 #!/usr/bin/python3
 if __name__ == "__main__":
-	raise Exception("This python script cannot be executed individually, please use main.py")
+	raise Exception(
+		"This python script cannot be executed individually, please use main.py"
+	)
 
 import os
 from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
 from core.debian.os_release import get_data
 
-SUPPORTED_RELEASES=(
+SUPPORTED_RELEASES = (
 	# DEBIAN
 	"stretch",
 	"buster",
@@ -41,13 +43,15 @@ res() {
 [ $(tty) = /dev/ttyS0 ] && res
 """.lstrip()
 
+
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="XTermJS Serial Terminal Resizing fix script.",
 		description="This program is used to implement the XTermJS Resize Fix for Proxmox VE Terminal Integration.",
-		**kwargs
+		**kwargs,
 	)
 	return parser
+
 
 def main(argv_a, **kwargs):
 	OS_RELEASE_DATA = get_data()
@@ -57,7 +61,9 @@ def main(argv_a, **kwargs):
 	PROFILE_PATH = "/etc/profile.d"
 	PROFILE_FIX = os.path.join(PROFILE_PATH, "xterm_resize.sh")
 
-	print_c(bcolors.L_YELLOW, f"Creating {PROFILE_PATH} directory if it does not exist.")
+	print_c(
+		bcolors.L_YELLOW, f"Creating {PROFILE_PATH} directory if it does not exist."
+	)
 	os.makedirs(PROFILE_PATH, exist_ok=True)
 
 	# Write XTermJS Data

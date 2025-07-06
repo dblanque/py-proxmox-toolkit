@@ -8,27 +8,29 @@ from core.format.colors import bcolors
 from argparse import ArgumentParser
 from gettext import gettext
 
-class ColoredArgParser(ArgumentParser):
 
+class ColoredArgParser(ArgumentParser):
 	# color_dict is a class attribute, here we avoid compatibility
 	# issues by attempting to override the __init__ method
 	# RED : Error, GREEN : Okay, YELLOW : Warning, Blue: Help/Info
 
-	def print_usage(self, file = None):
+	def print_usage(self, file=None):
 		if file is None:
 			file = sys.stdout
-		self._print_message(self.format_usage()[0].upper() +
-							self.format_usage()[1:],
-							file, bcolors.YELLOW)
+		self._print_message(
+			self.format_usage()[0].upper() + self.format_usage()[1:],
+			file,
+			bcolors.YELLOW,
+		)
 
-	def print_help(self, file = None):
+	def print_help(self, file=None):
 		if file is None:
 			file = sys.stdout
-		self._print_message(self.format_help()[0].upper() +
-							self.format_help()[1:],
-							file, bcolors.BLUE)
+		self._print_message(
+			self.format_help()[0].upper() + self.format_help()[1:], file, bcolors.BLUE
+		)
 
-	def _print_message(self, message, file = None, color = None):
+	def _print_message(self, message, file=None, color=None):
 		if message:
 			if file is None:
 				file = sys.stderr
@@ -37,17 +39,18 @@ class ColoredArgParser(ArgumentParser):
 				file.write(message)
 			else:
 				# \x1b[ is the ANSI Control Sequence Introducer (CSI)
-				file.write('\x1b[' + color.value + message.strip() + '\x1b[0m\n')
+				file.write("\x1b[" + color.value + message.strip() + "\x1b[0m\n")
 
-	def exit(self, status = 0, message = None):
+	def exit(self, status=0, message=None):
 		if message:
 			self._print_message(message, sys.stderr, bcolors.RED)
 		sys.exit(status)
 
 	def error(self, message):
 		self.print_usage(sys.stderr)
-		args = {'prog' : self.prog, 'message': message}
-		self.exit(2, gettext('%(prog)s: Error: %(message)s\n') % args)
+		args = {"prog": self.prog, "message": message}
+		self.exit(2, gettext("%(prog)s: Error: %(message)s\n") % args)
+
 
 def make_parser(**kwargs) -> ArgumentParser:
 	if "use_argcomplete" in kwargs:
@@ -59,13 +62,10 @@ def make_parser(**kwargs) -> ArgumentParser:
 	parser = ColoredArgParser(**kwargs)
 	if _arc:
 		from core.autocomplete import PathCompleter, SingleLevelPathCompleter
+
 		parser.add_argument(
-			'filename',
-			help="Script name or path to execute."
+			"filename", help="Script name or path to execute."
 		).completer = PathCompleter(toolkit_path=_toolkit_path)
 	else:
-		parser.add_argument(
-			'filename',
-			help="Script name or path to execute."
-		)
+		parser.add_argument("filename", help="Script name or path to execute.")
 	return parser

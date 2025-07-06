@@ -20,10 +20,13 @@
 import os
 import sys
 import signal
+
 script_path = os.path.realpath(__file__)
 script_dir = os.path.dirname(script_path)
 if __name__ == "__main__":
-	raise Exception("This python script cannot be executed individually, please use main.py")
+	raise Exception(
+		"This python script cannot be executed individually, please use main.py"
+	)
 
 from core.signal_handlers.sigint import graceful_exit
 
@@ -42,7 +45,7 @@ from core.proxmox.guests import (
 	get_guest_replication_statuses,
 	parse_guest_disk,
 	is_valid_guest_disk_type,
-	get_guest_replication_jobs
+	get_guest_replication_jobs,
 )
 from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
 from core.proxmox.storage import get_storage_cfg, DiskReassignException
@@ -54,34 +57,40 @@ from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 from time import sleep
 
+
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="Batch PVE Guest Network Modifier",
 		description="This program is used for scripted network modifications that might imply a network cutout or require an automatic rollback.",
-		**kwargs
+		**kwargs,
 	)
-	parser.add_argument('-l', '--remote-user', default="root")
-	parser.add_argument('-i', '--origin-id', default=None, type=int)
-	parser.add_argument('-t', '--target-id', default=None, type=int)
-	parser.add_argument('-y', '--yes', action='store_true', default=False)
-	parser.add_argument('-d', '--dry-run', action='store_true', default=False)
-	parser.add_argument('--debug', action='store_true', default=False)
-	parser.add_argument('-v', '--verbose', action='store_true', default=False)
+	parser.add_argument("-l", "--remote-user", default="root")
+	parser.add_argument("-i", "--origin-id", default=None, type=int)
+	parser.add_argument("-t", "--target-id", default=None, type=int)
+	parser.add_argument("-y", "--yes", action="store_true", default=False)
+	parser.add_argument("-d", "--dry-run", action="store_true", default=False)
+	parser.add_argument("--debug", action="store_true", default=False)
+	parser.add_argument("-v", "--verbose", action="store_true", default=False)
 	return parser
 
+
 ## ERRORS
-ERR_GUEST_EXISTS=1
-ERR_GUEST_NOT_EXISTS=2
-ERR_GUEST_NOT_STOPPED=3
-ERR_GUEST_REPLICATION_IN_PROGRESS=4
+ERR_GUEST_EXISTS = 1
+ERR_GUEST_NOT_EXISTS = 2
+ERR_GUEST_NOT_STOPPED = 3
+ERR_GUEST_REPLICATION_IN_PROGRESS = 4
 ERR_REASSIGN_MSG = "Could not re-assign disk %s, please check manually"
 NORMAL_PROMPT_EXIT_MSG = "Exiting script."
 
+
 def validate_vmid(vmid) -> bool:
-	try: int(vmid)
-	except: return False
+	try:
+		int(vmid)
+	except:
+		return False
 	vmid = int(vmid)
 	return vmid >= 100 and vmid < 999999999
+
 
 def vmid_prompt(target=False):
 	hint = "(INT. 1 - N, 9 digits max.)"
@@ -94,6 +103,7 @@ def vmid_prompt(target=False):
 			return int(vmid)
 		else:
 			sys.stdout.write(f"Please enter a valid VM/CT ID {hint}:")
+
 
 def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
 	logger = logging.getLogger()
@@ -110,7 +120,9 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 				job_description = ""
 			job_vmids: list = job_vmids_data.split(",")
 			if not old_id in job_vmids:
-				logger.debug("VM not in Backup Job %s (%s), skipping.", job_id, job_description)
+				logger.debug(
+					"VM not in Backup Job %s (%s), skipping.", job_id, job_description
+				)
 				continue
 
 			job_vmids.remove(old_id)
@@ -119,18 +131,19 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 
 			if not dry_run:
 				if set_backup_attrs(
-					job_id = job_id,
-					data = {"vmid": job_vmids_data},
-					raise_exception = False
+					job_id=job_id, data={"vmid": job_vmids_data}, raise_exception=False
 				):
 					backup_change_errors.append(job_id)
 				else:
 					logger.info("Modified backup job %s (%s).", job_id, job_description)
 			else:
-				logger.info("Fake modified backup job %s (%s).", job_id, job_description)
+				logger.info(
+					"Fake modified backup job %s (%s).", job_id, job_description
+				)
 	if len(backup_change_errors) > 0:
 		logger.error("Unable to re-target some backup jobs, please fix them manually.")
 	return
+
 
 def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -150,15 +163,16 @@ def main(argv_a, **kwargs):
 	# Logging
 	logger = logging.getLogger()
 	log_level = "INFO"
-	if argv_a.debug: log_level = "DEBUG"
-	debug_verbose = (argv_a.debug and argv_a.verbose)
+	if argv_a.debug:
+		log_level = "DEBUG"
+	debug_verbose = argv_a.debug and argv_a.verbose
 	log_file = f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
 	logger = set_logger(
 		logger,
 		log_console=(not running_in_background),
 		log_file=log_file,
 		level=log_level,
-		format="%(levelname)s %(message)s"
+		format="%(levelname)s %(message)s",
 	)
 
 	id_origin = argv_a.origin_id
@@ -178,19 +192,22 @@ def main(argv_a, **kwargs):
 
 	if not argv_a.yes:
 		logger.info("This might break Replication and Backup Configurations.")
-		logger.info("Please ensure such tasks are reconfigured after script completion.")
+		logger.info(
+			"Please ensure such tasks are reconfigured after script completion."
+		)
 		confirm = yes_no_input(
 			f"Are you sure you wish to change Guest {id_origin}'s ID to {id_target}?",
-			input_default="N"
+			input_default="N",
 		)
 		if not confirm:
 			print_c(bcolors.L_BLUE, NORMAL_PROMPT_EXIT_MSG)
 			sys.exit(0)
 
-	if argv_a.dry_run: logger.info("Executing in dry-run mode.")
+	if argv_a.dry_run:
+		logger.info("Executing in dry-run mode.")
 	guest_cfg_details = get_guest_cfg_path(guest_id=id_origin, get_as_dict=True)
 	guest_cfg_host = guest_cfg_details["host"]
-	guest_on_remote_host = (hostname != guest_cfg_host)
+	guest_on_remote_host = hostname != guest_cfg_host
 
 	# Set SSH Args if necessary
 	args_ssh = None
@@ -218,10 +235,9 @@ def main(argv_a, **kwargs):
 		sys.exit(ERR_GUEST_NOT_STOPPED)
 
 	# Generate new config file path
-	old_cfg_path = guest_cfg_details['path']
-	new_cfg_path = guest_cfg_details['path'].replace(
-		f"{id_origin}.conf",
-		f"{id_target}.conf"
+	old_cfg_path = guest_cfg_details["path"]
+	new_cfg_path = guest_cfg_details["path"].replace(
+		f"{id_origin}.conf", f"{id_target}.conf"
 	)
 
 	# Add snapshot vmstate disks to configuration.
@@ -231,16 +247,14 @@ def main(argv_a, **kwargs):
 			remote_args=args_ssh,
 			debug=debug_verbose,
 			snapshot_name=snapshot,
-			current=False
+			current=False,
 		)
 		logger.debug("Snapshot Keys: %s", snapshot_cfg.keys())
 		logger.debug("Snapshot Configuration: %s", snapshot_cfg)
 		for key, value in snapshot_cfg.items():
 			if key == "vmstate":
 				parsed_disk = parse_guest_disk(
-					disk_name=key,
-					disk_values=value,
-					vmstate=True
+					disk_name=key, disk_values=value, vmstate=True
 				)
 				if parsed_disk:
 					logger.debug("Parsed Snapshot VM State: %s", parsed_disk)
@@ -248,8 +262,10 @@ def main(argv_a, **kwargs):
 
 	# Second prompt if snapshots present
 	if not argv_a.yes and guest_snapshots:
-		print(f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "+
-		"irreversibly affected if the process does not finish correctly.")
+		print(
+			f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "
+			+ "irreversibly affected if the process does not finish correctly."
+		)
 		print("If there are any replication jobs they will be deleted and re-added.")
 		if not yes_no_input("Are you SURE you wish to continue?", input_default="N"):
 			print_c(bcolors.L_BLUE, NORMAL_PROMPT_EXIT_MSG)
@@ -276,27 +292,30 @@ def main(argv_a, **kwargs):
 	_timer = 0
 	logger.info(
 		"Waiting for replication jobs to finish deletion (Timeout per job: %s seconds).",
-		_TIMEOUT
+		_TIMEOUT,
 	)
 	replication_statuses = get_guest_replication_statuses(
-		guest_id=id_origin,
-		remote_args=args_ssh
+		guest_id=id_origin, remote_args=args_ssh
 	)
 	if any([v != "OK" for v in replication_statuses.values()]):
-		logger.error("Guest with Origin ID (%s) has a replication job in progress.", id_origin)
+		logger.error(
+			"Guest with Origin ID (%s) has a replication job in progress.", id_origin
+		)
 		sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 	_curr_repl_statuses_len = len(replication_statuses)
 	_prev_repl_statuses_len = len(replication_statuses)
 	while _curr_repl_statuses_len > 0:
 		_prev_repl_statuses_len = _curr_repl_statuses_len
 		replication_statuses = get_guest_replication_statuses(
-			guest_id=id_origin,
-			remote_args=args_ssh
+			guest_id=id_origin, remote_args=args_ssh
 		)
 		_curr_repl_statuses_len = len(replication_statuses)
 		if _timer != 0 and _timer % 10 == 0:
 			logger.info("Waiting for replication jobs...")
-		if _prev_repl_statuses_len != _curr_repl_statuses_len and _curr_repl_statuses_len > 0:
+		if (
+			_prev_repl_statuses_len != _curr_repl_statuses_len
+			and _curr_repl_statuses_len > 0
+		):
 			logger.info("A job finished, awaiting further.")
 			_timer = 0
 
@@ -312,9 +331,7 @@ def main(argv_a, **kwargs):
 	# pvesh get /cluster/backup --output-format json-pretty
 	# pvesh usage /cluster/backup --verbose
 	change_guest_id_on_backup_jobs(
-		old_id=id_origin,
-		new_id=id_target,
-		dry_run=argv_a.dry_run
+		old_id=id_origin, new_id=id_target, dry_run=argv_a.dry_run
 	)
 
 	# Rename Guest Config File
@@ -331,7 +348,8 @@ def main(argv_a, **kwargs):
 	# For each discovered disk, do pre-checks
 	logger.info("The following disks will be renamed: ")
 	for key, value in guest_cfg.items():
-		if not is_valid_guest_disk_type(key, value): continue
+		if not is_valid_guest_disk_type(key, value):
+			continue
 		parsed_disk = parse_guest_disk(disk_name=key, disk_values=value)
 		if parsed_disk:
 			guest_disks.append(parsed_disk)
@@ -347,7 +365,7 @@ def main(argv_a, **kwargs):
 				new_guest_id=id_target,
 				new_guest_cfg=new_cfg_path,
 				remote_args=args_ssh,
-				dry_run=argv_a.dry_run
+				dry_run=argv_a.dry_run,
 			)
 		except DiskReassignException as e:
 			logger.error(ERR_REASSIGN_MSG, d_name)
@@ -366,7 +384,7 @@ def main(argv_a, **kwargs):
 				v = f'"{job[arg]}"'
 			else:
 				v = str(job[arg])
-			new_job_cmd = new_job_cmd + [ f"--{arg}", v ]
+			new_job_cmd = new_job_cmd + [f"--{arg}", v]
 		if guest_on_remote_host:
 			new_job_cmd = args_ssh + new_job_cmd
 		logger.debug(" ".join(new_job_cmd))
@@ -375,8 +393,7 @@ def main(argv_a, **kwargs):
 				subprocess.call(new_job_cmd)
 			except:
 				print_c(
-					bcolors.L_YELLOW, 
-					f"Replication job creation for {job_name} failed."
+					bcolors.L_YELLOW, f"Replication job creation for {job_name} failed."
 				)
 				pass
 

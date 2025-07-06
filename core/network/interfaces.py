@@ -9,7 +9,7 @@ NETWORK_INTERFACES_INET_TYPES = (
 	"dhcp",
 )
 
-PHYSICAL_INTERFACE_PATTERNS=(
+PHYSICAL_INTERFACE_PATTERNS = (
 	r"^eth[0-9].*$",
 	r"^eno[0-9].*$",
 	r"^enp[0-9].*$",
@@ -17,11 +17,9 @@ PHYSICAL_INTERFACE_PATTERNS=(
 	r"^ens[0-9].*$",
 )
 
-VIRTUAL_BRIDGE_PATTERNS=(
-	r"^vmbr[0-9].*$",
-)
+VIRTUAL_BRIDGE_PATTERNS = (r"^vmbr[0-9].*$",)
 
-VIRTUAL_INTERFACE_PATTERNS=(
+VIRTUAL_INTERFACE_PATTERNS = (
 	r"^veth[0-9].*$",
 	r"^fwbr[0-9].*$",
 	r"^fwln[0-9].*$",
@@ -29,21 +27,24 @@ VIRTUAL_INTERFACE_PATTERNS=(
 	r"^tap[0-9a-fA-F].*$",
 )
 
+
 def get_interfaces(
-		interface_patterns: tuple | list=PHYSICAL_INTERFACE_PATTERNS,
-		override_patterns: tuple | list=False,
-		verbose: bool=False,
-		exclude_patterns: tuple | list=None
-	) -> list:
+	interface_patterns: tuple | list = PHYSICAL_INTERFACE_PATTERNS,
+	override_patterns: tuple | list = False,
+	verbose: bool = False,
+	exclude_patterns: tuple | list = None,
+) -> list:
 	"""
 	Fetches physical interface names and returns them as a list.
 	If override_patterns is set to True then only the patterns passed will be matched.
 	"""
 	if not interface_patterns and override_patterns:
-		print("interface_patterns should contain at least one Regex Pattern if override_patterns is used.")
+		print(
+			"interface_patterns should contain at least one Regex Pattern if override_patterns is used."
+		)
 
 	filtered_interfaces = []
-	network_interfaces=os.listdir('/sys/class/net/')
+	network_interfaces = os.listdir("/sys/class/net/")
 	check_patterns = []
 
 	if interface_patterns:
@@ -67,5 +68,7 @@ def get_interfaces(
 				match = True
 
 		if not match and verbose:
-			print_c(bcolors.L_BLUE, f"[DEBUG] - Skipping {iface} (did not match regex).")
+			print_c(
+				bcolors.L_BLUE, f"[DEBUG] - Skipping {iface} (did not match regex)."
+			)
 	return filtered_interfaces
