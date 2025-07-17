@@ -38,13 +38,10 @@ UNIT_COMMANDS = Literal[
 	"list-units",
 ]
 
-UNIT_STATE_COMMANDS = Literal[
-	"is-active",
-	"is-failed",
-	"is-enabled"
-]
+UNIT_STATE_COMMANDS = Literal["is-active", "is-failed", "is-enabled"]
 
-class Unit():
+
+class Unit:
 	def __init__(self, name: str, service_type: UNIT_TYPES, **kwargs):
 		self.name = name
 		self.status: UNIT_STATUSES = "UNKNOWN"

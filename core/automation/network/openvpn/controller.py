@@ -5,29 +5,30 @@ from core.classes.AttrDict import NamedDict
 from core.format.colors import print_c, bcolors
 import subprocess
 
-class VPNController():
+
+class VPNController:
 	def __init__(self, net_command: str, connection_name: str, **kwargs):
 		try:
 			self.command = net_command
 		except:
-			raise AttributeError(self, 'net_command')
+			raise AttributeError(self, "net_command")
 
 		try:
 			self.connection = connection_name
 		except:
-			raise AttributeError(self, 'connection_name')
+			raise AttributeError(self, "connection_name")
 		self.args = NamedDict()
 
 		self.args.main = None
-		if self.command == 'nmcli':
-			self.args.main = 'con'
-			self.args.activate = 'up'
-			self.args.deactivate = 'down'
-			self.args.status = 'show'
-		elif self.command == 'systemctl':
-			self.args.activate = 'start'
-			self.args.deactivate = 'stop'
-			self.args.status = 'status'
+		if self.command == "nmcli":
+			self.args.main = "con"
+			self.args.activate = "up"
+			self.args.deactivate = "down"
+			self.args.status = "show"
+		elif self.command == "systemctl":
+			self.args.activate = "start"
+			self.args.deactivate = "stop"
+			self.args.status = "status"
 
 		for k in kwargs.keys():
 			self.args[k] = kwargs[k]

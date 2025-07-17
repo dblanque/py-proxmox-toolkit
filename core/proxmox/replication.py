@@ -1,5 +1,6 @@
 from typing import TypedDict
 
+
 class ReplicationJobDict(TypedDict):
 	comment: str
 	target: str

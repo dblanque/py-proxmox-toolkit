@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 # TODO - Finish this script
 if __name__ == "__main__":
-	raise Exception("This python script cannot be executed individually, please use main.py")
+	raise Exception(
+		"This python script cannot be executed individually, please use main.py"
+	)
 
 import signal
 import re
@@ -18,27 +20,32 @@ from core.utils.shell import is_user_root
 ERR_CACHER_ALREADY_SET = 1
 ERR_INVALID_CACHER_ADDRESS = 2
 
+
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="Script to setup APT Cacher Proxy IP/Port.",
 		description="This program is used to configure your apt cacher address and port.",
-		**kwargs
+		**kwargs,
 	)
 	parser.add_argument(
-		"-o", "--overwrite",
+		"-o",
+		"--overwrite",
 		help="Overwrites pre-existing apt cacher configurations.",
-		action="store_true"
+		action="store_true",
 	)
 	parser.add_argument(
-		"-c", "--cacher-address",
+		"-c",
+		"--cacher-address",
 		help="Sets APT Cacher <address:port> value.",
 	)
 	parser.add_argument(
-		"-s", "--https-cacher",
+		"-s",
+		"--https-cacher",
 		help="Adds the APT Cacher as an HTTP(S) source as well.",
-		action="store_true"
+		action="store_true",
 	)
 	return parser
+
 
 def is_valid_apt_cacher(value: str):
 	split_value = value.rsplit(":", 1)
@@ -55,15 +62,16 @@ def is_valid_apt_cacher(value: str):
 		return False
 	return True
 
+
 def main(argv_a, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
 	is_user_root(exit_on_fail=True)
 	APT_CONF_DIR = "/etc/apt/apt.conf.d"
 	apt_conf_files = []
-	HTTP_CACHER_REGEX = re.compile(r'^\s*Acquire::http::Proxy \".*\";')
-	HTTPS_CACHER_REGEX = re.compile(r'^\s*Acquire::https::Proxy \".*\";')
-	HTTP_CACHER_TEMPLATE = "Acquire::http::Proxy \"http://{0}\";"
-	HTTPS_CACHER_TEMPLATE = "Acquire::https::Proxy \"https://{0}\";"
+	HTTP_CACHER_REGEX = re.compile(r"^\s*Acquire::http::Proxy \".*\";")
+	HTTPS_CACHER_REGEX = re.compile(r"^\s*Acquire::https::Proxy \".*\";")
+	HTTP_CACHER_TEMPLATE = 'Acquire::http::Proxy "http://{0}";'
+	HTTPS_CACHER_TEMPLATE = 'Acquire::https::Proxy "https://{0}";'
 
 	for conf_file in grep_r(HTTP_CACHER_REGEX, APT_CONF_DIR, return_files=True):
 		apt_conf_files.append(conf_file)
@@ -75,7 +83,9 @@ def main(argv_a, **kwargs):
 
 	if len(apt_conf_files) > 0:
 		if not argv_a.overwrite:
-			print_c(bcolors.L_RED, "APT Cacher Proxy already set in one or more file(s):")
+			print_c(
+				bcolors.L_RED, "APT Cacher Proxy already set in one or more file(s):"
+			)
 		else:
 			print_c(bcolors.L_YELLOW, "Overwriting Proxy in files:")
 
@@ -83,7 +93,10 @@ def main(argv_a, **kwargs):
 			print(f"\t- {conf_file}")
 
 		if not argv_a.overwrite:
-			print_c(bcolors.L_BLUE, "Use -o | --overwrite flag to change in pre-existing file(s).")
+			print_c(
+				bcolors.L_BLUE,
+				"Use -o | --overwrite flag to change in pre-existing file(s).",
+			)
 			sys.exit(ERR_CACHER_ALREADY_SET)
 
 	if argv_a.cacher_address:
@@ -95,7 +108,9 @@ def main(argv_a, **kwargs):
 		apt_cacher = input("Please enter an IP Address and Port for your APT Cacher: ")
 
 	while not is_valid_apt_cacher(apt_cacher):
-		apt_cacher = input("Please enter a VALID APT Cacher <address:port> formatted string: ")
+		apt_cacher = input(
+			"Please enter a VALID APT Cacher <address:port> formatted string: "
+		)
 
 	HTTP_CACHER_LINE = HTTP_CACHER_TEMPLATE.format(apt_cacher) + "\n"
 	HTTPS_CACHER_LINE = HTTPS_CACHER_TEMPLATE.format(apt_cacher) + "\n"

@@ -12,6 +12,4 @@ deb http://ftp.debian.org/debian/ {0} main contrib non-free non-free-firmware
 deb http://security.debian.org/ {0}-security main contrib non-free non-free-firmware
 """
 
-DEB_LISTS = {
-	"bookworm": SRC_DEB_BOOKWORM_SYNTAX
-}
+DEB_LISTS = {"bookworm": SRC_DEB_BOOKWORM_SYNTAX}

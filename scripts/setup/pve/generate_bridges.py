@@ -1,38 +1,75 @@
 #!/usr/bin/python3
 if __name__ == "__main__":
-	raise Exception("This python script cannot be executed individually, please use main.py")
+	raise Exception(
+		"This python script cannot be executed individually, please use main.py"
+	)
 
 import subprocess
 import os
 import re
 from core.format.colors import bcolors, print_c
-from core.network.interfaces import get_interfaces, PHYSICAL_INTERFACE_PATTERNS, VIRTUAL_BRIDGE_PATTERNS
+from core.network.interfaces import (
+	get_interfaces,
+	PHYSICAL_INTERFACE_PATTERNS,
+	VIRTUAL_BRIDGE_PATTERNS,
+)
 from core.debian.constants import FILE_NETWORK_INTERFACES
-from core.proxmox.network import parse_interfaces, DEFAULT_PVE_HEADER, stringify_interfaces
+from core.proxmox.network import (
+	parse_interfaces,
+	DEFAULT_PVE_HEADER,
+	stringify_interfaces,
+)
 from core.parser import make_parser, ArgumentParser
+
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="Proxmox VE VMBR Generator Script",
 		description="This program is used to generate Proxmox VE network bridges.",
-		**kwargs
+		**kwargs,
 	)
-	parser.add_argument("-s", "--source", help="Source specific Interfaces file.", default=FILE_NETWORK_INTERFACES)
-	parser.add_argument("-o", "--ovs-bridge", help="Generate OVS Bridges instead of Linux Bridges.", action="store_true")
-	parser.add_argument("-r", "--reconfigure-all", 
-		help="Ignores existing configuration and regenerates all NIC and Bridge " +
-		"assignments, also deletes non-existing or disconnected NICs.",
-		action="store_true"
+	parser.add_argument(
+		"-s",
+		"--source",
+		help="Source specific Interfaces file.",
+		default=FILE_NETWORK_INTERFACES,
 	)
-	parser.add_argument("-x", "--keep-offloading", help="Do not disable offloading with ethtool.", action="store_true")
-	parser.add_argument("-p", "--port-map", help="Map port to a specific bridge. (Separated by spaces, written as 'port:bridge')", nargs="*", default=[])
+	parser.add_argument(
+		"-o",
+		"--ovs-bridge",
+		help="Generate OVS Bridges instead of Linux Bridges.",
+		action="store_true",
+	)
+	parser.add_argument(
+		"-r",
+		"--reconfigure-all",
+		help="Ignores existing configuration and regenerates all NIC and Bridge "
+		+ "assignments, also deletes non-existing or disconnected NICs.",
+		action="store_true",
+	)
+	parser.add_argument(
+		"-x",
+		"--keep-offloading",
+		help="Do not disable offloading with ethtool.",
+		action="store_true",
+	)
+	parser.add_argument(
+		"-p",
+		"--port-map",
+		help="Map port to a specific bridge. (Separated by spaces, written as 'port:bridge')",
+		nargs="*",
+		default=[],
+	)
 	return parser
+
 
 def iface_sort(x: str):
 	import re
-	prefix = re.sub('\d+', '', x)
+
+	prefix = re.sub("\d+", "", x)
 	number = x.replace(prefix, "")
 	return prefix, number
+
 
 def generate_bridge(name, **kwargs):
 	data = {
@@ -40,20 +77,19 @@ def generate_bridge(name, **kwargs):
 		"auto": True,
 		"type": "static",
 		"bridge-ports": [],
-		"bridge-stp": [ "off" ],
-		"bridge-fd": [ 0 ]
+		"bridge-stp": ["off"],
+		"bridge-fd": [0],
 	}
 	for kw in kwargs:
 		data[kw] = kwargs[kw]
 	return data
 
+
 def main(argv_a, **kwargs):
 	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"
 	OFFLOADING_CMD = "/sbin/ethtool -offload {0} tx off rx off; /sbin/ethtool -K {0} gso off; /sbin/ethtool -K {0} tso off;"
 	INDENT = "\t-> "
-	NON_BRIDGEABLE = [
-		"lo"
-	]
+	NON_BRIDGEABLE = ["lo"]
 
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	physical_interfaces = get_interfaces(interface_patterns=PHYSICAL_INTERFACE_PATTERNS)
@@ -73,11 +109,14 @@ def main(argv_a, **kwargs):
 			port = i[0]
 			bridge = i[1]
 			vmbr_map[port] = bridge
-			if len(i) != 2: raise Exception(f"Invalid map element (Length must be 2) {i}.")
+			if len(i) != 2:
+				raise Exception(f"Invalid map element (Length must be 2) {i}.")
 
 	for port in vmbr_map.keys():
 		if not port in physical_interfaces and not port in configured_ifaces:
-			raise Exception(f"{port} was not found in the Interface list (Port Mapping).")
+			raise Exception(
+				f"{port} was not found in the Interface list (Port Mapping)."
+			)
 
 	# Add parent bridges to NICs that have it.
 	# Re-concile physical interfaces with configured (in case a NIC is disconnected).
@@ -91,9 +130,8 @@ def main(argv_a, **kwargs):
 				for sub_iface in bridge["bridge-ports"]:
 					configured_ifaces[sub_iface]["parent"] = iface
 		# NICs
-		elif (
-			not iface in physical_interfaces and 
-			any([re.match(regex, iface) for regex in PHYSICAL_INTERFACE_PATTERNS])
+		elif not iface in physical_interfaces and any(
+			[re.match(regex, iface) for regex in PHYSICAL_INTERFACE_PATTERNS]
 		):
 			physical_interfaces.append(iface)
 
@@ -103,8 +141,8 @@ def main(argv_a, **kwargs):
 		try:
 			ec = subprocess.check_call(
 				f"dpkg -l {pkg}".split(),
-				stdout=open(os.devnull, 'wb'),
-				stderr=subprocess.STDOUT
+				stdout=open(os.devnull, "wb"),
+				stderr=subprocess.STDOUT,
 			)
 			if ec == 0:
 				print_c(bcolors.L_GREEN, f"{pkg} is installed, proceeding.")
@@ -139,33 +177,47 @@ def main(argv_a, **kwargs):
 
 				# Generate VMBR if non-existent
 				if not current_bridge in configured_ifaces and not parent_bridge:
-					print_c(bcolors.L_YELLOW, f"{INDENT}Adding virtual bridge {current_bridge}")
+					print_c(
+						bcolors.L_YELLOW,
+						f"{INDENT}Adding virtual bridge {current_bridge}",
+					)
 					configured_ifaces[current_bridge] = generate_bridge(
 						name=current_bridge,
-						**{
-							"bridge-ports": [ iface ],
-							"description": "AUTOGENERATED"
-						}
+						**{"bridge-ports": [iface], "description": "AUTOGENERATED"},
 					)
 				elif not parent_bridge:
-					print_c(bcolors.L_BLUE, f"{INDENT}Linking port to virtual bridge {current_bridge}")
+					print_c(
+						bcolors.L_BLUE,
+						f"{INDENT}Linking port to virtual bridge {current_bridge}",
+					)
 					configured_ifaces[current_bridge]["bridge-ports"].append(iface)
 				else:
-					print_c(bcolors.L_BLUE, f"{INDENT}{iface} already has a bridge configured ({parent_bridge})")
+					print_c(
+						bcolors.L_BLUE,
+						f"{INDENT}{iface} already has a bridge configured ({parent_bridge})",
+					)
 
 				# Add offloading if necessary
 				if argv_a.keep_offloading is not True and iface in configured_ifaces:
 					if not "post-up" in configured_ifaces[iface]:
-						print_c(bcolors.L_YELLOW, f"{INDENT}Adding offloading to Interface {iface}.")
-						configured_ifaces[iface]["post-up"] = OFFLOADING_CMD.format(iface).split()
+						print_c(
+							bcolors.L_YELLOW,
+							f"{INDENT}Adding offloading to Interface {iface}.",
+						)
+						configured_ifaces[iface]["post-up"] = OFFLOADING_CMD.format(
+							iface
+						).split()
 					else:
-						print_c(bcolors.L_RED, f"{INDENT}Interface {iface} already has a post-up argument, please disable offloading manually.")
+						print_c(
+							bcolors.L_RED,
+							f"{INDENT}Interface {iface} already has a post-up argument, please disable offloading manually.",
+						)
 
 				# Configure NIC
 				if iface in configured_ifaces and not argv_a.reconfigure_all:
 					print_c(
 						bcolors.L_GREEN,
-			 			f"{INDENT}{iface} is already configured, skipping other settings."
+						f"{INDENT}{iface} is already configured, skipping other settings.",
 					)
 					continue
 				else:
@@ -174,9 +226,15 @@ def main(argv_a, **kwargs):
 						"name": iface,
 						"type": "manual",
 						"auto": True,
-						"post-up": OFFLOADING_CMD.format(iface).split()
+						"post-up": OFFLOADING_CMD.format(iface).split(),
 					}
 
-		f.write(stringify_interfaces(configured_ifaces, top_level_args, sort_function=iface_sort))
-	print(	f"New interfaces generated at {bcolors.L_YELLOW}{NEW_INTERFACES_FILE}{bcolors.NC}, "+
-			f"rename it to {bcolors.L_YELLOW}{FILE_NETWORK_INTERFACES}{bcolors.NC} to apply changes.")
+		f.write(
+			stringify_interfaces(
+				configured_ifaces, top_level_args, sort_function=iface_sort
+			)
+		)
+	print(
+		f"New interfaces generated at {bcolors.L_YELLOW}{NEW_INTERFACES_FILE}{bcolors.NC}, "
+		+ f"rename it to {bcolors.L_YELLOW}{FILE_NETWORK_INTERFACES}{bcolors.NC} to apply changes."
+	)

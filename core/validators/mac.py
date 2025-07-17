@@ -1,5 +1,6 @@
 import re
 
+
 def mac_address_validator(value) -> bool:
 	pattern = r"^([0-9a-fA-F][0-9a-fA-F]:){5}([0-9a-fA-F][0-9a-fA-F])$"
 	try:

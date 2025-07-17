@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 if __name__ == "__main__":
-	raise Exception("This python script cannot be executed individually, please use main.py")
+	raise Exception(
+		"This python script cannot be executed individually, please use main.py"
+	)
 
 import subprocess
 import os
@@ -9,7 +11,7 @@ from core.format.colors import bcolors, print_c
 from core.parser import make_parser, ArgumentParser
 from core.debian.os_release import get_data
 
-SUPPORTED_RELEASES=(
+SUPPORTED_RELEASES = (
 	# DEBIAN
 	"stretch",
 	"buster",
@@ -38,13 +40,15 @@ exec /sbin/getty -L 115200 ttyS0 vt102
 sudo start ttyS0
 """.lstrip()
 
+
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="XTermJS Serial Terminal socket setup script.",
 		description="This program is used to setup the XTermJS Socket for Proxmox VE Terminal Integration.",
-		**kwargs
+		**kwargs,
 	)
 	return parser
+
 
 def main(argv_a, **kwargs):
 	OS_RELEASE_DATA = get_data()
@@ -62,31 +66,30 @@ def main(argv_a, **kwargs):
 	print_c(bcolors.L_BLUE, "Writing TTYS0 Config File.")
 	with open(TTY_FILE, "w") as file:
 		file.write(XTERM_TEMPLATE)
-	
+
 	# Backup GRUB File
 	if not os.path.isfile(f"{GRUB_FILE}.bkp"):
 		print_c(bcolors.L_YELLOW, f"Creating backup of {GRUB_FILE}")
 		shutil.copyfile(GRUB_FILE, f"{GRUB_FILE}.bkp")
 
 	print_c(bcolors.L_YELLOW, f"Updating GRUB CMDLINE with TTY0/TTYS0 Usage.")
-	cmd_grep = "grep -q \"console=tty0\"".split()
+	cmd_grep = 'grep -q "console=tty0"'.split()
 	cmd_grep.append(GRUB_FILE)
 	if subprocess.call(cmd_grep) > 0:
 		sed_regex = r's#^\(GRUB_CMDLINE_LINUX=".*\)"$#\1 console=tty0"#'
-		subprocess.call([
-			"/usr/bin/sed", "-i", sed_regex, GRUB_FILE
-		])
+		subprocess.call(["/usr/bin/sed", "-i", sed_regex, GRUB_FILE])
 
-	cmd_grep = "grep -q \"console=ttyS0,115200\"".split()
+	cmd_grep = 'grep -q "console=ttyS0,115200"'.split()
 	cmd_grep.append(GRUB_FILE)
 	if subprocess.call(cmd_grep) > 0:
 		sed_regex = r's#^\(GRUB_CMDLINE_LINUX=".*\)"$#\1 console=ttyS0,115200"#'
-		subprocess.call([
-			"/usr/bin/sed", "-i", sed_regex, GRUB_FILE
-		])
+		subprocess.call(["/usr/bin/sed", "-i", sed_regex, GRUB_FILE])
 
 	print_c(bcolors.L_YELLOW, f"Doing update-grub.")
 	subprocess.call(["update-grub"])
 
-	print_c(bcolors.L_BLUE, "Do not forget to add the serial socket onto the VM Hardware Section in Proxmox.")
+	print_c(
+		bcolors.L_BLUE,
+		"Do not forget to add the serial socket onto the VM Hardware Section in Proxmox.",
+	)
 	print_c(bcolors.L_GREEN, "Done!")

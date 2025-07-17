@@ -13,24 +13,25 @@ logger = logging.getLogger()
 
 PVEGuestCommand = Literal["pct", "qm"]
 
+
 class DiskDict(TypedDict):
 	interface: str
 	raw_values: str
 	storage: str
 	name: str
 
+
 def get_guest_exists(guest_id: int):
 	guest_id = int(guest_id)
-	if not os.path.isdir(PVE_CFG_NODES_DIR): return False
+	if not os.path.isdir(PVE_CFG_NODES_DIR):
+		return False
 	guest_list = get_all_guests()
 	return guest_id in guest_list["vm"] or guest_id in guest_list["ct"]
 
+
 def get_guest_cfg_path(
-		guest_id,
-		get_host=False,
-		get_type=False,
-		get_as_dict=False
-	) -> str:
+	guest_id, get_host=False, get_type=False, get_as_dict=False
+) -> str:
 	"""
 	Returns config path by default
 
@@ -45,23 +46,23 @@ def get_guest_cfg_path(
 			p = f"{PVE_CFG_NODES_DIR}/{h}/{subp}/{guest_id}.conf"
 			if os.path.isfile(p):
 				guest_type = "vm"
-				if subp == "lxc": guest_type = "ct"
+				if subp == "lxc":
+					guest_type = "ct"
 				if get_as_dict:
-					return {
-						"path":p,
-						"host":h,
-						"type":guest_type,
-						"subpath":subp
-					}
-				if get_host: return h
-				if get_type: return subp
+					return {"path": p, "host": h, "type": guest_type, "subpath": subp}
+				if get_host:
+					return h
+				if get_type:
+					return subp
 				return p
+
 
 def get_guest_is_ct(guest_id):
 	guest_type = get_guest_cfg_path(guest_id=guest_id, get_host=False, get_type=True)
 	if guest_type == "qemu-server":
 		return False
 	return True
+
 
 def get_guest_status(guest_id: int, remote_args=None):
 	# CT
@@ -76,11 +77,18 @@ def get_guest_status(guest_id: int, remote_args=None):
 	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+			raise Exception(
+				f"Bad command return code ({proc.returncode}).",
+				proc_o.decode(),
+				proc_e.decode(),
+			)
 		result = proc_o.decode().split("\n")
 		return result[0].strip().split(": ")[-1]
 
+
 GUEST_CONF_REGEX = r"^[0-9]+.conf$"
+
+
 def get_all_guests(filter_ids: list | dict = []):
 	if isinstance(filter_ids, dict):
 		filter_ids = list(filter_ids.keys())
@@ -100,12 +108,16 @@ def get_all_guests(filter_ids: list | dict = []):
 					guests["ct"].append(guest_id)
 	return guests
 
+
 def parse_net_opts_to_string(net_opts: dict):
 	r = None
 	for k, v in net_opts.items():
-		if not r: r = f"{k}={v}"
-		else: r = f"{r},{k}={v},"
-	return r.rstrip(",").replace(",,",",")
+		if not r:
+			r = f"{k}={v}"
+		else:
+			r = f"{r},{k}={v},"
+	return r.rstrip(",").replace(",,", ",")
+
 
 def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
 	if not isinstance(guest_id, int) and not int(guest_id):
@@ -113,16 +125,15 @@ def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
 	else:
 		guest_id = int(guest_id)
 	snapshots = []
-	if get_guest_is_ct(guest_id): proc_cmd = "pct"
-	else: proc_cmd = "qm"
+	if get_guest_is_ct(guest_id):
+		proc_cmd = "pct"
+	else:
+		proc_cmd = "qm"
 	proc_cmd = proc_cmd.split()
 	if remote_args:
 		proc_cmd = remote_args + proc_cmd
-	proc_cmd = proc_cmd + [ "listsnapshot", str(guest_id) ]
-	output = subprocess.check_output(proc_cmd)\
-		.decode(
-			getdefaultencoding()
-		)
+	proc_cmd = proc_cmd + ["listsnapshot", str(guest_id)]
+	output = subprocess.check_output(proc_cmd).decode(getdefaultencoding())
 	for line in output.splitlines():
 		try:
 			snapshot_name = line.strip().split()[1]
@@ -134,13 +145,14 @@ def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
 			raise
 	return snapshots
 
+
 def parse_guest_cfg(
-		guest_id: int,
-		remote_args: list = None,
-		debug = False,
-		current = True,
-		snapshot_name: str = None
-	) -> dict:
+	guest_id: int,
+	remote_args: list = None,
+	debug=False,
+	current=True,
+	snapshot_name: str = None,
+) -> dict:
 	if not isinstance(guest_id, int) and not int(guest_id):
 		raise ValueError("guest_id must be of type int.")
 	else:
@@ -148,19 +160,25 @@ def parse_guest_cfg(
 
 	if not snapshot_name:
 		logger.info("Collecting Config for Guest %s", guest_id)
-	else: 
-		logger.info("Collecting Config for Guest %s (Snapshot %s)", guest_id, snapshot_name)
+	else:
+		logger.info(
+			"Collecting Config for Guest %s (Snapshot %s)", guest_id, snapshot_name
+		)
 
 	guest_cfg = {}
-	if get_guest_is_ct(guest_id): proc_cmd = "pct"
-	else: proc_cmd = "qm"
+	if get_guest_is_ct(guest_id):
+		proc_cmd = "pct"
+	else:
+		proc_cmd = "qm"
 
-	cmd_args = [f'/usr/sbin/{proc_cmd}', "config", str(guest_id)]
+	cmd_args = [f"/usr/sbin/{proc_cmd}", "config", str(guest_id)]
 	if current and snapshot_name:
-		raise ValueError("The current and snapshot args cannot be used at the same time.")
+		raise ValueError(
+			"The current and snapshot args cannot be used at the same time."
+		)
 	if snapshot_name:
-		cmd_args.insert(len(cmd_args)-1, "--snapshot")
-		cmd_args.insert(len(cmd_args)-1, snapshot_name)
+		cmd_args.insert(len(cmd_args) - 1, "--snapshot")
+		cmd_args.insert(len(cmd_args) - 1, snapshot_name)
 	if current:
 		cmd_args.append("--current")
 	if remote_args:
@@ -168,66 +186,91 @@ def parse_guest_cfg(
 	if debug:
 		logger.debug(cmd_args)
 
-	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+	with subprocess.Popen(
+		cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+	) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
 			raise Exception(
 				f"Bad command return code ({proc.returncode}).",
 				proc_o.decode(),
-				proc_e.decode()
+				proc_e.decode(),
 			)
-		if debug: logger.debug("Showing parsed Guest config lines:")
+		if debug:
+			logger.debug("Showing parsed Guest config lines:")
 		for line in proc_o.decode("utf-8").split("\n"):
 			line = line.rstrip()
-			if debug: logger.debug(line)
-			if len(line.strip()) == 0: continue
+			if debug:
+				logger.debug(line)
+			if len(line.strip()) == 0:
+				continue
 			line_split = line.split(": ")
 			option_k = line_split[0]
 			option_v = line_split[-1]
 			# If Option has multiple key/value pairs in it (Comma separated)
 			if "," in option_v:
-				if not option_k in guest_cfg: guest_cfg[option_k] = {}
-				option_v = option_v.replace(",,",",").split(",")
+				if not option_k in guest_cfg:
+					guest_cfg[option_k] = {}
+				option_v = option_v.replace(",,", ",").split(",")
 				for sub_v in option_v:
 					# Guess Separator
 					fs = None
 					for sep in ["=", ":"]:
-						if sep in sub_v and sub_v.count(sep) == 1: fs = sep
+						if sep in sub_v and sub_v.count(sep) == 1:
+							fs = sep
 					# If separator is equal assume it's not a Volume/Disk path.
 					if fs == "=":
 						k, v = sub_v.split(fs)
-						try: v = int(v)
-						except: pass
+						try:
+							v = int(v)
+						except:
+							pass
 						guest_cfg[option_k][k] = v
 					# If it's a raw value
 					else:
-						if not sub_v or sub_v.lower() == "none": continue
+						if not sub_v or sub_v.lower() == "none":
+							continue
 						if not "raw_values" in guest_cfg[option_k]:
 							guest_cfg[option_k]["raw_values"] = []
-						try: sub_v = int(sub_v)
-						except: pass
+						try:
+							sub_v = int(sub_v)
+						except:
+							pass
 						guest_cfg[option_k]["raw_values"].append(sub_v)
 			else:
-				try: option_v = int(option_v)
-				except: pass
+				try:
+					option_v = int(option_v)
+				except:
+					pass
 				guest_cfg[option_k] = option_v
 		return guest_cfg
 
-def parse_guest_net_cfg(guest_id, remote=False, remote_user="root", remote_host=None, debug=False):
+
+def parse_guest_net_cfg(
+	guest_id, remote=False, remote_user="root", remote_host=None, debug=False
+):
 	logger.info("Collecting Network Config for Guest %s", guest_id)
 	if remote and not remote_host:
 		raise ValueError("remote_host is required when calling as remote function")
 	net_cfg = {}
-	if get_guest_is_ct(guest_id): proc_cmd = "pct"
-	else: proc_cmd = "qm"
+	if get_guest_is_ct(guest_id):
+		proc_cmd = "pct"
+	else:
+		proc_cmd = "qm"
 
-	cmd_args = [f'/usr/sbin/{proc_cmd}', "config", str(guest_id), "--current"]
-	if remote: cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
-	if debug: logger.debug(cmd_args)
+	cmd_args = [f"/usr/sbin/{proc_cmd}", "config", str(guest_id), "--current"]
+	if remote:
+		cmd_args = ["/usr/bin/ssh", f"{remote_user}@{remote_host}"] + cmd_args
+	if debug:
+		logger.debug(cmd_args)
 	with subprocess.Popen(cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).", proc_o.decode(), proc_e.decode())
+			raise Exception(
+				f"Bad command return code ({proc.returncode}).",
+				proc_o.decode(),
+				proc_e.decode(),
+			)
 		for line in proc_o.decode().split("\n"):
 			line = line.rstrip()
 			if re.search(r"^net[0-9]+:.*$", line):
@@ -241,15 +284,18 @@ def parse_guest_net_cfg(guest_id, remote=False, remote_user="root", remote_host=
 				net_cfg[int(net_index)] = net_opts_parsed
 		return net_cfg
 
+
 def is_valid_guest_disk_type(label: str, disk_data: str, exclude_media=True) -> bool:
 	if not re.sub(r"[0-9]+", "", label) in DISK_TYPES:
 		return False
 	if "raw_values" in disk_data:
 		is_cloudinit = "cloudinit" in " ".join(disk_data["raw_values"])
-	else: is_cloudinit = False
+	else:
+		is_cloudinit = False
 	if exclude_media and "media" in disk_data and not is_cloudinit:
 		return False
 	return True
+
 
 def rename_guest_replication_jobs(old_id: int, new_id: int) -> None:
 	"""
@@ -258,24 +304,30 @@ def rename_guest_replication_jobs(old_id: int, new_id: int) -> None:
 	"""
 	logger = logging.getLogger()
 	# Rename disk in Guest Configuration
-	logger.info("Changing replication jobs for Guest %s to %s in %s",
-													old_id, new_id, PVE_CFG_REPLICATION)
+	logger.info(
+		"Changing replication jobs for Guest %s to %s in %s",
+		old_id,
+		new_id,
+		PVE_CFG_REPLICATION,
+	)
 	sed_regex = rf"s/^local: {old_id}-\(.*\)$/local: {new_id}-\1/g"
 	rpl_cmd_args = [
 		"/usr/bin/sed",
 		"-i",
-		sed_regex, # Sed F String Regex
-		PVE_CFG_REPLICATION
+		sed_regex,  # Sed F String Regex
+		PVE_CFG_REPLICATION,
 	]
 	logger.debug("Executing command:" + " ".join(rpl_cmd_args))
 	with subprocess.Popen(rpl_cmd_args, stdout=subprocess.PIPE) as proc:
 		proc_o, proc_e = proc.communicate()
 		if proc.returncode != 0:
-			raise Exception(f"Bad command return code ({proc.returncode}).",
-			proc_o.decode(),
-			proc_e.decode()
-		)
+			raise Exception(
+				f"Bad command return code ({proc.returncode}).",
+				proc_o.decode(),
+				proc_e.decode(),
+			)
 	return
+
 
 def get_guest_replication_jobs(old_id: int) -> dict:
 	"""
@@ -312,7 +364,10 @@ def get_guest_replication_jobs(old_id: int) -> dict:
 					raise
 	return jobs
 
-def get_guest_replication_statuses(guest_id: int, remote_args: list = None, raise_exception = False) -> dict:
+
+def get_guest_replication_statuses(
+	guest_id: int, remote_args: list = None, raise_exception=False
+) -> dict:
 	"""
 	:return: Dictionary with id:status pairs
 	:rtype: dict
@@ -339,30 +394,35 @@ def get_guest_replication_statuses(guest_id: int, remote_args: list = None, rais
 			data[_parsed_line[_job_idx]] = _parsed_line[_status_idx]
 	return data
 
+
 def parse_guest_disk(disk_name, disk_values, vmstate=False):
 	logger = logging.getLogger()
 	logging.info(f"Parsing disk {disk_name}")
 	if "raw_values" in disk_values:
-		if len(disk_values['raw_values']) != 1:
+		if len(disk_values["raw_values"]) != 1:
 			logger.error("Bad Parsing.")
-			logger.error("Disk %s has more than one path (%s).", disk_name, disk_values['raw_values'])
-			logger.error("Path Array Length: %s", len(disk_values['raw_values']))
-			raise ValueError(disk_values['raw_values'])
-		_raw_values = disk_values['raw_values'][0]
-		_split_values = _raw_values.split(":") 
+			logger.error(
+				"Disk %s has more than one path (%s).",
+				disk_name,
+				disk_values["raw_values"],
+			)
+			logger.error("Path Array Length: %s", len(disk_values["raw_values"]))
+			raise ValueError(disk_values["raw_values"])
+		_raw_values = disk_values["raw_values"][0]
+		_split_values = _raw_values.split(":")
 		logger.info("%s: %s", disk_name, _raw_values)
 		return {
 			"interface": disk_name,
 			"raw_values": _raw_values,
 			"storage": _split_values[0],
-			"name": _split_values[1]
+			"name": _split_values[1],
 		}
 	elif vmstate:
-		_split_values = disk_values.split(":") 
+		_split_values = disk_values.split(":")
 		logger.info("%s: %s", disk_name, disk_values)
 		return {
 			"interface": disk_name,
 			"storage": _split_values[0],
-			"name": _split_values[1]
+			"name": _split_values[1],
 		}
 	return None

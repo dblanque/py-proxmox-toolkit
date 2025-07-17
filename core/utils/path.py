@@ -6,6 +6,7 @@ EXCLUDED_FILES = [
 	"template.py",
 ]
 
+
 def get_all_allowed_paths(project_root: str, subdirectory: str = None):
 	if not os.path.isdir(project_root):
 		raise ValueError(project_root, "Must be a path.")
@@ -21,6 +22,7 @@ def get_all_allowed_paths(project_root: str, subdirectory: str = None):
 			continue
 		paths.append(_rel_path)
 	return paths
+
 
 def path_as_module(_path):
 	return os.path.splitext(_path)[0].replace("/", ".")

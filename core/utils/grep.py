@@ -1,7 +1,8 @@
 from os import walk, path
 from re import Pattern, compile
 
-def grep_r (pattern: Pattern, dir, return_files=False):
+
+def grep_r(pattern: Pattern, dir, return_files=False):
 	if not isinstance(pattern, Pattern):
 		compiled_pattern = compile(pattern)
 	else:

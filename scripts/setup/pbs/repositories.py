@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 if __name__ == "__main__":
-	raise Exception("This python script cannot be executed individually, please use main.py")
+	raise Exception(
+		"This python script cannot be executed individually, please use main.py"
+	)
 
 import os
 import signal
@@ -10,10 +12,12 @@ from core.utils.prompt import yes_no_input, prompt_reboot, prompt_update
 from core.format.colors import bcolors, print_c
 from ..debian.repositories import pre_checks, set_debian_sources
 from ..apt.sources.pbs import SRC_PBS_ENTERPRISE, SRC_PBS_NO_SUBSCRIPTION
+
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PBS_NS = f"{SOURCES_LIST_DIR}/pbs-no-subscription.list"
 SOURCES_LIST_PBS_EN = f"{SOURCES_LIST_DIR}/pbs-enterprise.list"
+
 
 def main(**kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -24,7 +28,7 @@ def main(**kwargs):
 	# Setting PBS No-Subscription or Enterprise Sources
 	pbs_src_no_subscription = yes_no_input(
 		msg="Do you wish to use the PBS No-Subscription Repositories?",
-		input_default=True
+		input_default=True,
 	)
 
 	# PBS SRCs
@@ -39,7 +43,8 @@ def main(**kwargs):
 
 	with open(pbs_list_file, "w") as pbs_apt_lists:
 		pbs_apt_lists.write(pbs_list_data.format(debian_distribution))
-	if os.path.exists(pbs_list_delete): os.remove(pbs_list_delete)
+	if os.path.exists(pbs_list_delete):
+		os.remove(pbs_list_delete)
 	print_c(bcolors.L_GREEN, "Proxmox Backup Server Sources Set.")
 
 	# Update Proxmox
