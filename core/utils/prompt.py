@@ -14,10 +14,10 @@ DEFAULT_CHOICES: YesNoChoicesDict = {
 
 def yes_no_input(
 		msg: str,
-		input_default: str = None,
+		input_default: str | bool | None = None,
 		input_choices: YesNoChoicesDict = DEFAULT_CHOICES,
-		yes_msg: str = None,
-		no_msg: str = None,
+		yes_msg: str | None = None,
+		no_msg: str | None = None,
 		show_choices = True
 	):
 	if input_default is True:
