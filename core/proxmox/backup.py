@@ -17,7 +17,7 @@ BackupJob = TypedDict(
 )
 
 
-def get_all_backup_jobs() -> list[dict]:
+def get_all_backup_jobs() -> list[BackupJob]:
 	"""
 	PVE API Based Function, does not require remote/ssh arguments.
 	"""
