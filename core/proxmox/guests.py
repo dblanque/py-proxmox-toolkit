@@ -393,7 +393,7 @@ def get_guest_replication_jobs(old_id: int) -> dict:
 
 
 def get_guest_replication_statuses(
-	guest_id: int, remote_args: list = None, raise_exception=False
+	guest_id: int, remote_args: list | None = None, raise_exception=False
 ) -> dict:
 	"""
 	:return: Dictionary with id:status pairs
