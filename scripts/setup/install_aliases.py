@@ -28,6 +28,11 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 
+class LocalParser(ArgumentParser):
+	add_aliases: bool
+	bash_completion: bool
+
+
 def install_actsh(toolkit_path, act_sh_path):
 	if os.path.islink(act_sh_path) or os.path.isfile(act_sh_path):
 		if not os.path.exists(act_sh_path + ".old"):
@@ -65,7 +70,7 @@ def install_aliases(user_home, bash_completion, add_aliases):
 			print_c(bcolors.L_YELLOW, f"Wrote bash-completion to {ALIASES_PATH}")
 
 
-def main(argv_a, **kwargs):
+def main(argv_a: LocalParser, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
 	toolkit_path = kwargs.pop("toolkit_path")
 	user_home = Path.home()
