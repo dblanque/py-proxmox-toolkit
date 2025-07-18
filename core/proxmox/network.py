@@ -46,9 +46,9 @@ def parse_interfaces(
 	top_level_args = {}
 	if not isfile(file):
 		raise Exception(f"{file} does not exist.")
-	with open(file, "r") as f:
+	with open(file, "r") as network_interfaces_file:
 		iface_name: str | None = None
-		for line in f.readlines():
+		for line in network_interfaces_file.readlines():
 			line = line.strip()
 			if len(line) <= 0:
 				continue
