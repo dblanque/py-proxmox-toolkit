@@ -16,25 +16,20 @@
 # * Change Replication Tasks
 # * Change Backup Tasks
 # * Change Backup Names
-
-import os
-import sys
-import signal
-
-script_path = os.path.realpath(__file__)
-script_dir = os.path.dirname(script_path)
 if __name__ == "__main__":
 	raise Exception(
 		"This python script cannot be executed individually, please use main.py"
 	)
 
+import os
+import sys
+import signal
 from core.signal_handlers.sigint import graceful_exit
 
 # IMPORTS
 import logging
 import socket
 import subprocess
-import re
 from core.proxmox.guests import (
 	get_guest_cfg_path,
 	get_guest_status,
@@ -47,16 +42,17 @@ from core.proxmox.guests import (
 	is_valid_guest_disk_type,
 	get_guest_replication_jobs,
 )
-from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs, BackupJob
+from core.proxmox.backup import get_all_backup_jobs, set_backup_attrs
 from core.proxmox.storage import get_storage_cfg, DiskReassignException
 from core.proxmox.replication import ReplicationJobDict
 from core.format.colors import bcolors, print_c
 from core.classes.ColoredFormatter import set_logger
 from core.utils.prompt import yes_no_input
-from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 from time import sleep
 
+script_path = os.path.realpath(__file__)
+script_dir = os.path.dirname(script_path)
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -86,7 +82,7 @@ NORMAL_PROMPT_EXIT_MSG = "Exiting script."
 def validate_vmid(vmid) -> bool:
 	try:
 		int(vmid)
-	except:
+	except ValueError:
 		return False
 	vmid = int(vmid)
 	return vmid >= 100 and vmid < 999999999
@@ -110,7 +106,6 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 	backup_jobs = get_all_backup_jobs()
 	backup_change_errors = []
 	for job in backup_jobs:
-		job: BackupJob
 		if "vmid" in job:
 			job_id = job["id"]
 			job_vmids_data = job["vmid"]
@@ -119,7 +114,7 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 			else:
 				job_description = ""
 			job_vmids: list = job_vmids_data.split(",")
-			if not old_id in job_vmids:
+			if old_id not in job_vmids:
 				logger.debug(
 					"VM not in Backup Job %s (%s), skipping.", job_id, job_description
 				)
@@ -157,7 +152,8 @@ def main(argv_a, **kwargs):
 			running_in_background = True
 			# Ignore SIGHUP
 			signal.signal(signal.SIGHUP, signal.SIG_IGN)
-	except:
+	except Exception:
+		print("Could not check if process executed in background.")
 		pass
 
 	# Logging

@@ -6,13 +6,17 @@ import logging
 import subprocess
 from .constants import PVE_CFG_NODES_DIR
 from sys import getdefaultencoding
-from typing import TypedDict, Literal
+from typing import TypedDict, Literal, overload
+from enum import Enum
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 
 logger = logging.getLogger()
 
-PVEGuestCommand = Literal["pct", "qm"]
+PveGuestCommand = Literal["pct", "qm"]
 
+class PveGuestType(Enum):
+	VIRTUAL_MACHINE = "vm"
+	LINUX_CONTAINER = "ct"
 
 class DiskDict(TypedDict):
 	interface: str
@@ -28,10 +32,29 @@ def get_guest_exists(guest_id: int):
 	guest_list = get_all_guests()
 	return guest_id in guest_list["vm"] or guest_id in guest_list["ct"]
 
+@overload
+def get_guest_cfg_path(
+	guest_id, get_host=False, get_type=False, get_as_dict=True
+) -> dict[str, str]: ...
+
+@overload
+def get_guest_cfg_path(
+	guest_id, get_host=False, get_type=False, get_as_dict=False
+) -> str: ...
+
+@overload
+def get_guest_cfg_path(
+	guest_id, get_host=False, get_type=True, get_as_dict=False
+) -> str: ...
+
+@overload
+def get_guest_cfg_path(
+	guest_id, get_host=True, get_type=False, get_as_dict=False
+) -> str: ...
 
 def get_guest_cfg_path(
 	guest_id, get_host=False, get_type=False, get_as_dict=False
-) -> str:
+) -> str | dict[str, str] | None:
 	"""
 	Returns config path by default
 
@@ -45,9 +68,9 @@ def get_guest_cfg_path(
 		for subp in ["qemu-server", "lxc"]:
 			p = f"{PVE_CFG_NODES_DIR}/{h}/{subp}/{guest_id}.conf"
 			if os.path.isfile(p):
-				guest_type = "vm"
+				guest_type = PveGuestType.VIRTUAL_MACHINE.value
 				if subp == "lxc":
-					guest_type = "ct"
+					guest_type = PveGuestType.LINUX_CONTAINER.value
 				if get_as_dict:
 					return {"path": p, "host": h, "type": guest_type, "subpath": subp}
 				if get_host:
@@ -57,14 +80,14 @@ def get_guest_cfg_path(
 				return p
 
 
-def get_guest_is_ct(guest_id):
+def get_guest_is_ct(guest_id: int) -> bool:
 	guest_type = get_guest_cfg_path(guest_id=guest_id, get_host=False, get_type=True)
 	if guest_type == "qemu-server":
 		return False
 	return True
 
 
-def get_guest_status(guest_id: int, remote_args=None):
+def get_guest_status(guest_id: int, remote_args: list[str] | None = None):
 	# CT
 	if get_guest_is_ct(guest_id):
 		cmd_args = ["pct"]
@@ -148,10 +171,10 @@ def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
 
 def parse_guest_cfg(
 	guest_id: int,
-	remote_args: list = None,
+	remote_args: list | None = None,
 	debug=False,
 	current=True,
-	snapshot_name: str = None,
+	snapshot_name: str | None = None,
 ) -> dict:
 	if not isinstance(guest_id, int) and not int(guest_id):
 		raise ValueError("guest_id must be of type int.")
@@ -209,7 +232,7 @@ def parse_guest_cfg(
 			option_v = line_split[-1]
 			# If Option has multiple key/value pairs in it (Comma separated)
 			if "," in option_v:
-				if not option_k in guest_cfg:
+				if option_k not in guest_cfg:
 					guest_cfg[option_k] = {}
 				option_v = option_v.replace(",,", ",").split(",")
 				for sub_v in option_v:
@@ -223,24 +246,24 @@ def parse_guest_cfg(
 						k, v = sub_v.split(fs)
 						try:
 							v = int(v)
-						except:
+						except Exception:
 							pass
 						guest_cfg[option_k][k] = v
 					# If it's a raw value
 					else:
 						if not sub_v or sub_v.lower() == "none":
 							continue
-						if not "raw_values" in guest_cfg[option_k]:
+						if "raw_values" not in guest_cfg[option_k]:
 							guest_cfg[option_k]["raw_values"] = []
 						try:
 							sub_v = int(sub_v)
-						except:
+						except Exception:
 							pass
 						guest_cfg[option_k]["raw_values"].append(sub_v)
 			else:
 				try:
 					option_v = int(option_v)
-				except:
+				except ValueError:
 					pass
 				guest_cfg[option_k] = option_v
 		return guest_cfg
@@ -285,8 +308,12 @@ def parse_guest_net_cfg(
 		return net_cfg
 
 
-def is_valid_guest_disk_type(label: str, disk_data: str, exclude_media=True) -> bool:
-	if not re.sub(r"[0-9]+", "", label) in DISK_TYPES:
+def is_valid_guest_disk_type(
+	label: str,
+	disk_data: dict,
+	exclude_media=True
+) -> bool:
+	if re.sub(r"[0-9]+", "", label) not in DISK_TYPES:
 		return False
 	if "raw_values" in disk_data:
 		is_cloudinit = "cloudinit" in " ".join(disk_data["raw_values"])
