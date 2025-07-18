@@ -55,7 +55,7 @@ class ColoredArgParser(ArgumentParser):
 def make_parser(**kwargs) -> ArgumentParser:
 	if "use_argcomplete" in kwargs:
 		_arc = kwargs.pop("use_argcomplete")
-	if not "toolkit_path" in kwargs:
+	if "toolkit_path" not in kwargs:
 		raise Exception("Toolkit path missing in make_parser kwargs.")
 	else:
 		_toolkit_path = kwargs.pop("toolkit_path")

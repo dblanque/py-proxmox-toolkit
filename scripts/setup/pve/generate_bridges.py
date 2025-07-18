@@ -176,7 +176,7 @@ def main(argv_a, **kwargs):
 						current_bridge = f"vmbr{vmbr_index}"
 
 				# Generate VMBR if non-existent
-				if not current_bridge in configured_ifaces and not parent_bridge:
+				if current_bridge not in configured_ifaces and not parent_bridge:
 					print_c(
 						bcolors.L_YELLOW,
 						f"{INDENT}Adding virtual bridge {current_bridge}",
@@ -199,7 +199,7 @@ def main(argv_a, **kwargs):
 
 				# Add offloading if necessary
 				if argv_a.keep_offloading is not True and iface in configured_ifaces:
-					if not "post-up" in configured_ifaces[iface]:
+					if "post-up" not in configured_ifaces[iface]:
 						print_c(
 							bcolors.L_YELLOW,
 							f"{INDENT}Adding offloading to Interface {iface}.",

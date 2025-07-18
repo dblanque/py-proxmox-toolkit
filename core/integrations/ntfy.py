@@ -38,9 +38,13 @@ def priority_valid_int(priority):
 # Check NTFY Documentation for more info
 # src: https://docs.ntfy.sh/publish/
 def emit_ntfy(
-	ntfy_server, ntfy_token, message: str, title: str = None, priority="default"
+	ntfy_server: str,
+	ntfy_token: str,
+	message: str,
+	title: str | None = None,
+	priority: str | int = "default",
 ):
-	if not str(priority) in NTFY_PRIORITY_CHOICES and not priority_valid_int(
+	if str(priority) not in NTFY_PRIORITY_CHOICES and not priority_valid_int(
 		priority=priority
 	):
 		raise ValueError("Invalid Priority Tag on NTFY Emit.", priority)

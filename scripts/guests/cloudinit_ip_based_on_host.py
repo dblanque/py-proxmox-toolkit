@@ -64,13 +64,13 @@ def main(argv_a, **kwargs):
 		cmd = PVE_NETWORK_CMD.format(node).split()
 		PVE_NETWORK_DATA: list[dict] = json.loads(subprocess.check_output(cmd))
 		for iface_dict in PVE_NETWORK_DATA:
-			if not "iface" in iface_dict:
+			if "iface" not in iface_dict:
 				raise ValueError(
 					f"Missing critical key in Interface Dictionary.\n{iface_dict}"
 				)
 			if not iface_dict["iface"].startswith(argv_a.bridge):
 				continue
-			if not "cidr" in iface_dict:
+			if "cidr" not in iface_dict:
 				continue
 			if network is None:
 				network = ipaddress.ip_network(iface_dict["cidr"], False)
@@ -81,11 +81,11 @@ def main(argv_a, **kwargs):
 
 	reserved_ip_addresses.sort()
 	cloudinit_guest_address = reserved_ip_addresses[-1] + 1
-	if not cloudinit_guest_address in network:
+	if cloudinit_guest_address not in network:
 		print("Cannot increment IP Address bits, attempting to use a lower address.")
 		cloudinit_guest_address = reserved_ip_addresses[0] - 1
 
-	if not cloudinit_guest_address in network:
+	if cloudinit_guest_address not in network:
 		raise Exception("Could not find a valid contiguous IP within requested subnet.")
 	print(f"Using {cloudinit_guest_address} for guest.")
 

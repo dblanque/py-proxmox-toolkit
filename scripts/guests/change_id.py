@@ -374,7 +374,7 @@ def main(argv_a, **kwargs):
 		new_job_name = job_name.replace(str(id_origin), str(id_target))
 		new_job_cmd = f"pvesr create-local-job {new_job_name} {target}".split()
 		for arg in ["rate", "schedule", "comment"]:
-			if not arg in job:
+			if arg not in job:
 				continue
 
 			if arg == "comment":

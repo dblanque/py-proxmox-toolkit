@@ -230,10 +230,10 @@ def get_storage_cfg(storage_name: str) -> PVEStorage:
 				attr_key = line[0].strip()
 				attr_val = line[1].strip()
 				storage[attr_key] = attr_val
-		if not storage["type"] in PATH_ASSOC:
+		if storage["type"] not in PATH_ASSOC:
 			raise Exception(f"Storage type unsupported ({storage['type']})")
 		path_def = PATH_ASSOC[storage["type"]]
-		if not path_def in storage:
+		if path_def not in storage:
 			raise Exception(
 				"Bad storage parameters, path definition not found.", storage
 			)
