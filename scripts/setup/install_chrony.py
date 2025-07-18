@@ -24,7 +24,7 @@ def main(**kwargs):
 		if ec == 0:
 			print_c(bcolors.L_GREEN, "Chrony is already installed.")
 			sys.exit(0)
-	except:
+	except Exception:
 		pass
 
 	apt_install(packages=["chrony"], force_yes=True)

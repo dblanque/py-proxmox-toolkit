@@ -53,7 +53,7 @@ def main(**kwargs):
 	if not cpu_vendor:
 		print_c(bcolors.L_RED, "CPU Vendor not found.")
 		sys.exit(1)
-	if not cpu_vendor.lower() in SUPPORTED_CPU_VENDORS:
+	if cpu_vendor.lower() not in SUPPORTED_CPU_VENDORS:
 		print_c(bcolors.L_YELLOW, f"CPU Vendor is not supported ({cpu_vendor}).")
 		sys.exit(1)
 
@@ -71,7 +71,7 @@ def main(**kwargs):
 				f"{cpu_vendor_data['label']} Microcode is already installed.",
 			)
 			sys.exit(0)
-	except:
+	except Exception:
 		pass
 
 	apt_update()
