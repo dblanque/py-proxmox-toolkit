@@ -78,7 +78,7 @@ def main(argv_a, **kwargs):
 
 	if argv_a.https_cacher:
 		for conf_file in grep_r(HTTPS_CACHER_REGEX, APT_CONF_DIR, return_files=True):
-			if not conf_file in apt_conf_files:
+			if conf_file not in apt_conf_files:
 				apt_conf_files.append(conf_file)
 
 	if len(apt_conf_files) > 0:

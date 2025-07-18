@@ -53,7 +53,7 @@ def argparser(**kwargs) -> ArgumentParser:
 def main(argv_a, **kwargs):
 	OS_RELEASE_DATA = get_data()
 	OS_RELEASE = OS_RELEASE_DATA["version_codename"]
-	if not OS_RELEASE in SUPPORTED_RELEASES:
+	if OS_RELEASE not in SUPPORTED_RELEASES:
 		raise Exception(f"OS Release unsupported ({OS_RELEASE}).")
 	INIT_PATH = "/etc/init"
 	TTY_FILE = os.path.join(INIT_PATH, "ttyS0.conf")
@@ -72,7 +72,7 @@ def main(argv_a, **kwargs):
 		print_c(bcolors.L_YELLOW, f"Creating backup of {GRUB_FILE}")
 		shutil.copyfile(GRUB_FILE, f"{GRUB_FILE}.bkp")
 
-	print_c(bcolors.L_YELLOW, f"Updating GRUB CMDLINE with TTY0/TTYS0 Usage.")
+	print_c(bcolors.L_YELLOW, "Updating GRUB CMDLINE with TTY0/TTYS0 Usage.")
 	cmd_grep = 'grep -q "console=tty0"'.split()
 	cmd_grep.append(GRUB_FILE)
 	if subprocess.call(cmd_grep) > 0:
@@ -85,7 +85,7 @@ def main(argv_a, **kwargs):
 		sed_regex = r's#^\(GRUB_CMDLINE_LINUX=".*\)"$#\1 console=ttyS0,115200"#'
 		subprocess.call(["/usr/bin/sed", "-i", sed_regex, GRUB_FILE])
 
-	print_c(bcolors.L_YELLOW, f"Doing update-grub.")
+	print_c(bcolors.L_YELLOW, "Doing update-grub.")
 	subprocess.call(["update-grub"])
 
 	print_c(
