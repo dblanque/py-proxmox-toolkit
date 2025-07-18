@@ -41,7 +41,7 @@ class SingleLevelPathCompleter(object):
 
 	def __call__(self, **kwargs):
 		prefix: str = kwargs.pop("prefix")
-		if len(prefix) == 0 or not "/" in prefix:
+		if len(prefix) == 0 or "/" not in prefix:
 			for file in os.listdir(
 				os.path.join(self.toolkit_path, self.scripts_subdir)
 			):
