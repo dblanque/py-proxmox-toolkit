@@ -38,9 +38,14 @@ def argparser(**kwargs) -> ArgumentParser:
 		"--timeout",
 		default=3,
 		help="How long to wait until ping is considered a fail",
+		type=int,
 	)
 	parser.add_argument(
-		"-i", "--interval", default=30, help="How often to check Gateway Availability"
+		"-i",
+		"--interval",
+		default=30,
+		help="How often to check Gateway Availability",
+		type=int,
 	)
 	parser.add_argument(
 		"-n",
@@ -73,8 +78,18 @@ def argparser(**kwargs) -> ArgumentParser:
 	)
 	return parser
 
+class LocalParser(ArgumentParser):
+	gateway: str
+	connection_name: str
+	timeout: int
+	interval: int
+	use_network_manager: bool
+	ping_args: str
+	script: str
+	script_args: str
+	shell: str
 
-def main(argv_a, **kwargs):
+def main(argv_a: LocalParser, **kwargs):
 	gateway = argv_a.gateway
 	connection = argv_a.connection_name
 	use_network_manager = argv_a.use_network_manager
@@ -170,7 +185,8 @@ def main(argv_a, **kwargs):
 
 if __name__ == "__main__":
 	try:
-		main()
+		parser = argparser()
+		main(parser, toolkit_path=None) # type: ignore
 	except KeyboardInterrupt:
 		msg = f"{SCRIPT_NAME} stopped"
 		print_c(bcolors.BLUE, msg)
