@@ -61,11 +61,12 @@ def make_parser(**kwargs) -> ArgumentParser:
 		_toolkit_path = kwargs.pop("toolkit_path")
 	parser = ColoredArgParser(**kwargs)
 	if _arc:
-		from core.autocomplete import PathCompleter, SingleLevelPathCompleter
+		from core.autocomplete import PathCompleter
+		# from core.autocomplete import SingleLevelPathCompleter
 
 		parser.add_argument(
 			"filename", help="Script name or path to execute."
-		).completer = PathCompleter(toolkit_path=_toolkit_path)
+		).completer = PathCompleter(toolkit_path=_toolkit_path) # type: ignore
 	else:
 		parser.add_argument("filename", help="Script name or path to execute.")
 	return parser
