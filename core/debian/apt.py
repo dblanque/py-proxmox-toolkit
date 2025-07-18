@@ -4,9 +4,9 @@ import subprocess
 from core.format.colors import bcolors, print_c
 
 
-def apt_update(extra_args: list = None) -> int:
+def apt_update(extra_args: list[str] | None = None) -> int:
 	print_c(bcolors.L_BLUE, "Updating Package Lists.")
-	cmd = f"apt-get update"
+	cmd = "apt-get update"
 	if extra_args:
 		cmd = cmd + " " + " ".join(extra_args)
 	cmd = f"{cmd} -y"
@@ -25,7 +25,7 @@ def apt_install(
 	skip_if_installed=True,
 	do_update=True,
 	force_yes=False,
-	extra_args: list = None,
+	extra_args: list[str] | None = None,
 ) -> int:
 	if do_update:
 		apt_update()
@@ -47,7 +47,7 @@ def apt_install(
 				if ec == 0:
 					packages.remove(pkg)
 					already_installed.append(pkg)
-			except:
+			except Exception:
 				pass
 
 		if len(already_installed) > 0:
@@ -70,7 +70,10 @@ def apt_install(
 
 
 def apt_dist_upgrade(
-	fix_missing=True, fix_broken=True, force_yes=True, extra_args: list = None
+	fix_missing=True,
+	fix_broken=True,
+	force_yes=True,
+	extra_args: list[str] | None = None,
 ) -> int:
 	cmd = "apt-get dist-upgrade"
 	if fix_broken:
