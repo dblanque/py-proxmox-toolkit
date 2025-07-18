@@ -14,10 +14,10 @@ DEFAULT_CHOICES: YesNoChoicesDict = {"yes": ["yes", "y"], "no": ["no", "n"]}
 
 def yes_no_input(
 	msg: str,
-	input_default: str = None,
+	input_default: str | bool | None = None,
 	input_choices: YesNoChoicesDict = DEFAULT_CHOICES,
-	yes_msg: str = None,
-	no_msg: str = None,
+	yes_msg: str | None = None,
+	no_msg: str | None = None,
 	show_choices=True,
 ):
 	if input_default is True:
@@ -37,7 +37,7 @@ def yes_no_input(
 			or input_default.lower() in input_choices["no"]
 		):
 			default_str = f" [{input_default}]"
-		elif input_default == True:
+		elif input_default is True:
 			default_str = f" [{input_choices['yes'][0].upper()}]"
 		else:
 			default_str = f" [{input_choices['no'][0].upper()}]"
@@ -55,11 +55,11 @@ def yes_no_input(
 			if no_msg:
 				print(no_msg)
 			return False
-		elif input_default == True or input_default in input_choices["yes"]:
+		elif input_default is True or input_default in input_choices["yes"]:
 			if yes_msg:
 				print(yes_msg)
 			return True
-		elif input_default == False or input_default in input_choices["no"]:
+		elif input_default is False or input_default in input_choices["no"]:
 			if no_msg:
 				print(no_msg)
 			return False
