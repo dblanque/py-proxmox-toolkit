@@ -10,7 +10,6 @@ from core.parser import make_parser, ArgumentParser
 from core.debian.apt import apt_update, apt_dist_upgrade, apt_autoremove, apt_autoclean
 from core.utils.shell import is_user_root
 
-
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="OS Update Script",
@@ -37,8 +36,12 @@ def argparser(**kwargs) -> ArgumentParser:
 	)
 	return parser
 
+class LocalParser(ArgumentParser):
+	download_only: bool
+	download_first: bool
+	show_prompts: bool
 
-def main(argv_a, **kwargs):
+def main(argv_a: LocalParser, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
 	is_user_root(exit_on_fail=True)
 
