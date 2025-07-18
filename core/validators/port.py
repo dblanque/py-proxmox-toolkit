@@ -1,4 +1,4 @@
-def validate_port(value: int, raise_exception=False):
+def validate_port(value: int | str, raise_exception=False):
 	try:
 		port = int(value)
 		if 1 <= port <= 65535:
