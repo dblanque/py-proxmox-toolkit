@@ -89,7 +89,7 @@ def main(argv_a, **kwargs):
 	NEW_INTERFACES_FILE = f"{argv_a.source}.auto"
 	OFFLOADING_CMD = "/sbin/ethtool -offload {0} tx off rx off; /sbin/ethtool -K {0} gso off; /sbin/ethtool -K {0} tso off;"
 	INDENT = "\t-> "
-	NON_BRIDGEABLE = ["lo"]
+	NON_BRIDGEABLE = ["lo"]  # noqa: F841
 
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	physical_interfaces = get_interfaces(interface_patterns=PHYSICAL_INTERFACE_PATTERNS)
@@ -102,10 +102,10 @@ def main(argv_a, **kwargs):
 				del configured_ifaces[bridge]
 
 	vmbr_map = {}
-	port_map_list: dict[str] = argv_a.port_map
+	port_map_list: dict[str, str] = argv_a.port_map
 	if port_map_list:
 		for i in port_map_list:
-			i: str = i.split(":")
+			i = i.split(":")
 			port = i[0]
 			bridge = i[1]
 			vmbr_map[port] = bridge
@@ -113,7 +113,7 @@ def main(argv_a, **kwargs):
 				raise Exception(f"Invalid map element (Length must be 2) {i}.")
 
 	for port in vmbr_map.keys():
-		if not port in physical_interfaces and not port in configured_ifaces:
+		if port not in physical_interfaces and port not in configured_ifaces:
 			raise Exception(
 				f"{port} was not found in the Interface list (Port Mapping)."
 			)
@@ -130,7 +130,7 @@ def main(argv_a, **kwargs):
 				for sub_iface in bridge["bridge-ports"]:
 					configured_ifaces[sub_iface]["parent"] = iface
 		# NICs
-		elif not iface in physical_interfaces and any(
+		elif iface not in physical_interfaces and any(
 			[re.match(regex, iface) for regex in PHYSICAL_INTERFACE_PATTERNS]
 		):
 			physical_interfaces.append(iface)
