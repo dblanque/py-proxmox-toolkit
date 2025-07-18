@@ -36,7 +36,10 @@ class NetworkInterfacesParseException(Exception):
 
 def parse_interfaces(
 	file=FILE_NETWORK_INTERFACES,
-) -> tuple[dict[dict], dict[list[list]]]:
+) -> tuple[
+		dict[str, dict[str, str]],
+		dict[str, list[list[str]]]
+	]:
 	"""
 	Parses /etc/network/interfaces file.
 	:return: interfaces, top_level_arguments
@@ -47,35 +50,35 @@ def parse_interfaces(
 	if not isfile(file):
 		raise Exception(f"{file} does not exist.")
 	with open(file, "r") as f:
-		iface_name: str = None
-		for l in f.readlines():
-			l = l.strip()
-			if len(l) <= 0:
+		iface_name: str | None = None
+		for line in f.readlines():
+			line = line.strip()
+			if len(line) <= 0:
 				continue
 			try:
-				l_args = l.split()
+				l_args = line.split()
 				param: str = l_args[0].strip()
 
 				if param in TOP_LEVEL_LONE_ARGS:
-					if not param in top_level_args:
+					if param not in top_level_args:
 						top_level_args[param] = []
 					top_level_args[param].append(l_args[1:])
 				elif param.startswith("#") and not iface_name:
 					continue
 				elif param == "iface":
-					if not l_args[1] in ifaces:
+					if l_args[1] not in ifaces:
 						ifaces[l_args[1]] = {}
 					iface_name = l_args[1]
 					ifaces[iface_name]["name"] = iface_name
 
-					if not l_args[-1] in NETWORK_INTERFACES_INET_TYPES:
+					if l_args[-1] not in NETWORK_INTERFACES_INET_TYPES:
 						raise NetworkInterfacesParseException(
 							"Invalid network interface type."
 						)
 					else:
 						ifaces[iface_name]["type"] = l_args[-1]
 				elif param in TOP_LEVEL_IFACE_BOOL:
-					if not l_args[1] in ifaces:
+					if l_args[1] not in ifaces:
 						ifaces[l_args[1]] = {}
 					ifaces[l_args[1]][param] = True
 				elif param.startswith("#"):
@@ -87,13 +90,13 @@ def parse_interfaces(
 							"A network interface has multiple descriptions.",
 							ifaces[iface_name]["description"],
 						)
-					ifaces[iface_name]["description"] = re.sub(r"^(#+)(.*)$", "\\2", l)
+					ifaces[iface_name]["description"] = re.sub(r"^(#+)(.*)$", "\\2", line)
 					iface_name = None
 				elif iface_name:
 					ifaces[iface_name][param] = l_args[1:]
 			except:
 				print("Offending line:")
-				print(l)
+				print(line)
 				raise
 	return ifaces, top_level_args
 
@@ -108,7 +111,7 @@ def stringify_interfaces(
 		)
 	for iface_key in network_interfaces_keys_sorted:
 		iface_dict: dict = network_interfaces_dict[iface_key]
-		l = ""
+		line = ""
 		try:
 			iface_name = iface_dict.pop("name")
 			iface_type = iface_dict.pop("type")
@@ -119,10 +122,10 @@ def stringify_interfaces(
 		for bool_arg in TOP_LEVEL_IFACE_BOOL:
 			if bool_arg in iface_dict:
 				iface_dict.pop(bool_arg)
-				l = f"{l}\n{bool_arg} {iface_name}"
+				line = f"{line}\n{bool_arg} {iface_name}"
 
-		l = f"{l}\niface {iface_name} inet {iface_type}"
-		output = f"{output}\n{l}"
+		line = f"{line}\niface {iface_name} inet {iface_type}"
+		output = f"{output}\n{line}"
 		for k, v in iface_dict.items():
 			if k == "description":
 				v: str
