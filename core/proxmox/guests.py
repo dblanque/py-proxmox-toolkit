@@ -132,8 +132,8 @@ def get_all_guests(filter_ids: list | dict = []):
 	return guests
 
 
-def parse_net_opts_to_string(net_opts: dict):
-	r = None
+def parse_net_opts_to_string(net_opts: dict) -> str:
+	r = ""
 	for k, v in net_opts.items():
 		if not r:
 			r = f"{k}={v}"
@@ -142,7 +142,7 @@ def parse_net_opts_to_string(net_opts: dict):
 	return r.rstrip(",").replace(",,", ",")
 
 
-def get_guest_snapshots(guest_id: int, remote_args: list = None) -> list:
+def get_guest_snapshots(guest_id: int, remote_args: list | None = None) -> list:
 	if not isinstance(guest_id, int) and not int(guest_id):
 		raise ValueError("guest_id must be of type int.")
 	else:
