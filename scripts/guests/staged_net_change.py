@@ -31,6 +31,7 @@ if __name__ == "__main__":
 		"This python script cannot be executed individually, please use main.py"
 	)
 
+
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="Proxmox VE Staged Guest Network Modifier",

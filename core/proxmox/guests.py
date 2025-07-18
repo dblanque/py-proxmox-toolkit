@@ -14,9 +14,11 @@ logger = logging.getLogger()
 
 PveGuestCommand = Literal["pct", "qm"]
 
+
 class PveGuestType(Enum):
 	VIRTUAL_MACHINE = "vm"
 	LINUX_CONTAINER = "ct"
+
 
 class DiskDict(TypedDict):
 	interface: str
@@ -32,25 +34,30 @@ def get_guest_exists(guest_id: int):
 	guest_list = get_all_guests()
 	return guest_id in guest_list["vm"] or guest_id in guest_list["ct"]
 
+
 @overload
 def get_guest_cfg_path(
 	guest_id, get_host=False, get_type=False, get_as_dict=True
 ) -> dict[str, str]: ...
+
 
 @overload
 def get_guest_cfg_path(
 	guest_id, get_host=False, get_type=False, get_as_dict=False
 ) -> str: ...
 
+
 @overload
 def get_guest_cfg_path(
 	guest_id, get_host=False, get_type=True, get_as_dict=False
 ) -> str: ...
 
+
 @overload
 def get_guest_cfg_path(
 	guest_id, get_host=True, get_type=False, get_as_dict=False
 ) -> str: ...
+
 
 def get_guest_cfg_path(
 	guest_id, get_host=False, get_type=False, get_as_dict=False
@@ -308,11 +315,7 @@ def parse_guest_net_cfg(
 		return net_cfg
 
 
-def is_valid_guest_disk_type(
-	label: str,
-	disk_data: dict,
-	exclude_media=True
-) -> bool:
+def is_valid_guest_disk_type(label: str, disk_data: dict, exclude_media=True) -> bool:
 	if re.sub(r"[0-9]+", "", label) not in DISK_TYPES:
 		return False
 	if "raw_values" in disk_data:

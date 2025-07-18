@@ -36,10 +36,7 @@ class NetworkInterfacesParseException(Exception):
 
 def parse_interfaces(
 	file=FILE_NETWORK_INTERFACES,
-) -> tuple[
-		dict[str, dict[str, str]],
-		dict[str, list[list[str]]]
-	]:
+) -> tuple[dict[str, dict[str, str]], dict[str, list[list[str]]]]:
 	"""
 	Parses /etc/network/interfaces file.
 	:return: interfaces, top_level_arguments
@@ -90,7 +87,9 @@ def parse_interfaces(
 							"A network interface has multiple descriptions.",
 							ifaces[iface_name]["description"],
 						)
-					ifaces[iface_name]["description"] = re.sub(r"^(#+)(.*)$", "\\2", line)
+					ifaces[iface_name]["description"] = re.sub(
+						r"^(#+)(.*)$", "\\2", line
+					)
 					iface_name = None
 				elif iface_name:
 					ifaces[iface_name][param] = l_args[1:]
