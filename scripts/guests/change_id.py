@@ -70,6 +70,14 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-v", "--verbose", action="store_true", default=False)
 	return parser
 
+class LocalParser(ArgumentParser):
+	remote_user: str
+	origin_id: int
+	target_id: int
+	yes: bool
+	dry_run: bool
+	debug: bool
+	verbose: bool
 
 ## ERRORS
 ERR_GUEST_EXISTS = 1
@@ -141,7 +149,7 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 	return
 
 
-def main(argv_a, **kwargs):
+def main(argv_a: LocalParser, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
 	hostname = socket.gethostname()
 	running_in_background = True
