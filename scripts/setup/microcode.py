@@ -11,16 +11,26 @@ import sys
 from core.format.colors import print_c, bcolors
 from core.signal_handlers.sigint import graceful_exit
 from core.debian.apt import apt_install, apt_update
+from typing import TypedDict, Required, NotRequired
 
-SUPPORTED_CPU_VENDORS = {
-	"authenticamd": {"label": "AMD", "deb": "amd64-microcode"},
-	"genuineintel": {
-		"label": "Intel",
-		"deb": "intel-microcode",
-		"supplementary_packages": ["iucode-tool"],
-	},
+class SupportedVendorDict(TypedDict):
+	label: Required[str]
+	deb: Required[str]
+	supplementary_deb: NotRequired[list[str] | set[str] | tuple | str]
+
+VENDOR_AMD: SupportedVendorDict = {
+	"label": "AMD",
+	"deb": "amd64-microcode",
 }
-
+VENDOR_INTEL: SupportedVendorDict = {
+	"label": "Intel",
+	"deb": "intel-microcode",
+	"supplementary_deb": ["iucode-tool"],
+}
+SUPPORTED_CPU_VENDORS: dict[str, SupportedVendorDict] = {
+	"authenticamd": VENDOR_AMD,
+	"genuineintel": VENDOR_INTEL,
+}
 
 def get_cpu_vendor():
 	lscpu = subprocess.Popen(["lscpu"], stdout=subprocess.PIPE)
@@ -29,23 +39,28 @@ def get_cpu_vendor():
 		stdin=lscpu.stdout,
 		stdout=subprocess.PIPE,
 	)
-	output = subprocess.check_output("head -n 1".split(), stdin=grep.stdout)
+	output = subprocess.check_output(["head", "-n", "1"], stdin=grep.stdout)
 	lscpu.wait()
 	grep.wait()
 	return output.decode("utf-8").strip()
 
 
-def get_cpu_vendor_json():
-	output = subprocess.check_output("lscpu --json".split())
-	json_output: list = json.loads(output)["lscpu"]
-	for d in json_output:
-		d: dict
-		field: str = d["field"]
-		field = field.lower().rstrip(":")
-		value = d["data"]
-		if "vendor" in field:
-			return value
-
+def get_cpu_vendor_json(raise_exception = False) -> str:
+	try:
+		output = subprocess.check_output(["lscpu", "--json"])
+		json_output: list = json.loads(output)["lscpu"]
+		for d in json_output:
+			d: dict
+			field: str = d["field"]
+			field = field.lower().rstrip(":")
+			value = d["data"]
+			if "vendor" in field:
+				return value
+	except Exception as e:
+		if raise_exception:
+			raise e
+		print_c(bcolors.L_RED, str(e))
+	return "Unknown"
 
 def main(**kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -68,7 +83,9 @@ def main(**kwargs):
 		if ec == 0:
 			print_c(
 				bcolors.L_GREEN,
-				f"{cpu_vendor_data['label']} Microcode is already installed.",
+				"%s Microcode is already installed." % (
+					cpu_vendor_data["label"]
+				),
 			)
 			sys.exit(0)
 	except Exception:
@@ -77,21 +94,28 @@ def main(**kwargs):
 	apt_update()
 	print_c(
 		bcolors.L_BLUE,
-		f"Downloading and Installing {cpu_vendor_data['label']} Processor Microcode.",
+		"Downloading and Installing %s Processor Microcode." % (
+			cpu_vendor_data["label"]
+		),
 	)
 	apt_search = subprocess.check_output(
-		f"apt-cache search ^{cpu_microcode_deb}$".split()
+		["apt-cache", "search", f"^{cpu_microcode_deb}$"]
 	)
 	if not apt_search.decode().strip().split(" - ")[0] == cpu_microcode_deb:
 		print_c(
 			bcolors.L_RED,
-			"Package not found, please add non-free-firmware APT Debian Repository.",
+			"Package not found, please add non-free-firmware "
+			"APT Debian Repository.",
 		)
 		sys.exit(1)
 	try:
 		deb_to_install = [cpu_microcode_deb]
-		if "supplementary_packages" in cpu_vendor_data:
-			deb_to_install = deb_to_install + cpu_vendor_data["supplementary_packages"]
+		deb_extras = cpu_vendor_data.get("supplementary_deb", [])
+		if deb_extras:
+			if isinstance(deb_extras, (list, set, tuple)):
+				deb_to_install = deb_to_install + list(deb_extras)
+			elif isinstance(deb_extras, str):
+				deb_to_install.append(deb_extras)
 		apt_install(packages=deb_to_install, do_update=False)
 	except:
 		raise
