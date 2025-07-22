@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
 	raise Exception(
 		"This python script cannot be executed individually, please use main.py"
 	)
@@ -114,16 +114,18 @@ def main(**kwargs):
 			"APT Debian Repository.",
 		)
 		sys.exit(1)
-	try:
-		deb_to_install = [cpu_microcode_deb]
-		deb_extras = cpu_vendor_data.get("supplementary_deb", [])
-		if deb_extras:
-			if isinstance(deb_extras, (list, set, tuple)):
-				deb_to_install = deb_to_install + list(deb_extras)
-			elif isinstance(deb_extras, str):
-				deb_to_install.append(deb_extras)
-		apt_install(packages=deb_to_install, do_update=False)
-	except:
-		raise
+	
+	# Setup Packages
+	deb_to_install = [cpu_microcode_deb]
+	deb_extras = cpu_vendor_data.get("supplementary_deb", [])
+	if deb_extras:
+		if isinstance(deb_extras, (list, set, tuple)):
+			deb_to_install = deb_to_install + list(deb_extras)
+		elif isinstance(deb_extras, str):
+			deb_to_install.append(deb_extras)
+
+	# Install Packages
+	apt_install(packages=deb_to_install, do_update=False)
+
 	print_c(bcolors.L_GREEN, "Microcode Installed.")
 	sys.exit(0)
