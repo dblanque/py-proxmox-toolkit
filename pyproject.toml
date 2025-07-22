@@ -19,6 +19,7 @@ pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
 pytest-mock = "^3.14.1"
 genbadge = "^1.1.2"
+jupyter = "^1.1.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
