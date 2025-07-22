@@ -4,11 +4,14 @@ from pytest_mock import MockerFixture
 
 ################################################################################
 import subprocess
+import signal
 from scripts.setup.microcode import (
 	get_cpu_vendor,
 	get_cpu_vendor_json,
 	SUPPORTED_CPU_VENDORS,
+	main,
 )
+from core.format.colors import bcolors
 from typing import Protocol
 
 MODULE_PATH = "scripts.setup.microcode"
@@ -311,3 +314,228 @@ class TestSupportedVendors:
 		assert SUPPORTED_CPU_VENDORS[
 			vendor_name.lower()
 		]["deb"] == expected_deb_pkg
+
+class TestMain:
+	@pytest.mark.parametrize(
+		"cpu_vendor",
+		(
+			"AuthenticAMD",
+			"GenuineIntel",
+		)
+	)
+	def test_success(
+		self,
+		mocker: MockerFixture,
+		cpu_vendor: str,
+	):
+		expected_deb = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]["deb"]
+		m_graceful_exit = mocker.patch(f"{MODULE_PATH}.graceful_exit")
+		m_signal = mocker.patch("signal.signal")
+
+		# Mock cpu vendor result
+		m_get_cpu_vendor = mocker.patch(
+			f"{MODULE_PATH}.get_cpu_vendor",
+			return_value=cpu_vendor
+		)
+		# Mock microcode not installed
+		m_check_call = mocker.patch("subprocess.check_call", return_value=1)
+
+		# Mock apt functions
+		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
+		m_apt_search = mocker.patch(
+			f"{MODULE_PATH}.apt_search",
+			return_value=[expected_deb],
+		)
+		m_apt_install = mocker.patch(f"{MODULE_PATH}.apt_install")
+
+		# Execute script func
+		with pytest.raises(SystemExit) as e:
+			main()
+		assert e.value.code == 0
+
+		# Assertions
+		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
+		m_get_cpu_vendor.assert_called_once()
+		m_check_call.assert_called_once_with(
+			["dpkg", "-l", expected_deb],
+			stdout=subprocess.DEVNULL,
+			stderr=subprocess.STDOUT,
+		)
+		m_apt_update.assert_called_once()
+		m_apt_search.assert_called_once_with(package=expected_deb)
+		expected_pkgs = [expected_deb] + list(
+			SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]\
+				.get("supplementary_deb", [])
+		)
+		m_apt_install.assert_called_once_with(
+			packages=expected_pkgs,
+			do_update=False,
+		)
+
+	@pytest.mark.parametrize(
+		"cpu_vendor",
+		(
+			"AuthenticAMD",
+			"GenuineIntel",
+		)
+	)
+	def test_microcode_already_installed(
+		self,
+		mocker: MockerFixture,
+		cpu_vendor: str,
+	):
+		expected_deb = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]["deb"]
+		expected_label = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]["label"]
+		m_graceful_exit = mocker.patch(f"{MODULE_PATH}.graceful_exit")
+		m_signal = mocker.patch("signal.signal")
+		m_print_c = mocker.patch(f"{MODULE_PATH}.print_c")
+
+		# Mock cpu vendor result
+		m_get_cpu_vendor = mocker.patch(
+			f"{MODULE_PATH}.get_cpu_vendor",
+			return_value=cpu_vendor
+		)
+		# Mock microcode already installed
+		m_check_call = mocker.patch("subprocess.check_call", return_value=0)
+
+		# Mock apt functions
+		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
+		m_apt_search = mocker.patch(f"{MODULE_PATH}.apt_search")
+		m_apt_install = mocker.patch(f"{MODULE_PATH}.apt_install")
+
+		# Execute script func
+		with pytest.raises(SystemExit) as e:
+			main()
+		assert e.value.code == 0
+
+		# Assertions
+		m_print_c.assert_called_once_with(
+			bcolors.L_GREEN,
+			f"{expected_label} Microcode is already installed.",
+		)
+		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
+		m_get_cpu_vendor.assert_called_once()
+		m_check_call.assert_called_once_with(
+			["dpkg", "-l", expected_deb],
+			stdout=subprocess.DEVNULL,
+			stderr=subprocess.STDOUT,
+		)
+		m_apt_update.assert_not_called()
+		m_apt_search.assert_not_called()
+		m_apt_install.assert_not_called()
+
+	@pytest.mark.parametrize(
+		"cpu_vendor",
+		(
+			"AuthenticAMD",
+			"GenuineIntel",
+		)
+	)
+	def test_microcode_not_found_in_repos(
+		self,
+		mocker: MockerFixture,
+		cpu_vendor: str,
+	):
+		expected_deb = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]["deb"]
+		expected_label = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]["label"]
+		m_graceful_exit = mocker.patch(f"{MODULE_PATH}.graceful_exit")
+		m_signal = mocker.patch("signal.signal")
+		m_print_c = mocker.patch(f"{MODULE_PATH}.print_c")
+
+		# Mock cpu vendor result
+		m_get_cpu_vendor = mocker.patch(
+			f"{MODULE_PATH}.get_cpu_vendor",
+			return_value=cpu_vendor
+		)
+		# Mock microcode already installed
+		m_check_call = mocker.patch("subprocess.check_call", return_value=1)
+
+		# Mock apt functions
+		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
+		m_apt_search = mocker.patch(
+			f"{MODULE_PATH}.apt_search",
+			return_value=[]
+		)
+		m_apt_install = mocker.patch(f"{MODULE_PATH}.apt_install")
+
+		# Execute script func
+		with pytest.raises(SystemExit) as e:
+			main()
+		assert e.value.code == 1
+
+		# Assertions
+		m_print_c.assert_any_call(
+			bcolors.L_BLUE,
+			"Downloading and Installing %s Processor Microcode." % (
+				expected_label
+			),
+		)
+		m_print_c.assert_any_call(
+			bcolors.L_RED,
+			"Package not found, please add non-free-firmware "
+			"APT Debian Repository.",
+		)
+		assert m_print_c.call_count == 2
+		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
+		m_get_cpu_vendor.assert_called_once()
+		m_check_call.assert_called_once_with(
+			["dpkg", "-l", expected_deb],
+			stdout=subprocess.DEVNULL,
+			stderr=subprocess.STDOUT,
+		)
+		m_apt_update.assert_called_once()
+		m_apt_search.assert_called_once_with(package=expected_deb)
+		m_apt_install.assert_not_called()
+
+	@pytest.mark.parametrize(
+		"cpu_vendor, expected_color, match_msg",
+		(
+			("", bcolors.L_RED, "CPU Vendor not found."),
+			(None, bcolors.L_RED, "CPU Vendor not found."),
+			("BadVendor", bcolors.L_YELLOW, "CPU Vendor is not supported ({cpu_vendor})."),
+		),
+		ids=[
+			"Empty Vendor String",
+			"None Return",
+			"Unsupported Vendor String",
+		]
+	)
+	def test_invalid_vendor(
+		self,
+		mocker: MockerFixture,
+		cpu_vendor: str | None,
+		expected_color: bcolors,
+		match_msg: str,
+	):
+		m_graceful_exit = mocker.patch(f"{MODULE_PATH}.graceful_exit")
+		m_signal = mocker.patch("signal.signal")
+		m_print_c = mocker.patch(f"{MODULE_PATH}.print_c")
+
+		# Mock cpu vendor result
+		m_get_cpu_vendor = mocker.patch(
+			f"{MODULE_PATH}.get_cpu_vendor",
+			return_value=cpu_vendor
+		)
+		# Mock microcode not installed
+		m_check_call = mocker.patch("subprocess.check_call", return_value=1)
+
+		# Mock apt functions
+		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
+		m_apt_search = mocker.patch(f"{MODULE_PATH}.apt_search")
+		m_apt_install = mocker.patch(f"{MODULE_PATH}.apt_install")
+
+		# Execute script func
+		with pytest.raises(SystemExit) as e:
+			main()
+		assert e.value.code == 1
+
+		# Assertions
+		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
+		m_print_c.assert_called_once_with(
+			expected_color, match_msg.format(cpu_vendor=cpu_vendor)
+		)
+		m_get_cpu_vendor.assert_called_once()
+		m_check_call.assert_not_called()
+		m_apt_update.assert_not_called()
+		m_apt_search.assert_not_called()
+		m_apt_install.assert_not_called()
