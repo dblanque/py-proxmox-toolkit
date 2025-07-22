@@ -14,3 +14,4 @@ venv/
 core/proxmox/vmid_change.py.log
 core/local_config.py
 .local_tests/
+.coverage
