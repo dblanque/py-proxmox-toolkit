@@ -1,7 +1,7 @@
 # For more ANSI Color Codes see:
 # https://misc.flogisoft.com/bash/tip_colors_and_formatting
 from enum import Enum
-
+import sys
 
 class bcolors(Enum):
 	def __str__(self):
@@ -32,7 +32,9 @@ def print_c(color: bcolors, message: str, **kwargs):
 	"""
 	Concatenates and prints {color}{message}{nc}
 	"""
-	return print(f"{color}{message}{bcolors.NC}", **kwargs)
+	force_print = kwargs.pop("force_print", False)
+	if "pytest" not in sys.modules and not force_print:
+		return print(f"{color}{message}{bcolors.NC}", **kwargs)
 
 
 def colorize(color: bcolors, message: str):
