@@ -2,7 +2,6 @@
 import pytest
 from pytest_mock import MockerFixture
 ################################################################################
-import subprocess
 from core.debian.apt import apt_update
 from core.format.colors import bcolors
 
