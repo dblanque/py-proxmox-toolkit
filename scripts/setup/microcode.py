@@ -10,7 +10,7 @@ import json
 import sys
 from core.format.colors import print_c, bcolors
 from core.signal_handlers.sigint import graceful_exit
-from core.debian.apt import apt_install, apt_update
+from core.debian.apt import apt_install, apt_update, apt_search
 from typing import TypedDict, Required, NotRequired
 
 class SupportedVendorDict(TypedDict):
@@ -64,12 +64,20 @@ def get_cpu_vendor_json(raise_exception = False) -> str:
 
 def main(**kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
+
+	# Check CPU Vendor is supported
 	cpu_vendor = get_cpu_vendor()
+	bad_vendor_msg = None
 	if not cpu_vendor:
-		print_c(bcolors.L_RED, "CPU Vendor not found.")
-		sys.exit(1)
-	if cpu_vendor.lower() not in SUPPORTED_CPU_VENDORS:
-		print_c(bcolors.L_YELLOW, f"CPU Vendor is not supported ({cpu_vendor}).")
+		bad_vendor_msg = (bcolors.L_RED, "CPU Vendor not found.")
+	elif cpu_vendor.lower() not in SUPPORTED_CPU_VENDORS:
+		bad_vendor_msg = (
+			bcolors.L_YELLOW,
+			f"CPU Vendor is not supported ({cpu_vendor})."
+		)
+
+	if bad_vendor_msg:
+		print_c(bad_vendor_msg[0], bad_vendor_msg[1])
 		sys.exit(1)
 
 	cpu_vendor_data = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]
@@ -98,10 +106,8 @@ def main(**kwargs):
 			cpu_vendor_data["label"]
 		),
 	)
-	apt_search = subprocess.check_output(
-		["apt-cache", "search", f"^{cpu_microcode_deb}$"]
-	)
-	if not apt_search.decode().strip().split(" - ")[0] == cpu_microcode_deb:
+	search_res = apt_search(package=cpu_microcode_deb)
+	if cpu_microcode_deb not in search_res:
 		print_c(
 			bcolors.L_RED,
 			"Package not found, please add non-free-firmware "
