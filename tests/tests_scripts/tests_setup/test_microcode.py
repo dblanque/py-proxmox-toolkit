@@ -329,8 +329,10 @@ class TestMain:
 		cpu_vendor: str,
 	):
 		expected_deb = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]["deb"]
+		expected_label = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]["label"]
 		m_graceful_exit = mocker.patch(f"{MODULE_PATH}.graceful_exit")
 		m_signal = mocker.patch("signal.signal")
+		m_print_c = mocker.patch(f"{MODULE_PATH}.print_c")
 
 		# Mock cpu vendor result
 		m_get_cpu_vendor = mocker.patch(
@@ -354,6 +356,17 @@ class TestMain:
 		assert e.value.code == 0
 
 		# Assertions
+		m_print_c.assert_any_call(
+			bcolors.L_BLUE,
+			"Downloading and Installing %s Processor Microcode." % (
+				expected_label
+			),
+		)
+		m_print_c.assert_any_call(
+			bcolors.L_GREEN,
+			"Microcode Installed."
+		)
+		assert m_print_c.call_count == 2
 		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
 		m_get_cpu_vendor.assert_called_once()
 		m_check_call.assert_called_once_with(
