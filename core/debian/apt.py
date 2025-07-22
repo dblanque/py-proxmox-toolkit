@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 from core.format.colors import bcolors, print_c
-
+from typing import overload
 
 def apt_update(extra_args: list[str] | None = None) -> int:
 	print_c(bcolors.L_BLUE, "Updating Package Lists.")
@@ -89,7 +89,7 @@ def apt_dist_upgrade(
 	return subprocess.call(cmd.split())
 
 
-def apt_autoremove(force_yes=False):
+def apt_autoremove(force_yes=False) -> int:
 	print_c(bcolors.L_BLUE, "Auto-removing packages.")
 	cmd = "apt-get autoremove"
 	if force_yes:
@@ -97,9 +97,67 @@ def apt_autoremove(force_yes=False):
 	return subprocess.call(cmd.split())
 
 
-def apt_autoclean(force_yes=False):
+def apt_autoclean(force_yes=False) -> int:
 	print_c(bcolors.L_BLUE, "Performing Auto-clean.")
 	cmd = "apt-get autoclean"
 	if force_yes:
 		cmd = f"{cmd} -y"
 	return subprocess.call(cmd.split())
+
+@overload
+def apt_search(s: str) -> list[str]: ...
+@overload
+def apt_search(s: str, return_bytes: bool = True) -> bytes: ...
+@overload
+def apt_search(s: str, return_bytes: bool = False) -> list[str]: ...
+
+@overload
+def apt_search(package: str) -> list[str]: ...
+@overload
+def apt_search(package: str, return_bytes: bool = True) -> bytes: ...
+@overload
+def apt_search(package: str, return_bytes: bool = False) -> list[str]: ...
+
+@overload
+def apt_search(search_args: list[str]) -> list[str]: ...
+@overload
+def apt_search(search_args: list[str], return_bytes = True) -> bytes: ...
+@overload
+def apt_search(search_args: list[str], return_bytes = False) -> list[str]: ...
+
+def apt_search(*args, **kwargs) -> list[str] | bytes:
+	"""Searches for substring or exact package name with apt-cache search."""
+	s: str | None = kwargs.pop("s", None) if not args else args[0]
+	if s and not isinstance(s, str):
+		raise TypeError("s must be of type str.")
+
+	package: str | None = kwargs.pop("package", None)
+	return_bytes: bool = kwargs.pop("return_bytes", False)
+	search_args: list[str] = kwargs.pop("search_args", [])
+
+	args = ["apt-cache", "search"]
+	if s and search_args or package and search_args:
+		raise ValueError("search_args cannot be used with s or package args")
+	if package and s:
+		raise ValueError("s and package cannot be used simultaneously.")
+	if not package and not s:
+		raise ValueError("s or package args must be used.")
+
+	if s:
+		args.append(s)
+	elif package:
+		args.append(f"^{package}$")
+
+	if search_args:
+		args += search_args
+
+	search_res = subprocess.check_output(args=args)
+	if return_bytes:
+		return search_res
+
+	packages = []
+	for line in search_res.decode().split("\n"):
+		package_name = line.split(" - ")[0].strip()
+		if package_name:
+			packages.append(package_name)
+	return packages
