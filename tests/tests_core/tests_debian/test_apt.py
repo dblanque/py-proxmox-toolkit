@@ -165,7 +165,90 @@ class TestAptUpdate:
 		)
 
 class TestAptInstall:
-	...
+	def test_no_packages(self, mocker: MockerFixture):
+		m_print_c = mocker.patch(f"{MODULE_PATH}.print_c")
+		assert not apt_install(packages=[])
+		m_print_c.assert_called_once()
+	
+	@pytest.mark.parametrize(
+		"bad_value",
+		(
+			[1,2,3],
+			{"some", "set"},
+			{"some": "dict"},
+		),
+	)
+	def test_raises_type_error(self, bad_value):
+		with pytest.raises(TypeError, match="must be of type list"):
+			apt_install(packages=bad_value)
+
+	@pytest.mark.parametrize(
+		",".join([
+			"packages",
+			"installed_packages",
+			"expected_packages",
+			"expected_args",
+			"force_yes",
+		]),
+		(
+			(
+				["mock-pkg-1", "mock-pkg-2", "mock-pkg-3"],
+				[],
+				["mock-pkg-1", "mock-pkg-2", "mock-pkg-3"],
+				["apt-get","install"],
+				False
+			),
+			(
+				["mock-pkg-1", "mock-pkg-2", "mock-pkg-3"],
+				["mock-pkg-1"],
+				["mock-pkg-2", "mock-pkg-3"],
+				["apt-get","install"],
+				False
+			),
+			(
+				["mock-pkg-1", "mock-pkg-2", "mock-pkg-3"],
+				["mock-pkg-1", "mock-pkg-2", "mock-pkg-3"],
+				[],
+				["apt-get","install"],
+				False
+			),
+		),
+	)
+	def test_success(
+		self,
+		mocker: MockerFixture,
+		packages: list[str],
+		installed_packages: list[str],
+		expected_packages: list[str],
+		expected_args: list[str],
+		force_yes: bool
+	):
+		# Mocking
+		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
+		m_is_installed = mocker.patch(
+			f"{MODULE_PATH}.dpkg_deb_is_installed",
+			side_effect=[
+				True if v in installed_packages else False
+				for v in packages
+			]
+		)
+		m_sp_call = mocker.patch(
+			"subprocess.call",
+			return_value=True
+		)
+
+		# Execution
+		apt_install(packages=packages, force_yes=force_yes)
+
+		# Assertions
+		m_apt_update.assert_called_once()
+		if expected_packages:
+			m_sp_call.assert_called_once_with(expected_args + expected_packages)
+		else:
+			m_sp_call.assert_not_called()
+		assert m_is_installed.call_count == len(packages)
+
+		
 
 class TestAptDistUpgrade:
 	...
