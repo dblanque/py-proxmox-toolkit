@@ -140,7 +140,7 @@ def test_dpkg_deb_is_installed(
 	hide_stdout: bool,
 	hide_stderr: bool,
 ):
-	expected_stdout = subprocess.DEVNULL if hide_stdout else subprocess.STDOUT
+	expected_stdout = subprocess.DEVNULL if hide_stdout else subprocess.PIPE
 	expected_stderr = subprocess.DEVNULL if hide_stderr else subprocess.STDOUT
 	m_call = mocker.patch("subprocess.call", return_value = ret_code)
 

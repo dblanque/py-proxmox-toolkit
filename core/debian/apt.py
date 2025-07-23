@@ -60,7 +60,7 @@ def dpkg_deb_is_installed(
 ) -> bool:
 	return subprocess.call(
 		["dpkg","-l", pkg],
-		stdout=subprocess.DEVNULL if hide_stdout else subprocess.STDOUT,
+		stdout=subprocess.DEVNULL if hide_stdout else subprocess.PIPE,
 		stderr=subprocess.DEVNULL if hide_stderr else subprocess.STDOUT,
 	) == 0
 
