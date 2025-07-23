@@ -96,7 +96,6 @@ def apt_install(
 		print_c(bcolors.L_BLUE, "Checking Installed Packages.")
 		for pkg in packages:
 			if dpkg_deb_is_installed(pkg):
-				packages.remove(pkg)
 				already_installed.add(pkg)
 
 		if already_installed:
@@ -106,6 +105,8 @@ def apt_install(
 			)
 			for package in already_installed:
 				print(f"\t- {package}")
+	# Re-make list with only non-installed packages
+	packages = [ pkg for pkg in packages if pkg not in already_installed ]
 
 	if packages:
 		print_c(
