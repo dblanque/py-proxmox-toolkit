@@ -16,8 +16,7 @@ def get_all_allowed_paths(project_root: str, subdirectory: str | None = None):
 	paths = []
 	if isinstance(subdirectory, str):
 		for _path in glob.glob(
-			os.path.join(subdirectory, "**", "*.py"),
-			recursive=True
+			os.path.join(subdirectory, "**", "*.py"), recursive=True
 		):
 			_rel_path = os.path.relpath(_path, project_root)
 			basename = os.path.basename(_rel_path)

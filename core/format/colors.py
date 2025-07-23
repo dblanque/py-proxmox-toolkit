@@ -3,6 +3,7 @@
 from enum import Enum
 import sys
 
+
 class bcolors(Enum):
 	def __str__(self):
 		return str(self.value)

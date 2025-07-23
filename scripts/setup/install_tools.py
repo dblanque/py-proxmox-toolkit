@@ -20,8 +20,10 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-l", "--light", action="store_true")
 	return parser
 
+
 class LocalParser(ArgumentParser):
 	light: bool
+
 
 def main(argv_a: LocalParser, **kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)

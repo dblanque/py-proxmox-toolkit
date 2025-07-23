@@ -234,8 +234,7 @@ class TestGetCpuVendorJson:
 	def test_logic(self, mocker: MockerFixture, mock_vendor: str):
 		m_check_output_ret = mocker.Mock()
 		m_check_output = mocker.patch(
-			"subprocess.check_output",
-			return_value=m_check_output_ret
+			"subprocess.check_output", return_value=m_check_output_ret
 		)
 		m_lscpu_json_partial = {
 			"lscpu": [
@@ -254,25 +253,20 @@ class TestGetCpuVendorJson:
 		m_json_loads.assert_called_once_with(m_check_output_ret)
 
 	def test_returns_unknown(self, mocker: MockerFixture):
-		m_check_output = mocker.patch(
-			"subprocess.check_output",
-			side_effect=Exception
-		)
+		m_check_output = mocker.patch("subprocess.check_output", side_effect=Exception)
 		m_json_loads = mocker.patch("json.loads")
 		assert get_cpu_vendor_json() == "Unknown"
 		m_check_output.assert_called_once_with(["lscpu", "--json"])
 		m_json_loads.assert_not_called()
 
 	def test_raises(self, mocker: MockerFixture):
-		m_check_output = mocker.patch(
-			"subprocess.check_output",
-			side_effect=Exception
-		)
+		m_check_output = mocker.patch("subprocess.check_output", side_effect=Exception)
 		m_json_loads = mocker.patch("json.loads")
 		with pytest.raises(Exception):
 			get_cpu_vendor_json(raise_exception=True)
 		m_check_output.assert_called_once_with(["lscpu", "--json"])
 		m_json_loads.assert_not_called()
+
 
 class TestSupportedVendors:
 	@pytest.mark.parametrize(
@@ -311,9 +305,8 @@ class TestSupportedVendors:
 		),
 	)
 	def test_deb(self, vendor_name: str, expected_deb_pkg: str):
-		assert SUPPORTED_CPU_VENDORS[
-			vendor_name.lower()
-		]["deb"] == expected_deb_pkg
+		assert SUPPORTED_CPU_VENDORS[vendor_name.lower()]["deb"] == expected_deb_pkg
+
 
 class TestMain:
 	@pytest.mark.parametrize(
@@ -321,7 +314,7 @@ class TestMain:
 		(
 			"AuthenticAMD",
 			"GenuineIntel",
-		)
+		),
 	)
 	def test_success(
 		self,
@@ -336,13 +329,11 @@ class TestMain:
 
 		# Mock cpu vendor result
 		m_get_cpu_vendor = mocker.patch(
-			f"{MODULE_PATH}.get_cpu_vendor",
-			return_value=cpu_vendor
+			f"{MODULE_PATH}.get_cpu_vendor", return_value=cpu_vendor
 		)
 		# Mock microcode not installed
 		m_is_installed = mocker.patch(
-			f"{MODULE_PATH}.dpkg_deb_is_installed",
-			return_value=False
+			f"{MODULE_PATH}.dpkg_deb_is_installed", return_value=False
 		)
 
 		# Mock apt functions
@@ -361,14 +352,9 @@ class TestMain:
 		# Assertions
 		m_print_c.assert_any_call(
 			bcolors.L_BLUE,
-			"Downloading and Installing %s Processor Microcode." % (
-				expected_label
-			),
+			"Downloading and Installing %s Processor Microcode." % (expected_label),
 		)
-		m_print_c.assert_any_call(
-			bcolors.L_GREEN,
-			"Microcode Installed."
-		)
+		m_print_c.assert_any_call(bcolors.L_GREEN, "Microcode Installed.")
 		assert m_print_c.call_count == 2
 		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
 		m_get_cpu_vendor.assert_called_once()
@@ -376,8 +362,7 @@ class TestMain:
 		m_apt_update.assert_called_once()
 		m_apt_search.assert_called_once_with(package=expected_deb)
 		expected_pkgs = [expected_deb] + list(
-			SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]\
-				.get("supplementary_deb", [])
+			SUPPORTED_CPU_VENDORS[cpu_vendor.lower()].get("supplementary_deb", [])
 		)
 		m_apt_install.assert_called_once_with(
 			packages=expected_pkgs,
@@ -389,7 +374,7 @@ class TestMain:
 		(
 			"AuthenticAMD",
 			"GenuineIntel",
-		)
+		),
 	)
 	def test_microcode_already_installed(
 		self,
@@ -404,13 +389,11 @@ class TestMain:
 
 		# Mock cpu vendor result
 		m_get_cpu_vendor = mocker.patch(
-			f"{MODULE_PATH}.get_cpu_vendor",
-			return_value=cpu_vendor
+			f"{MODULE_PATH}.get_cpu_vendor", return_value=cpu_vendor
 		)
 		# Mock microcode already installed
 		m_is_installed = mocker.patch(
-			f"{MODULE_PATH}.dpkg_deb_is_installed",
-			return_value=True
+			f"{MODULE_PATH}.dpkg_deb_is_installed", return_value=True
 		)
 
 		# Mock apt functions
@@ -440,7 +423,7 @@ class TestMain:
 		(
 			"AuthenticAMD",
 			"GenuineIntel",
-		)
+		),
 	)
 	def test_microcode_not_found_in_repos(
 		self,
@@ -455,21 +438,16 @@ class TestMain:
 
 		# Mock cpu vendor result
 		m_get_cpu_vendor = mocker.patch(
-			f"{MODULE_PATH}.get_cpu_vendor",
-			return_value=cpu_vendor
+			f"{MODULE_PATH}.get_cpu_vendor", return_value=cpu_vendor
 		)
 		# Mock microcode not installed
 		m_is_installed = mocker.patch(
-			f"{MODULE_PATH}.dpkg_deb_is_installed",
-			return_value=False
+			f"{MODULE_PATH}.dpkg_deb_is_installed", return_value=False
 		)
 
 		# Mock apt functions
 		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
-		m_apt_search = mocker.patch(
-			f"{MODULE_PATH}.apt_search",
-			return_value=[]
-		)
+		m_apt_search = mocker.patch(f"{MODULE_PATH}.apt_search", return_value=[])
 		m_apt_install = mocker.patch(f"{MODULE_PATH}.apt_install")
 
 		# Execute script func
@@ -480,14 +458,11 @@ class TestMain:
 		# Assertions
 		m_print_c.assert_any_call(
 			bcolors.L_BLUE,
-			"Downloading and Installing %s Processor Microcode." % (
-				expected_label
-			),
+			"Downloading and Installing %s Processor Microcode." % (expected_label),
 		)
 		m_print_c.assert_any_call(
 			bcolors.L_RED,
-			"Package not found, please add non-free-firmware "
-			"APT Debian Repository.",
+			"Package not found, please add non-free-firmware APT Debian Repository.",
 		)
 		assert m_print_c.call_count == 2
 		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
@@ -502,13 +477,17 @@ class TestMain:
 		(
 			("", bcolors.L_RED, "CPU Vendor not found."),
 			(None, bcolors.L_RED, "CPU Vendor not found."),
-			("BadVendor", bcolors.L_YELLOW, "CPU Vendor is not supported ({cpu_vendor})."),
+			(
+				"BadVendor",
+				bcolors.L_YELLOW,
+				"CPU Vendor is not supported ({cpu_vendor}).",
+			),
 		),
 		ids=[
 			"Empty Vendor String",
 			"None Return",
 			"Unsupported Vendor String",
-		]
+		],
 	)
 	def test_invalid_vendor(
 		self,
@@ -523,8 +502,7 @@ class TestMain:
 
 		# Mock cpu vendor result
 		m_get_cpu_vendor = mocker.patch(
-			f"{MODULE_PATH}.get_cpu_vendor",
-			return_value=cpu_vendor
+			f"{MODULE_PATH}.get_cpu_vendor", return_value=cpu_vendor
 		)
 		# Mock microcode not installed
 		m_check_call = mocker.patch("subprocess.check_call", return_value=1)

@@ -70,6 +70,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-v", "--verbose", action="store_true", default=False)
 	return parser
 
+
 class LocalParser(ArgumentParser):
 	remote_user: str
 	origin_id: int
@@ -78,6 +79,7 @@ class LocalParser(ArgumentParser):
 	dry_run: bool
 	debug: bool
 	verbose: bool
+
 
 ## ERRORS
 ERR_GUEST_EXISTS = 1

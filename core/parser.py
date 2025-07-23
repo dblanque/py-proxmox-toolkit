@@ -66,7 +66,7 @@ def make_parser(**kwargs) -> ArgumentParser:
 
 		parser.add_argument(
 			"filename", help="Script name or path to execute."
-		).completer = PathCompleter(toolkit_path=_toolkit_path) # type: ignore
+		).completer = PathCompleter(toolkit_path=_toolkit_path)  # type: ignore
 	else:
 		parser.add_argument("filename", help="Script name or path to execute.")
 	return parser

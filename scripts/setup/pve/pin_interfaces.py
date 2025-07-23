@@ -75,7 +75,8 @@ def main(argv_a, **kwargs):
 				continue
 
 			print(
-				"Interface %s will be pinned with MAC Address %s" % (
+				"Interface %s will be pinned with MAC Address %s"
+				% (
 					colorize(bcolors.L_BLUE, iface_name),
 					colorize(bcolors.L_RED, iface_mac_addr or "None"),
 				)
@@ -83,7 +84,8 @@ def main(argv_a, **kwargs):
 			if os.path.isfile(udev_link_name) and not use_overwrite:
 				print(
 					"UDEV Link File %s for Interface %s already exists,"
-					"skipping.\n" % (
+					"skipping.\n"
+					% (
 						udev_link_name,
 						iface_name,
 					)

@@ -55,6 +55,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-d", "--verbose", action="store_true")
 	return parser
 
+
 class LocalParser(ArgumentParser):
 	physical: bool
 	virtual: bool
@@ -63,6 +64,7 @@ class LocalParser(ArgumentParser):
 	only_regex: bool
 	sort: bool
 	verbose: bool
+
 
 def main(argv_a: LocalParser, **kwargs):
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
@@ -95,10 +97,6 @@ def main(argv_a: LocalParser, **kwargs):
 		if argv_a.sort:
 			interfaces = sorted(interfaces)
 		for iface in interfaces:
-			print(
-				"\t -> %s" % (
-					colorize(bcolors.L_GREEN, iface)
-				)
-			)
+			print("\t -> %s" % (colorize(bcolors.L_GREEN, iface)))
 	else:
 		print_c(bcolors.L_YELLOW, "No network interfaces detected.")

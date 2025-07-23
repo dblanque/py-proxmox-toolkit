@@ -78,6 +78,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	)
 	return parser
 
+
 class LocalParser(ArgumentParser):
 	gateway: str
 	connection_name: str
@@ -88,6 +89,7 @@ class LocalParser(ArgumentParser):
 	script: str
 	script_args: str
 	shell: str
+
 
 def main(argv_a: LocalParser, **kwargs):
 	gateway = argv_a.gateway
@@ -186,7 +188,7 @@ def main(argv_a: LocalParser, **kwargs):
 if __name__ == "__main__":
 	try:
 		parser = argparser()
-		main(parser, toolkit_path=None) # type: ignore
+		main(parser, toolkit_path=None)  # type: ignore
 	except KeyboardInterrupt:
 		msg = f"{SCRIPT_NAME} stopped"
 		print_c(bcolors.BLUE, msg)
