@@ -1,6 +1,15 @@
 import os
 from typing import TypedDict, NotRequired
 
+DEBIAN_CODENAMES: dict[int, str] = {
+	10: "buster",
+	11: "bullseye",
+	12: "bookworm",
+	13: "trixie",
+	14: "forky",
+	15: "duke",
+}
+
 class OsReleaseDict(TypedDict):
 	name: str
 	id: str
