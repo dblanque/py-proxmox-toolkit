@@ -66,15 +66,15 @@ def apt_install(
 	force_yes=False,
 	extra_args: list[str] | None = None,
 ) -> int:
+	if not packages:
+		print_c(bcolors.L_BLUE, "Nothing to install.")
+		return 0
+
 	if (
 		not isinstance(packages, list) or
 		not all(isinstance(v, str) for v in packages)
 	):
 		raise TypeError("packages must be of type list[str]")
-	if not packages:
-		raise ValueError(
-			"packages must contain elements."
-		)
 
 	# Construct args
 	cmd_args = make_apt_args(
@@ -99,7 +99,7 @@ def apt_install(
 				packages.remove(pkg)
 				already_installed.add(pkg)
 
-		if len(already_installed) > 0:
+		if already_installed:
 			print_c(
 				bcolors.L_GREEN,
 				"The following packages are already installed:"
@@ -107,7 +107,7 @@ def apt_install(
 			for package in already_installed:
 				print(f"\t- {package}")
 
-	if len(packages) > 0:
+	if packages:
 		print_c(
 			bcolors.L_YELLOW,
 			"The following packages will be installed:"
