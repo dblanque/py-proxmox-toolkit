@@ -10,7 +10,7 @@ from core.network.interfaces import (
 	VIRTUAL_INTERFACE_PATTERNS,
 	VIRTUAL_BRIDGE_PATTERNS,
 )
-from core.format.colors import bcolors, print_c
+from core.format.colors import bcolors, print_c, colorize
 from core.parser import make_parser, ArgumentParser
 
 
@@ -95,6 +95,10 @@ def main(argv_a: LocalParser, **kwargs):
 		if argv_a.sort:
 			interfaces = sorted(interfaces)
 		for iface in interfaces:
-			print(f"\t -> {iface}")
+			print(
+				"\t -> %s" % (
+					colorize(bcolors.L_GREEN, iface)
+				)
+			)
 	else:
-		print("No network interfaces detected.")
+		print_c(bcolors.L_YELLOW, "No network interfaces detected.")
