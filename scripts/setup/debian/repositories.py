@@ -18,10 +18,10 @@ SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 
 
 def pre_checks() -> str:
-	"""
-	Performs Debian Release and Version Pre-checks
-	:returns: Debian Distribution Name.
-	:rtype: str
+	"""Performs Debian Release and Version Pre-checks
+
+	Returns:
+		str: Debian Distribution Name.
 	"""
 	release_info = os_release.get_data()
 	if not os_release.is_valid_version(release_info):
@@ -30,7 +30,12 @@ def pre_checks() -> str:
 			f"Unsupported OS Distribution ({release_info['id'].capitalize()}).",
 		)
 		sys.exit(1)
-	debian_distribution = release_info["version_codename"]
+	debian_distribution = release_info.get(
+		"version_codename",
+		os_release.DEBIAN_CODENAMES[
+			int(release_info["version_id"].split(".")[0])
+		]
+	)
 	return debian_distribution
 
 
