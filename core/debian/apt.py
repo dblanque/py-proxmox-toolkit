@@ -53,11 +53,15 @@ def apt_update(
 		sys.exit(ret_code)
 	return ret_code
 
-def dpkg_deb_is_installed(pkg: str) -> bool:
+def dpkg_deb_is_installed(
+	pkg: str,
+	hide_stdout=False,
+	hide_stderr=True
+) -> bool:
 	return subprocess.call(
 		["dpkg","-l", pkg],
-		stdout=subprocess.DEVNULL,
-		stderr=subprocess.DEVNULL,
+		stdout=subprocess.DEVNULL if hide_stdout else subprocess.STDOUT,
+		stderr=subprocess.DEVNULL if hide_stderr else subprocess.STDOUT,
 	) == 0
 
 def apt_install(
