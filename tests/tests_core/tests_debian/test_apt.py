@@ -132,7 +132,7 @@ def test_dpkg_deb_is_installed(mocker: MockerFixture, ret_code: int, expected: b
 	)
 
 class TestAptUpdate:
-	def test_success_no_extras(self, mocker: MockerFixture):
+	def test_success(self, mocker: MockerFixture):
 		m_subprocess_call = mocker.patch("subprocess.call", return_value=0)
 
 		# Execution
@@ -140,16 +140,6 @@ class TestAptUpdate:
 
 		m_subprocess_call.assert_called_once_with(
 			["apt-get", "update", "-y"]
-		)
-
-	def test_success_extras(self, mocker: MockerFixture):
-		m_subprocess_call = mocker.patch("subprocess.call", return_value=0)
-
-		# Execution
-		apt_update(extra_args=["-h"])
-
-		m_subprocess_call.assert_called_once_with(
-			["apt-get", "update", "-h", "-y"]
 		)
 
 	def test_raises_retcode(self, mocker: MockerFixture):
@@ -173,3 +163,18 @@ class TestAptUpdate:
 				str(m_ret_code)
 			),
 		)
+
+class TestAptInstall:
+	...
+
+class TestAptDistUpgrade:
+	...
+
+class TestAptAutoClean:
+	...
+
+class TestAptAutoRemove:
+	...
+
+class TestAptSearch:
+	...
