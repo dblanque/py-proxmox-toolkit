@@ -30,9 +30,9 @@ VIRTUAL_INTERFACE_PATTERNS = (
 
 def get_interfaces(
 	interface_patterns: tuple | list = PHYSICAL_INTERFACE_PATTERNS,
-	override_patterns: tuple | list = False,
+	override_patterns: bool = False,
 	verbose: bool = False,
-	exclude_patterns: tuple | list = None,
+	exclude_patterns: tuple | list | None = None,
 ) -> list:
 	"""
 	Fetches physical interface names and returns them as a list.
