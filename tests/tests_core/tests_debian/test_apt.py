@@ -116,19 +116,43 @@ class TestMakeAptArgs:
 			) # type: ignore
 
 @pytest.mark.parametrize(
-	"ret_code, expected",
+	",".join([
+		"ret_code",
+		"expected",
+		"hide_stdout",
+		"hide_stderr",
+	]),
 	(
-		(1, False),
-		(0, True),
+		(1, False, False, True),
+		(0, True, False, True),
+		(1, False, True, False),
+		(0, True, True, False),
+		(1, False, False, False),
+		(0, True, False, False),
+		(1, False, True, True),
+		(0, True, True, True),
 	)
 )
-def test_dpkg_deb_is_installed(mocker: MockerFixture, ret_code: int, expected: bool):
+def test_dpkg_deb_is_installed(
+	mocker: MockerFixture,
+	ret_code: int,
+	expected: bool,
+	hide_stdout: bool,
+	hide_stderr: bool,
+):
+	expected_stdout = subprocess.DEVNULL if hide_stdout else subprocess.STDOUT
+	expected_stderr = subprocess.DEVNULL if hide_stderr else subprocess.STDOUT
 	m_call = mocker.patch("subprocess.call", return_value = ret_code)
-	assert dpkg_deb_is_installed(pkg="mock-pkg") is expected
+
+	assert dpkg_deb_is_installed(
+		pkg="mock-pkg",
+		hide_stdout=hide_stdout,
+		hide_stderr=hide_stderr,
+	) is expected
 	m_call.assert_called_once_with(
 		["dpkg","-l", "mock-pkg"],
-		stdout=subprocess.DEVNULL,
-		stderr=subprocess.DEVNULL,
+		stdout=expected_stdout,
+		stderr=expected_stderr,
 	)
 
 class TestAptUpdate:
