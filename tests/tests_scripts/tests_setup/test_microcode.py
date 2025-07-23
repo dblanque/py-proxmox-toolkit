@@ -340,7 +340,10 @@ class TestMain:
 			return_value=cpu_vendor
 		)
 		# Mock microcode not installed
-		m_check_call = mocker.patch("subprocess.check_call", return_value=1)
+		m_is_installed = mocker.patch(
+			f"{MODULE_PATH}.dpkg_deb_is_installed",
+			return_value=False
+		)
 
 		# Mock apt functions
 		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
@@ -369,11 +372,7 @@ class TestMain:
 		assert m_print_c.call_count == 2
 		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
 		m_get_cpu_vendor.assert_called_once()
-		m_check_call.assert_called_once_with(
-			["dpkg", "-l", expected_deb],
-			stdout=subprocess.DEVNULL,
-			stderr=subprocess.STDOUT,
-		)
+		m_is_installed.assert_called_once_with(pkg=expected_deb)
 		m_apt_update.assert_called_once()
 		m_apt_search.assert_called_once_with(package=expected_deb)
 		expected_pkgs = [expected_deb] + list(
@@ -409,7 +408,10 @@ class TestMain:
 			return_value=cpu_vendor
 		)
 		# Mock microcode already installed
-		m_check_call = mocker.patch("subprocess.check_call", return_value=0)
+		m_is_installed = mocker.patch(
+			f"{MODULE_PATH}.dpkg_deb_is_installed",
+			return_value=True
+		)
 
 		# Mock apt functions
 		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
@@ -428,11 +430,7 @@ class TestMain:
 		)
 		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
 		m_get_cpu_vendor.assert_called_once()
-		m_check_call.assert_called_once_with(
-			["dpkg", "-l", expected_deb],
-			stdout=subprocess.DEVNULL,
-			stderr=subprocess.STDOUT,
-		)
+		m_is_installed.assert_called_once_with(pkg=expected_deb)
 		m_apt_update.assert_not_called()
 		m_apt_search.assert_not_called()
 		m_apt_install.assert_not_called()
@@ -460,8 +458,11 @@ class TestMain:
 			f"{MODULE_PATH}.get_cpu_vendor",
 			return_value=cpu_vendor
 		)
-		# Mock microcode already installed
-		m_check_call = mocker.patch("subprocess.check_call", return_value=1)
+		# Mock microcode not installed
+		m_is_installed = mocker.patch(
+			f"{MODULE_PATH}.dpkg_deb_is_installed",
+			return_value=False
+		)
 
 		# Mock apt functions
 		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
@@ -491,11 +492,7 @@ class TestMain:
 		assert m_print_c.call_count == 2
 		m_signal.assert_called_once_with(signal.SIGINT, m_graceful_exit)
 		m_get_cpu_vendor.assert_called_once()
-		m_check_call.assert_called_once_with(
-			["dpkg", "-l", expected_deb],
-			stdout=subprocess.DEVNULL,
-			stderr=subprocess.STDOUT,
-		)
+		m_is_installed.assert_called_once_with(pkg=expected_deb)
 		m_apt_update.assert_called_once()
 		m_apt_search.assert_called_once_with(package=expected_deb)
 		m_apt_install.assert_not_called()
