@@ -76,6 +76,9 @@ def apt_install(
 	):
 		raise TypeError("packages must be of type list[str]")
 
+	# De-duplicate package names
+	packages = list(dict.fromkeys(packages))
+
 	# Construct args
 	cmd_args = make_apt_args(
 		initial_args=["apt-get", "install"],
@@ -86,10 +89,6 @@ def apt_install(
 	# Do update if required
 	if do_update:
 		apt_update()
-
-	# De-duplicate package names
-	if isinstance(packages, list):
-		packages = list(dict.fromkeys(packages))
 
 	already_installed = set()
 	if skip_if_installed:
