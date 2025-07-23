@@ -1,23 +1,42 @@
-import os
 import sys
 import subprocess
 from core.format.colors import bcolors, print_c
 from typing import overload
+
+def make_apt_args(
+	initial_args: list[str],
+	extra_args: list[str] | None = [],
+	force_yes: bool = False,
+) -> list[str]:
+	if not initial_args:
+		raise ValueError("initial_args is required")
+	if not isinstance(initial_args, list):
+		raise TypeError("initial_args must be of type list")
+
+	if extra_args:
+		# Check type for extra_args
+		if not isinstance(extra_args, list):
+			raise TypeError("extra_args must be of type list")
+		# Validate all elements being str
+		if not all(isinstance(s, str) for s in extra_args):
+			raise TypeError("All elements in extra_args must be of type str.")
+		# Merge onto initial
+		initial_args += list(extra_args)
+
+	if force_yes and "-y" not in initial_args:
+		initial_args.append("-y")
+	return initial_args
 
 def apt_update(
 	extra_args: list[str] | None = None,
 	exit_on_fail = True
 ) -> int:
 	print_c(bcolors.L_BLUE, "Updating Package Lists.")
-	cmd_args = ["apt-get", "update"]
-	if extra_args:
-		if (
-			not isinstance(extra_args, list) or
-			not all(isinstance(s, str) for s in extra_args)
-		):
-			raise TypeError("extra_args must be of type list[str].")
-		cmd_args += extra_args
-	cmd_args.append("-y")
+	cmd_args = make_apt_args(
+		initial_args=["apt-get", "update"],
+		extra_args=extra_args,
+		force_yes=True
+	)
 
 	# Do update
 	ret_code = subprocess.call(cmd_args)
@@ -33,6 +52,13 @@ def apt_update(
 		sys.exit(ret_code)
 	return ret_code
 
+def dpkg_deb_is_installed(pkg: str) -> bool:
+	return subprocess.call(
+		["dpkg","-l", pkg],
+		stdout=subprocess.DEVNULL,
+		stderr=subprocess.DEVNULL,
+	) == 0
+
 def apt_install(
 	packages: list[str],
 	skip_if_installed=True,
@@ -40,37 +66,38 @@ def apt_install(
 	force_yes=False,
 	extra_args: list[str] | None = None,
 ) -> int:
+	if (
+		not isinstance(packages, list) or
+		not all(isinstance(v, str) for v in packages)
+	):
+		raise TypeError("packages must be of type list[str]")
+	if not packages:
+		raise ValueError(
+			"packages must contain elements."
+		)
+
+	# Construct args
+	cmd_args = make_apt_args(
+		initial_args=["apt-get", "install"],
+		extra_args=extra_args,
+		force_yes=force_yes
+	)
+
+	# Do update if required
 	if do_update:
 		apt_update()
-	
-	# Construct args
-	cmd_args = ["apt-get", "install"]
-	if extra_args:
-		if (
-			not isinstance(extra_args, list) or
-			not all(isinstance(s, str) for s in extra_args)
-		):
-			raise TypeError("extra_args must be of type list[str].")
-		cmd_args += extra_args
 
-	if force_yes and "-y" not in cmd_args:
-		cmd_args.append("-y")
+	# De-duplicate package names
+	if isinstance(packages, list):
+		packages = list(dict.fromkeys(packages))
 
-	already_installed = []
+	already_installed = set()
 	if skip_if_installed:
 		print_c(bcolors.L_BLUE, "Checking Installed Packages.")
 		for pkg in packages:
-			try:
-				ec = subprocess.check_call(
-					["dpkg","-l", pkg],
-					stdout=open(os.devnull, "wb"),
-					stderr=subprocess.STDOUT,
-				)
-				if ec == 0:
-					packages.remove(pkg)
-					already_installed.append(pkg)
-			except Exception:
-				pass
+			if dpkg_deb_is_installed(pkg):
+				packages.remove(pkg)
+				already_installed.add(pkg)
 
 		if len(already_installed) > 0:
 			print_c(
@@ -87,7 +114,7 @@ def apt_install(
 		)
 		for package in packages:
 			print(f"\t- {package}")
-		return subprocess.call(cmd_args + packages)
+		return subprocess.call(cmd_args + list(packages))
 	else:
 		print_c(bcolors.L_BLUE, "Nothing to install.")
 		return 0
@@ -99,23 +126,19 @@ def apt_dist_upgrade(
 	force_yes=True,
 	extra_args: list[str] | None = None,
 ) -> int:
-	cmd_args = ["apt-get", "dist-upgrade"]
-	if extra_args:
-		if (
-			not isinstance(extra_args, list) or
-			not all(isinstance(s, str) for s in extra_args)
-		):
-			raise TypeError("extra_args must be of type list[str].")
-		cmd_args += extra_args
+	if extra_args is None:
+		extra_args = []
+	if fix_broken and "--fix-broken" not in extra_args:
+		extra_args.append("--fix-broken")
+	if fix_missing and "--fix-missing" not in extra_args:
+		extra_args.append("--fix-missing")
 
-
-	if fix_broken and "--fix-broken" not in cmd_args:
-		cmd_args.append("--fix-broken")
-	if fix_missing and "--fix-missing" not in cmd_args:
-		cmd_args.append("--fix-missing")
-
-	if force_yes and "-y" not in cmd_args:
-		cmd_args.append("-y")
+	# Construct args
+	cmd_args = make_apt_args(
+		initial_args=["apt-get", "dist-upgrade"],
+		extra_args=extra_args,
+		force_yes=force_yes
+	)
 
 	print_c(bcolors.L_BLUE, "Performing dist-upgrade.")
 	return subprocess.call(cmd_args)
@@ -123,18 +146,24 @@ def apt_dist_upgrade(
 
 def apt_autoremove(force_yes=False) -> int:
 	print_c(bcolors.L_BLUE, "Auto-removing packages.")
-	cmd_args = ["apt-get", "autoremove"]
-	if force_yes:
-		cmd_args.append("-y")
-	return subprocess.call(cmd_args)
+	return subprocess.call(
+		make_apt_args(
+			initial_args=["apt-get", "autoremove"],
+			extra_args=[],
+			force_yes=force_yes
+		)
+	)
 
 
 def apt_autoclean(force_yes=False) -> int:
 	print_c(bcolors.L_BLUE, "Performing Auto-clean.")
-	cmd_args = ["apt-get", "autoclean"]
-	if force_yes:
-		cmd_args.append("-y")
-	return subprocess.call(cmd_args)
+	return subprocess.call(
+		make_apt_args(
+			initial_args=["apt-get", "autoclean"],
+			extra_args=[],
+			force_yes=force_yes
+		)
+	)
 
 @overload
 def apt_search(s: str) -> list[str]: ...
