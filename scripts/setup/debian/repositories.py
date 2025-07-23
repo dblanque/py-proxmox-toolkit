@@ -40,12 +40,10 @@ def pre_checks() -> str:
 
 
 def set_debian_sources(debian_distribution) -> None:
-	###################################### CHOICES #######################################
 	# Setting debian sources
 	reset_debian_sources = yes_no_input(
 		msg="Do you wish to reset the Debian Sources?", input_default=True
 	)
-	######################################################################################
 
 	# Debian SRCs
 	if reset_debian_sources:
