@@ -55,8 +55,16 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-d", "--verbose", action="store_true")
 	return parser
 
+class LocalParser(ArgumentParser):
+	physical: bool
+	virtual: bool
+	regex: list[str]
+	exclude: list[str]
+	only_regex: bool
+	sort: bool
+	verbose: bool
 
-def main(argv_a, **kwargs):
+def main(argv_a: LocalParser, **kwargs):
 	print_c(bcolors.L_YELLOW, "Scanning Network Interfaces.")
 	regex_list = []
 	if not argv_a.physical and not argv_a.virtual and not argv_a.regex:
@@ -70,7 +78,7 @@ def main(argv_a, **kwargs):
 			+ list(VIRTUAL_INTERFACE_PATTERNS)
 			+ list(VIRTUAL_BRIDGE_PATTERNS)
 		)
-	if argv_a.regex and len(argv_a.regex) > 0:
+	if argv_a.regex:
 		regex_list = regex_list + argv_a.regex
 
 	if argv_a.verbose:
