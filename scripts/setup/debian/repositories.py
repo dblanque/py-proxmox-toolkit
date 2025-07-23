@@ -27,7 +27,9 @@ def pre_checks() -> str:
 	if not os_release.is_valid_version(release_info):
 		print_c(
 			bcolors.L_RED,
-			f"Unsupported OS Distribution ({release_info['id'].capitalize()}).",
+			"Unsupported OS Distribution (%s)." % (
+				release_info["id"].capitalize()
+			),
 		)
 		sys.exit(1)
 	debian_distribution = release_info.get(
