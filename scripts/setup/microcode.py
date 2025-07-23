@@ -10,7 +10,12 @@ import json
 import sys
 from core.format.colors import print_c, bcolors
 from core.signal_handlers.sigint import graceful_exit
-from core.debian.apt import apt_install, apt_update, apt_search
+from core.debian.apt import (
+	apt_install,
+	apt_update,
+	apt_search,
+	dpkg_deb_is_installed,
+)
 from typing import TypedDict, Required, NotRequired
 
 class SupportedVendorDict(TypedDict):
@@ -82,22 +87,14 @@ def main(**kwargs):
 
 	cpu_vendor_data = SUPPORTED_CPU_VENDORS[cpu_vendor.lower()]
 	cpu_microcode_deb = cpu_vendor_data["deb"]
-	try:
-		ec = subprocess.check_call(
-			["dpkg", "-l", cpu_microcode_deb],
-			stdout=subprocess.DEVNULL,
-			stderr=subprocess.STDOUT,
+	if dpkg_deb_is_installed(pkg=cpu_microcode_deb):
+		print_c(
+			bcolors.L_GREEN,
+			"%s Microcode is already installed." % (
+				cpu_vendor_data["label"]
+			),
 		)
-		if ec == 0:
-			print_c(
-				bcolors.L_GREEN,
-				"%s Microcode is already installed." % (
-					cpu_vendor_data["label"]
-				),
-			)
-			sys.exit(0)
-	except Exception:
-		pass
+		sys.exit(0)
 
 	apt_update()
 	print_c(
