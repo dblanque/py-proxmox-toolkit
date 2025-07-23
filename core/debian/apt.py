@@ -42,12 +42,13 @@ def apt_update(
 	ret_code = subprocess.call(cmd_args)
 
 	# Exit or return code
-	print_c(
-		bcolors.L_RED,
-		"Could not do apt update (non-zero exit status %s)." % (
-			str(ret_code)
-		),
-	)
+	if ret_code:
+		print_c(
+			bcolors.L_RED,
+			"Could not do apt update (non-zero exit status %s)." % (
+				str(ret_code)
+			),
+		)
 	if exit_on_fail and ret_code:
 		sys.exit(ret_code)
 	return ret_code
