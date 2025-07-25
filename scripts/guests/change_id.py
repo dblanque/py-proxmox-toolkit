@@ -71,7 +71,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 
-class LocalParser(ArgumentParser):
+class LocalParser:
 	remote_user: str
 	origin_id: int
 	target_id: int

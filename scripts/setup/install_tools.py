@@ -21,7 +21,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 
-class LocalParser(ArgumentParser):
+class LocalParser:
 	light: bool
 
 

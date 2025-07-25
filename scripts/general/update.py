@@ -38,7 +38,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 
-class LocalParser(ArgumentParser):
+class LocalParser:
 	download_only: bool
 	download_first: bool
 	show_prompts: bool

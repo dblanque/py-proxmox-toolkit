@@ -56,7 +56,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 
-class LocalParser(ArgumentParser):
+class LocalParser:
 	physical: bool
 	virtual: bool
 	regex: list[str]

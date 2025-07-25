@@ -28,7 +28,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 
-class LocalParser(ArgumentParser):
+class LocalParser:
 	add_aliases: bool
 	bash_completion: bool
 

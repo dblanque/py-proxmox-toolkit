@@ -79,7 +79,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	return parser
 
 
-class LocalParser(ArgumentParser):
+class LocalParser:
 	gateway: str
 	connection_name: str
 	timeout: int
