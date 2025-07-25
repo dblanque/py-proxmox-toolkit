@@ -45,8 +45,14 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-v", "--verbose", action="store_true")
 	return parser
 
+class LocalParser:
+	interface: list[str]
+	fields: list[str]
+	overwrite: bool
+	print: bool
+	verbose: bool
 
-def main(argv_a, **kwargs):
+def main(argv_a: LocalParser, **kwargs):
 	udev_fields = argv_a.fields
 	use_print = argv_a.print
 	use_overwrite = argv_a.overwrite
@@ -104,7 +110,8 @@ def main(argv_a, **kwargs):
 						attrs = attrs + f"Property={k}={v}" + "\n"
 						print_c(
 							bcolors.L_YELLOW,
-							f"Pinning interface with additional attribute {k} ({v}).",
+							"Pinning interface with additional attribute"
+							f" {k} ({v}).",
 						)
 				data = UDEV_BY_PROPERTY.format(
 					iface_name=iface_name,
@@ -121,13 +128,19 @@ def main(argv_a, **kwargs):
 			if use_print:
 				print_c(
 					bcolors.L_YELLOW,
-					f"Showing UDEV Link Template {udev_link_name} for Interface {iface_name}.",
+					"Showing UDEV Link Template %s for Interface %s." % (
+						udev_link_name,
+						iface_name,
+					),
 				)
 				print(data)
 			else:
 				with open(udev_link_name, "w") as iface_udev_link:
 					print(
-						f"Writing UDEV Link File {colorize(bcolors.L_YELLOW, udev_link_name)} for Interface {colorize(bcolors.L_BLUE, iface_name)}."
+						"Writing UDEV Link File %s for Interface %s." % (
+							colorize(bcolors.L_YELLOW, udev_link_name),
+							colorize(bcolors.L_BLUE, iface_name),
+						)
 					)
 					iface_udev_link.write(data + "\n")
 					print("UDEV Link Written.")
