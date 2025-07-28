@@ -9,12 +9,32 @@ NETWORK_INTERFACES_INET_TYPES = (
 	"dhcp",
 )
 
-PHYSICAL_INTERFACE_PATTERNS = (
+PHYSICAL_INTERFACE_PATTERNS_SHORT = (
 	r"^eth[0-9].*$",
 	r"^eno[0-9].*$",
 	r"^enp[0-9].*$",
 	r"^enx[0-9a-fA-F].*$",
 	r"^ens[0-9].*$",
+)
+
+PHYSICAL_INTERFACE_PATTERNS = (
+	r"^eth[0-9]+$",									# Traditional Ethernet
+	r"^eno[0-9]+$",									# Embedded/onboard NIC
+	r"^enp[0-9]+s[0-9]+(?:f[0-9]+)?(?:d[0-9]+)?$",	# PCI geographic
+	r"^ens[0-9]+$",									# Hotplug slot
+	r"^enx[0-9a-fA-F]+$",							# MAC-based
+	r"^en[a-z][0-9]+$",								# General embedded
+	r"^ib[0-9]+$",									# Infiniband
+	# r"^usb[0-9]+$",								# USB network devices
+	# r"^[a-z]+[0-9]+_[0-9]+$",						# Virtual/physical hybrids
+
+	# Driver-based interface names (common for specific NICs)
+	r"^igb[0-9]+$",                # Intel Gigabit Ethernet (igb driver)
+	r"^ixgbe[0-9]+$",              # Intel 10GbE (ixgbe driver)
+	r"^i40e[0-9]+$",               # Intel 40GbE (i40e driver)
+	r"^bnxt[0-9]+$",               # Broadcom NetXtreme
+	r"^mlx[0-9]+_[0-9]+$",         # Mellanox (some variants)
+	r"^eth[0-9]+_[0-9]+$",         # Some multi-port NICs
 )
 
 VIRTUAL_BRIDGE_PATTERNS = (r"^vmbr[0-9].*$",)
