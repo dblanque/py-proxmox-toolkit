@@ -368,9 +368,10 @@ def get_guest_replication_jobs(old_id: int) -> dict:
 	else:
 		old_id = int(old_id)
 
-	logger = logging.getLogger()
-	jobs = {}
+	if not os.path.isfile(PVE_CFG_REPLICATION):
+		return {}
 
+	jobs = {}
 	with open(PVE_CFG_REPLICATION, "r") as replication_cfg:
 		replication_job = None
 		vmid = None
