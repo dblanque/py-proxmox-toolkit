@@ -20,7 +20,7 @@ PHYSICAL_INTERFACE_PATTERNS_SHORT = (
 PHYSICAL_INTERFACE_PATTERNS = (
 	r"^eth[0-9]+$",									# Traditional Ethernet
 	r"^eno[0-9]+$",									# Embedded/onboard NIC
-	r"^enp[0-9]+s[0-9]+(?:f[0-9]+)?(?:d[0-9]+)?$",	# PCI geographic
+	r"^enp[0-9]+s[0-9]+(?:f[0-9]+)?(?:d[0-9]+)?(?:np[0-9]+)?$", # PCI geographic
 	r"^ens[0-9]+$",									# Hotplug slot
 	r"^enx[0-9a-fA-F]+$",							# MAC-based
 	r"^en[a-z][0-9]+$",								# General embedded
