@@ -39,7 +39,25 @@ Allows you to install some useful aliases and/or bash-completion.
 ## Install Linux Utilities / Packages
 Installs useful linux packages onto your system.
 
-For a full package list you may inspect the code.
+Utility / Package List:
+* sudo
+* net-tools
+* lvm2
+* xfsprogs
+* aptitude
+* htop
+* iotop
+* locate
+* lshw
+* git
+* cifs-utils
+* bmon
+* ethtool
+* rename
+* iptraf-ng
+* nmap
+* arping
+* sysstat
 
 ### Install All Packages
 `./main.py scripts/setup/install_tools.py`
