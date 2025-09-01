@@ -121,6 +121,21 @@ or `Ubuntu` based distro.
 
 `./main.py scripts/setup/pve/pin_interfaces.py`
 
+## Proxmox VE Bridge Generator
+Utility script to automatically generate bridges for all your physical
+interfaces. Useful when you have 4+ NICs/Ports.
+
+There are some examples below but you may check the script's help args for the
+full capabilities.
+
+### Reconfigure All Bridges
+
+`./main.py scripts/setup/pve/generate_bridges.py -r`
+
+### Generate without removing offloading
+
+`./main.py scripts/setup/pve/generate_bridges.py -x`
+
 ## Other Scripts
 
 * `scripts/guests/cloudinit_ip_based_on_host.py`
@@ -145,18 +160,3 @@ This fix only applies on login so make sure to size the terminal to your
 liking before.
 
 `./main.py scripts/setup/debian/xtermjs_resize.py`
-
-## Proxmox VE Bridge Generator
-Utility script to automatically generate bridges for all your physical
-interfaces. Useful when you have 4+ NICs/Ports.
-
-There are some examples below but you may check the script's help args for the
-full capabilities.
-
-### Reconfigure All Bridges
-
-`./main.py scripts/setup/pve/generate_bridges.py -r`
-
-### Generate without removing offloading
-
-`./main.py scripts/setup/pve/generate_bridges.py -x`
