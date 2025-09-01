@@ -1,5 +1,8 @@
 # Proxmox Python Toolkit
 
+## DISCLAIMER
+
+These scripts have not yet been tested nor adapted to Debian 13 / Proxmox VE 9.
 
 ## Installation and usage (Without PIP)
 All dependencies will work, pip packages are not required for any scripts for the moment.
