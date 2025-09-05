@@ -15,6 +15,7 @@ SUPPORTED_RELEASES = (
 	"buster",
 	"bullseye",
 	"bookworm",
+	"trixie",
 	# UBUNTU
 	"focal",
 	"xenial",
