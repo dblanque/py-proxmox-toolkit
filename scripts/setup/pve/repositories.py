@@ -130,7 +130,7 @@ def main(**kwargs):
 	# CEPH SRCs
 	if use_ceph:
 		_ceph_sources = CEPH_SOURCES[ceph_version.name]
-		with open(SOURCES_LIST_CEPH, "w") as ceph_apt_lists:
+		with open(SOURCES_LIST_CEPH + source_file_ext, "w") as ceph_apt_lists:
 			if ceph_src_no_subscription:
 				ceph_list_data = _ceph_sources["no-subscription"]
 			else:
