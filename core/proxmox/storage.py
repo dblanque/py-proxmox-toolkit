@@ -38,6 +38,7 @@ class PVEStorage:
 	name: str
 	type: str
 	path: str
+	tagged_only: bool = False
 
 	def __str__(self):
 		return self.name
@@ -46,7 +47,7 @@ class PVEStorage:
 		self,
 		disk_name: str,
 		new_guest_id: int,
-		new_guest_cfg: str = None,
+		new_guest_cfg: str | None = None,
 		remote_args=None,
 		dry_run=False,
 	):
@@ -267,7 +268,7 @@ def get_storage_cfg(storage_name: str) -> PVEStorage:
 				setattr(r, k, v)
 		except:
 			try:
-				print(storage.__dict__())
+				print(storage)
 			except:
 				pass
 			raise
