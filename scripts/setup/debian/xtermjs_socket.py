@@ -53,7 +53,7 @@ def argparser(**kwargs) -> ArgumentParser:
 
 def main(argv_a, **kwargs):
 	OS_RELEASE_DATA = get_data()
-	OS_RELEASE = OS_RELEASE_DATA["version_codename"]
+	OS_RELEASE = OS_RELEASE_DATA.get("version_codename", "Unknown")
 	if OS_RELEASE not in SUPPORTED_RELEASES:
 		raise Exception(f"OS Release unsupported ({OS_RELEASE}).")
 	INIT_PATH = "/etc/init"
