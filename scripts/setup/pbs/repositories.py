@@ -11,7 +11,7 @@ from core.signal_handlers.sigint import graceful_exit
 from core.utils.prompt import yes_no_input, prompt_reboot, prompt_update
 from core.format.colors import bcolors, print_c
 from ..debian.repositories import pre_checks, set_debian_sources
-from ..apt.sources.pbs import SRC_PBS_ENTERPRISE, SRC_PBS_NO_SUBSCRIPTION
+from ..apt.sources.pbs import SRC_PBS_APT_FORMAT_MAP
 
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
@@ -32,13 +32,14 @@ def main(**kwargs):
 	)
 
 	# PBS SRCs
+	sources_formats = SRC_PBS_APT_FORMAT_MAP[debian_distribution]
 	if pbs_src_no_subscription:
 		pbs_list_file = SOURCES_LIST_PBS_NS
-		pbs_list_data = SRC_PBS_NO_SUBSCRIPTION
+		pbs_list_data = sources_formats["no-subscription"]
 		pbs_list_delete = SOURCES_LIST_PBS_EN
 	else:
 		pbs_list_file = SOURCES_LIST_PBS_EN
-		pbs_list_data = SRC_PBS_ENTERPRISE
+		pbs_list_data = sources_formats["enterprise"]
 		pbs_list_delete = SOURCES_LIST_PBS_NS
 
 	with open(pbs_list_file, "w") as pbs_apt_lists:
