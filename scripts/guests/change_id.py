@@ -54,7 +54,6 @@ from time import sleep
 
 script_path = os.path.realpath(__file__)
 script_dir = os.path.dirname(script_path)
-logger = logging.getLogger()
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
@@ -114,6 +113,7 @@ def vmid_prompt(target=False):
 
 
 def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
+	logger = logging.getLogger()
 	backup_jobs = get_all_backup_jobs()
 	backup_change_errors = []
 	for job in backup_jobs:
