@@ -4,9 +4,21 @@ Python Toolkit for Proxmox, Debian, and Ubuntu based hosts.
 
 You may see examples here: [EXAMPLES.md](./EXAMPLES.md)
 
-## DISCLAIMER
+## Supported Releases / Distributions
 
-These scripts have not yet been tested nor adapted to Debian 13 / Proxmox VE 9.
+### DEBIAN
+* stretch
+* buster
+* bullseye
+* bookworm
+* trixie
+
+### UBUNTU
+* focal
+* xenial
+* bionic
+* jammy
+* noble
 
 ## Installation and usage (Without PIP)
 All dependencies will work, pip packages are not required for any scripts for the moment.
