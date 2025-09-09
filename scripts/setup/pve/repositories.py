@@ -58,7 +58,7 @@ def main(**kwargs):
 	set_debian_sources(debian_distribution)
 
 	# Check if proxmox version valid (>8.0)
-	if not pve_version_exists:
+	if not pve_version_exists():
 		raise DependencyMissing()
 	pve_version = get_pve_version().split(".")
 	min_pve_version = MIN_VERSION.split(".")
