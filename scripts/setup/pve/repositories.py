@@ -15,7 +15,8 @@ from core.utils.prompt import yes_no_input, prompt_reboot, prompt_update
 from core.format.colors import bcolors, print_c
 from ..debian.repositories import pre_checks, set_debian_sources
 from ..apt.sources.ceph import CEPH_SOURCES
-from ..apt.sources.pve import SRC_PVE_ENTERPRISE, SRC_PVE_NO_SUBSCRIPTION
+from ..apt.sources.pve import SRC_PVE_APT_FORMAT_MAP
+from enum import StrEnum, auto
 
 MIN_VERSION = "8.0.0"
 
@@ -25,6 +26,28 @@ SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"
 SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
 
+class SupportedCephVersion(StrEnum):
+	QUINCY = auto()
+	REEF = auto()
+	SQUID = auto()
+
+def prompt_ceph_version() -> SupportedCephVersion:
+	"""Prompts user for required CEPH Version Codename.
+
+	Returns:
+		SupportedCephVersion: Enum containing the codename as 
+		key-value pair (upper-case, lower-case respectively)
+	"""
+	CEPH_CHOICES = SupportedCephVersion.__members__.values()
+	CEPH_CHOICES_STR = ", ".join(CEPH_CHOICES)
+	print("Available CEPH Versions: %s" % (CEPH_CHOICES_STR))
+	while True:
+		r = input("Please enter the desired CEPH Version: ")
+		try:
+			r = SupportedCephVersion(r)
+			return r
+		except ValueError:
+			print(f"Please enter a valid choice (one of {CEPH_CHOICES_STR}).")
 
 def main(**kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -55,10 +78,7 @@ def main(**kwargs):
 		msg="Do you wish to add the CEPH Repositories?", input_default=False
 	)
 	if use_ceph:
-		ceph_reef = yes_no_input(
-			msg="Do you wish to use CEPH REEF instead of CEPH QUINCY?",
-			input_default=True,
-		)
+		ceph_version = prompt_ceph_version()
 		ceph_src_no_subscription = yes_no_input(
 			msg="Do you wish to use the CEPH No-Subscription Repositories?",
 			input_default=True,
@@ -82,13 +102,14 @@ def main(**kwargs):
 	######################################################################################
 
 	# PVE SRCs
+	sources_formats = SRC_PVE_APT_FORMAT_MAP[debian_distribution]
 	if pve_src_no_subscription:
 		pve_list_file = SOURCES_LIST_PVE_NS
-		pve_list_data = SRC_PVE_NO_SUBSCRIPTION
+		pve_list_data = sources_formats["no-subscription"]
 		pve_list_delete = SOURCES_LIST_PVE_EN
 	else:
 		pve_list_file = SOURCES_LIST_PVE_EN
-		pve_list_data = SRC_PVE_ENTERPRISE
+		pve_list_data = sources_formats["enterprise"]
 		pve_list_delete = SOURCES_LIST_PVE_NS
 
 	with open(pve_list_file, "w") as pve_apt_lists:
@@ -99,17 +120,12 @@ def main(**kwargs):
 
 	# CEPH SRCs
 	if use_ceph:
+		_ceph_sources = CEPH_SOURCES[ceph_version.name]
 		with open(SOURCES_LIST_CEPH, "w") as ceph_apt_lists:
-			if ceph_reef:  # REEF
-				if ceph_src_no_subscription:
-					ceph_list_data = CEPH_SOURCES["REEF"]["NO_SUBSCRIPTION"]
-				else:
-					ceph_list_data = CEPH_SOURCES["REEF"]["ENTERPRISE"]
-			else:  # QUINCY
-				if ceph_src_no_subscription:
-					ceph_list_data = CEPH_SOURCES["QUINCY"]["NO_SUBSCRIPTION"]
-				else:
-					ceph_list_data = CEPH_SOURCES["QUINCY"]["ENTERPRISE"]
+			if ceph_src_no_subscription:
+				ceph_list_data = _ceph_sources["no-subscription"]
+			else:
+				ceph_list_data = _ceph_sources["enterprise"]
 			ceph_apt_lists.write(ceph_list_data)
 		print_c(bcolors.L_GREEN, "CEPH Sources Set.")
 	else:
