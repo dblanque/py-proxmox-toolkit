@@ -30,6 +30,7 @@ from core.signal_handlers.sigint import graceful_exit
 import logging
 import socket
 import subprocess
+import json
 from core.proxmox.guests import (
 	get_guest_cfg_path,
 	get_guest_status,
@@ -117,6 +118,7 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 	backup_jobs = get_all_backup_jobs()
 	backup_change_errors = []
 	for job in backup_jobs:
+		logger.debug("Looped through Backup Job: %s", json.dumps(job, indent=4))
 		if "vmid" in job:
 			job_id = job["id"]
 			job_vmids_data = job["vmid"]
@@ -290,6 +292,8 @@ def main(argv_a: LocalParser, **kwargs):
 		logger.info(f"Deleting job {job_name}")
 		job_delete_cmd = f"pvesr delete {job_name}".split()
 		if guest_on_remote_host:
+			if not args_ssh:
+				raise Exception("args_ssh cannot be None.")
 			job_delete_cmd = args_ssh + job_delete_cmd
 		logger.debug(" ".join(job_delete_cmd))
 		if not argv_a.dry_run:
@@ -344,6 +348,8 @@ def main(argv_a: LocalParser, **kwargs):
 	# Rename Guest Config File
 	args_mv = ["/usr/bin/mv", old_cfg_path, new_cfg_path]
 	if guest_on_remote_host:
+		if not args_ssh:
+			raise Exception("args_ssh cannot be None.")
 		args_mv = args_ssh + args_mv
 
 	# Rename Guest Configuration
@@ -393,6 +399,8 @@ def main(argv_a: LocalParser, **kwargs):
 				v = str(job[arg])
 			new_job_cmd = new_job_cmd + [f"--{arg}", v]
 		if guest_on_remote_host:
+			if not args_ssh:
+				raise Exception("args_ssh cannot be None.")
 			new_job_cmd = args_ssh + new_job_cmd
 		logger.debug(" ".join(new_job_cmd))
 		if not argv_a.dry_run:
