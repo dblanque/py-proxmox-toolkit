@@ -141,10 +141,16 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 				):
 					backup_change_errors.append(job_id)
 				else:
-					logger.info("Modified backup job %s (%s).", job_id, job_description)
+					logger.info(
+						"Modified backup job %s (%s).",
+						job_id,
+						f"({job_description})" if job_description else ""
+					)
 			else:
 				logger.info(
-					"Fake modified backup job %s (%s).", job_id, job_description
+					"Fake modified backup job %s (%s).",
+					job_id,
+					f"({job_description})" if job_description else ""
 				)
 	if len(backup_change_errors) > 0:
 		logger.error("Unable to re-target some backup jobs, please fix them manually.")
