@@ -90,7 +90,7 @@ def get_status(guest_id: int, guest_type: str):
 
 
 def main(**kwargs):
-	if args.status and type(args.status) == list:
+	if args.status and isinstance(args.status, list):
 		guest_id = args.status[0]
 		guest_type = args.status[1].lower()
 		subpath = "qemu-server"
