@@ -190,6 +190,10 @@ def main(argv_a: LocalParser, **kwargs):
 	if not validate_vmid(vmid=id_target):
 		id_target = vmid_prompt(target=True)
 
+	# Ensure ids are cast to int
+	id_origin = int(id_origin)
+	id_target = int(id_target)
+
 	if not get_guest_exists(id_origin):
 		logger.error("Guest with Origin ID (%s) does not exist.", id_origin)
 		sys.exit(ERR_GUEST_NOT_EXISTS)
