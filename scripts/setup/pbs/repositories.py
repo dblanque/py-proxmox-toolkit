@@ -13,11 +13,13 @@ from core.format.colors import bcolors, print_c
 from ..debian.repositories import pre_checks, set_debian_sources
 from ..apt.sources.pbs import SRC_PBS_APT_FORMAT_MAP
 
-SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
-SOURCES_LIST_PBS_NS = f"{SOURCES_LIST_DIR}/pbs-no-subscription.list"
-SOURCES_LIST_PBS_EN = f"{SOURCES_LIST_DIR}/pbs-enterprise.list"
+SOURCES_LIST_PBS_NS = f"{SOURCES_LIST_DIR}/pbs-no-subscription"
+SOURCES_LIST_PBS_EN = f"{SOURCES_LIST_DIR}/pbs-enterprise"
 
+def backup_old_list_format(filename):
+	if os.path.isfile(filename + ".list"):
+		os.rename(filename + ".list", filename + ".list.bkp")
 
 def main(**kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -33,6 +35,10 @@ def main(**kwargs):
 
 	# PBS SRCs
 	sources_formats = SRC_PBS_APT_FORMAT_MAP[debian_distribution]
+	source_file_ext = (
+		".list" if debian_distribution == "bookworm"
+		else ".sources"
+	)
 	if pbs_src_no_subscription:
 		pbs_list_file = SOURCES_LIST_PBS_NS
 		pbs_list_data = sources_formats["no-subscription"]
@@ -42,8 +48,9 @@ def main(**kwargs):
 		pbs_list_data = sources_formats["enterprise"]
 		pbs_list_delete = SOURCES_LIST_PBS_NS
 
-	with open(pbs_list_file, "w") as pbs_apt_lists:
+	with open(pbs_list_file + source_file_ext, "w") as pbs_apt_lists:
 		pbs_apt_lists.write(pbs_list_data.format(debian_distribution))
+	backup_old_list_format(pbs_list_file)
 	if os.path.exists(pbs_list_delete):
 		os.remove(pbs_list_delete)
 	print_c(bcolors.L_GREEN, "Proxmox Backup Server Sources Set.")

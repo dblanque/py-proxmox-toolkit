@@ -20,11 +20,10 @@ from enum import StrEnum, auto
 
 MIN_VERSION = "8.0.0"
 
-SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
-SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription.list"
-SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise.list"
-SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph.list"
+SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription"
+SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise"
+SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph"
 
 class SupportedCephVersion(StrEnum):
 	QUINCY = auto()
@@ -48,6 +47,10 @@ def prompt_ceph_version() -> SupportedCephVersion:
 			return r
 		except ValueError:
 			print(f"Please enter a valid choice (one of {CEPH_CHOICES_STR}).")
+
+def backup_old_list_format(filename):
+	if os.path.isfile(filename + ".list"):
+		os.rename(filename + ".list", filename + ".list.bkp")
 
 def main(**kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -103,6 +106,10 @@ def main(**kwargs):
 
 	# PVE SRCs
 	sources_formats = SRC_PVE_APT_FORMAT_MAP[debian_distribution]
+	source_file_ext = (
+		".list" if debian_distribution == "bookworm"
+		else ".sources"
+	)
 	if pve_src_no_subscription:
 		pve_list_file = SOURCES_LIST_PVE_NS
 		pve_list_data = sources_formats["no-subscription"]
@@ -112,8 +119,10 @@ def main(**kwargs):
 		pve_list_data = sources_formats["enterprise"]
 		pve_list_delete = SOURCES_LIST_PVE_NS
 
-	with open(pve_list_file, "w") as pve_apt_lists:
+	with open(pve_list_file + source_file_ext, "w") as pve_apt_lists:
 		pve_apt_lists.write(pve_list_data.format(debian_distribution))
+	if source_file_ext == ".sources":
+		backup_old_list_format(pve_list_file)
 	if os.path.exists(pve_list_delete):
 		os.remove(pve_list_delete)
 	print_c(bcolors.L_GREEN, "Proxmox VE Sources Set.")
