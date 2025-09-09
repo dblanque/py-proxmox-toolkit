@@ -24,7 +24,7 @@ SUPPORTED_RELEASES = (
 	"noble",
 )
 
-XTERM_RESIZE_TEMPLATE = """
+XTERM_RESIZE_TEMPLATE = r"""
 #!/bin/sh
 res() {
 
