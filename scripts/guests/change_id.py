@@ -236,7 +236,7 @@ def main(argv_a: LocalParser, **kwargs):
 		remote_args=args_ssh,
 		debug=debug_verbose,
 	)
-	guest_disks: list[dict] = []
+	guest_disks: list[DiskDict] = []
 	guest_snapshots = get_guest_snapshots(guest_id=id_origin, remote_args=args_ssh)
 
 	if argv_a.verbose:

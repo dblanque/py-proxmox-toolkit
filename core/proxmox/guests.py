@@ -6,7 +6,7 @@ import logging
 import subprocess
 from .constants import PVE_CFG_NODES_DIR
 from sys import getdefaultencoding
-from typing import TypedDict, Literal, overload
+from typing import TypedDict, Literal, overload, NotRequired
 from enum import Enum
 from core.proxmox.constants import DISK_TYPES, PVE_CFG_REPLICATION
 
@@ -22,7 +22,7 @@ class PveGuestType(Enum):
 
 class DiskDict(TypedDict):
 	interface: str
-	raw_values: str
+	raw_values: NotRequired[str]
 	storage: str
 	name: str
 
@@ -426,10 +426,14 @@ def get_guest_replication_statuses(
 	return data
 
 
-def parse_guest_disk(disk_name, disk_values, vmstate=False):
+def parse_guest_disk(disk_name, disk_values: str | dict, vmstate=False) -> DiskDict | None:
 	logger = logging.getLogger()
 	logging.info(f"Parsing disk {disk_name}")
 	if "raw_values" in disk_values:
+		if not isinstance(disk_values, dict):
+			raise TypeError(
+				"disk_values must be of type dict if vmstate is False."
+			)
 		if len(disk_values["raw_values"]) != 1:
 			logger.error("Bad Parsing.")
 			logger.error(
@@ -449,6 +453,10 @@ def parse_guest_disk(disk_name, disk_values, vmstate=False):
 			"name": _split_values[1],
 		}
 	elif vmstate:
+		if not isinstance(disk_values, str):
+			raise TypeError(
+				"disk_values must be of type str if vmstate is True."
+			)
 		_split_values = disk_values.split(":")
 		logger.info("%s: %s", disk_name, disk_values)
 		return {
