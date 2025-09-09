@@ -133,7 +133,7 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 
 			job_vmids.remove(old_id)
 			job_vmids.append(new_id)
-			job_vmids_data = ",".join(job_vmids)
+			job_vmids_data = ",".join([str(v) for v in job_vmids])
 
 			if not dry_run:
 				if set_backup_attrs(
