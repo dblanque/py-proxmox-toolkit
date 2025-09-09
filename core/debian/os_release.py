@@ -72,6 +72,7 @@ def get_data() -> OsReleaseDict:
 def is_valid_version(
 	os_release_info: OsReleaseDict,
 	min_version: int = 12,
+	max_version: int | None = None,
 ) -> bool:
 	"""Checks if OS major version is greater than min_version.
 
@@ -80,7 +81,8 @@ def is_valid_version(
 	major_version = int(os_release_info.get("version_id", "-1").split(".")[0])
 	if (
 		os_release_info.get("id", "unknown") != "debian" or
-		major_version < min_version
+		major_version < min_version or
+		(max_version is not None and major_version > max_version)
 	):
 		return False
 	return True
