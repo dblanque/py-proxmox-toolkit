@@ -11,7 +11,7 @@ from core.signal_handlers.sigint import graceful_exit
 from core.debian import os_release
 from core.utils.prompt import yes_no_input, prompt_reboot, prompt_update
 from core.format.colors import bcolors, print_c
-from ..apt.sources.debian import DEB_LISTS
+from ..apt.sources.debian import DEB_LISTS, DEB_FILENAMES
 
 SOURCES_LIST = "/etc/apt/sources.list"
 SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
@@ -24,11 +24,13 @@ def pre_checks() -> str:
 		str: Debian Distribution Name.
 	"""
 	release_info = os_release.get_data()
-	if not os_release.is_valid_version(release_info):
+	if not os_release.is_valid_version(release_info, max_version=13):
 		print_c(
 			bcolors.L_RED,
-			"Unsupported OS Distribution (%s)." % (
-				release_info["id"].capitalize()
+			"Unsupported OS Distribution or Version (%s, %s, %s)." % (
+				release_info["id"].capitalize(),
+				str(release_info.get("version", "Unknown Version")),
+				str(release_info.get("version_codename", "Unknown Codename")),
 			),
 		)
 		sys.exit(1)
@@ -49,7 +51,7 @@ def set_debian_sources(debian_distribution) -> None:
 
 	# Debian SRCs
 	if reset_debian_sources:
-		with open("/etc/apt/sources.list", "w") as debian_apt_lists:
+		with open(DEB_FILENAMES[debian_distribution], "w") as debian_apt_lists:
 			debian_apt_lists.write(
 				DEB_LISTS[debian_distribution].format(debian_distribution)
 			)
