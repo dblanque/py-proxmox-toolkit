@@ -39,7 +39,9 @@ def argparser(**kwargs) -> ArgumentParser:
 def append_tar_dirs(in_dirs: list, out_dirs: list) -> list:
 	for d in in_dirs:
 		if not os.path.isdir(d):
-			print_c(bcolors.L_YELLOW, f"Directory ({d}) does not exist, skipping.")
+			print_c(
+				bcolors.L_YELLOW, f"Directory ({d}) does not exist, skipping."
+			)
 			continue
 		out_dirs.append(d)
 	return out_dirs

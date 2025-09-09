@@ -6,12 +6,23 @@ parser = argparse.ArgumentParser(
 	description="Returns Boolean on timedelta based threshold.",
 )
 parser.add_argument(
-	"-s", "--date-start", required=True, help="Must be in format %Y-%m-%dT%H:%M:%S%z"
+	"-s",
+	"--date-start",
+	required=True,
+	help="Must be in format %Y-%m-%dT%H:%M:%S%z",
 )
-parser.add_argument("-td", "--threshold-days", required=False, default=0, type=int)
-parser.add_argument("-th", "--threshold-hours", required=False, default=0, type=int)
-parser.add_argument("-tm", "--threshold-minutes", required=False, default=0, type=int)
-parser.add_argument("-ts", "--threshold-seconds", required=False, default=0, type=int)
+parser.add_argument(
+	"-td", "--threshold-days", required=False, default=0, type=int
+)
+parser.add_argument(
+	"-th", "--threshold-hours", required=False, default=0, type=int
+)
+parser.add_argument(
+	"-tm", "--threshold-minutes", required=False, default=0, type=int
+)
+parser.add_argument(
+	"-ts", "--threshold-seconds", required=False, default=0, type=int
+)
 parser.add_argument(
 	"-go",
 	"--greater-only",
@@ -21,7 +32,11 @@ parser.add_argument(
 	help="Only return true if greater (default is greater or equal).",
 )
 parser.add_argument(
-	"-us", "--microsecond-precision", required=False, default=False, action="store_true"
+	"-us",
+	"--microsecond-precision",
+	required=False,
+	default=False,
+	action="store_true",
 )
 parser.add_argument(
 	"-t",
@@ -46,14 +61,18 @@ def check_date_threshold():
 			timezone.utc
 		)
 	except:
-		raise ValueError(f"date_start | Incorrect Date Format, must be {DATE_FMT}")
+		raise ValueError(
+			f"date_start | Incorrect Date Format, must be {DATE_FMT}"
+		)
 	if not isinstance(args.date_target, datetime):
 		try:
-			date_target = datetime.strptime(args.date_target, DATE_FMT).astimezone(
-				timezone.utc
-			)
+			date_target = datetime.strptime(
+				args.date_target, DATE_FMT
+			).astimezone(timezone.utc)
 		except:
-			raise ValueError(f"date_target | Incorrect Date Format, must be {DATE_FMT}")
+			raise ValueError(
+				f"date_target | Incorrect Date Format, must be {DATE_FMT}"
+			)
 	else:
 		date_target = args.date_target
 	if not args.microsecond_precision:

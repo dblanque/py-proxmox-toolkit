@@ -105,7 +105,9 @@ class SQLite:
 		try:
 			return self.insert(table=table, values=values, extra=extra_sql)
 		except:
-			logger.error("Could not upsert values %s onto table %s", values, table)
+			logger.error(
+				"Could not upsert values %s onto table %s", values, table
+			)
 			raise
 
 	def select(self, table: str, values: None, where: dict = {}):

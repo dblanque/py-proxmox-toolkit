@@ -17,9 +17,11 @@ SOURCES_LIST_DIR = "/etc/apt/sources.list.d"
 SOURCES_LIST_PBS_NS = f"{SOURCES_LIST_DIR}/pbs-no-subscription"
 SOURCES_LIST_PBS_EN = f"{SOURCES_LIST_DIR}/pbs-enterprise"
 
+
 def backup_old_list_format(filename):
 	if os.path.isfile(filename + ".list"):
 		os.rename(filename + ".list", filename + ".list.bkp")
+
 
 def main(**kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -36,8 +38,7 @@ def main(**kwargs):
 	# PBS SRCs
 	sources_formats = SRC_PBS_APT_FORMAT_MAP[debian_distribution]
 	source_file_ext = (
-		".list" if debian_distribution == "bookworm"
-		else ".sources"
+		".list" if debian_distribution == "bookworm" else ".sources"
 	)
 	if pbs_src_no_subscription:
 		pbs_list_file = SOURCES_LIST_PBS_NS

@@ -64,14 +64,20 @@ class Unit:
 	def is_disabled(self) -> bool:
 		return not self.is_enabled()
 
-	def _stat_command(self, action: UNIT_STATE_COMMANDS, extra_args=None) -> str:
+	def _stat_command(
+		self, action: UNIT_STATE_COMMANDS, extra_args=None
+	) -> str:
 		if action not in get_args(UNIT_STATE_COMMANDS):
 			raise ValueError(f"{action} not in {UNIT_STATE_COMMANDS}")
 		cmd = f"systemctl {action}"
 		if extra_args:
 			cmd = cmd + " " + " ".join(extra_args)
 		cmd = f"{cmd} {self.name}.{self.service_type}".split()
-		return subprocess.check_output(args=cmd).decode(getdefaultencoding()).strip()
+		return (
+			subprocess.check_output(args=cmd)
+			.decode(getdefaultencoding())
+			.strip()
+		)
 
 	def _command(self, action: UNIT_COMMANDS, extra_args=None) -> int:
 		if action not in get_args(UNIT_COMMANDS):

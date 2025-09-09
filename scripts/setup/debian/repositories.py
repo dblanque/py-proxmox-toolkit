@@ -27,7 +27,8 @@ def pre_checks() -> str:
 	if not os_release.is_valid_version(release_info, max_version=13):
 		print_c(
 			bcolors.L_RED,
-			"Unsupported OS Distribution or Version (%s, %s, %s)." % (
+			"Unsupported OS Distribution or Version (%s, %s, %s)."
+			% (
 				release_info["id"].capitalize(),
 				str(release_info.get("version", "Unknown Version")),
 				str(release_info.get("version_codename", "Unknown Codename")),
@@ -38,7 +39,7 @@ def pre_checks() -> str:
 		"version_codename",
 		os_release.DEBIAN_CODENAMES[
 			int(release_info["version_id"].split(".")[0])
-		]
+		],
 	)
 	return debian_distribution
 

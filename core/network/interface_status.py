@@ -40,7 +40,9 @@ def get_iface_status(iface_name):
 	for l in output:
 		if "state" in l:
 			iface_status_line = l.split(" ")
-	iface_status = iface_status_line[iface_status_line.index("state") + 1].strip()
+	iface_status = iface_status_line[
+		iface_status_line.index("state") + 1
+	].strip()
 	return iface_status
 
 

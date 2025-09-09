@@ -37,7 +37,9 @@ def get_backup_job(job_id: str) -> dict:
 	return json.loads(jobs)
 
 
-def set_backup_attrs(job_id: str, data: dict, raise_exception=False) -> None | list:
+def set_backup_attrs(
+	job_id: str, data: dict, raise_exception=False
+) -> None | list:
 	"""
 	Sets a dictionary of attributes on a backup job.
 	PVE API Based Function, does not require remote/ssh arguments.

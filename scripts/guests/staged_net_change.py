@@ -46,7 +46,10 @@ def argparser(**kwargs) -> ArgumentParser:
 		"-rd", "--rollback-delay", type=int, help="Rollback Delay in Seconds"
 	)
 	parser.add_argument(
-		"-p", "--print-original", type=int, help="Print Original Config Arguments"
+		"-p",
+		"--print-original",
+		type=int,
+		help="Print Original Config Arguments",
 	)
 	parser.add_argument(
 		"--example", action="store_true", help="Shows example config file"
@@ -55,7 +58,9 @@ def argparser(**kwargs) -> ArgumentParser:
 
 
 # src: https://stackoverflow.com/questions/44037060/how-to-set-a-timeout-for-input
-def TimedInputYN(question, default="yes", timeout=30, timeoutmsg="Prompt Timed Out."):
+def TimedInputYN(
+	question, default="yes", timeout=30, timeoutmsg="Prompt Timed Out."
+):
 	logger = logging.getLogger()
 
 	def timeout_error(*_):
@@ -91,7 +96,9 @@ def main(argv_a, **kwargs):
 		logger.setLevel(logging.DEBUG)
 
 	# Logging
-	logfile = f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
+	logfile = (
+		f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
+	)
 	with open(logfile, "w"):
 		pass
 	logger.addHandler(logging.FileHandler(logfile))
@@ -153,7 +160,10 @@ def main(argv_a, **kwargs):
 			guest_host = get_guest_cfg_path(guest_id=guest_id, get_host=True)
 			if guest_host != hostname:
 				guest_net_orig[int(guest_id)] = parse_guest_net_cfg(
-					guest_id, remote=True, remote_host=guest_host, debug=argv_a.debug
+					guest_id,
+					remote=True,
+					remote_host=guest_host,
+					debug=argv_a.debug,
 				)
 			else:
 				guest_net_orig[int(guest_id)] = parse_guest_net_cfg(
@@ -183,7 +193,9 @@ def main(argv_a, **kwargs):
 		net_cfg = deepcopy(guest_net_orig[int(guest_id)])
 
 		if guest_is_remote:
-			logger.info("%s is located in remote host (%s)", guest_id, guest_host)
+			logger.info(
+				"%s is located in remote host (%s)", guest_id, guest_host
+			)
 		for net_id in guest_net_map[guest_id]:
 			new_net_opts = guest_net_map[guest_id][net_id]
 			if net_id in net_cfg:
@@ -256,7 +268,9 @@ def main(argv_a, **kwargs):
 		net_cfg = deepcopy(guest_net_orig[int(guest_id)])
 
 		if guest_is_remote:
-			logger.info("%s is located in remote host (%s)", guest_id, guest_host)
+			logger.info(
+				"%s is located in remote host (%s)", guest_id, guest_host
+			)
 		for net_id, net_opts in net_cfg.items():
 			# Skip network interfaces without changes
 			if net_id not in guest_net_map[guest_id]:

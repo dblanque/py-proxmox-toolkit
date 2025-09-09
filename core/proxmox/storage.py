@@ -65,7 +65,12 @@ class PVEStorage:
 		new_disk_name = disk_name.replace(f"-{guest_id}-", f"-{new_guest_id}-")
 		if self.type in ["lvm", "lvmthin"]:
 			# lvrename \"$storpath\" \"$diskname\" \"$diskname_new\"
-			cmd_args = ["/usr/sbin/lvrename", self.path, disk_name, new_disk_name]
+			cmd_args = [
+				"/usr/sbin/lvrename",
+				self.path,
+				disk_name,
+				new_disk_name,
+			]
 			if hasattr(self, "tagged_only"):
 				lv_tags = True if self.tagged_only else False
 		elif self.type == "zfspool":
@@ -105,7 +110,9 @@ class PVEStorage:
 				f"{self.path}/{new_disk_name}",
 			]
 		else:
-			raise UnsupportedStorageType(f"Unsupported Storage Type {self.type}")
+			raise UnsupportedStorageType(
+				f"Unsupported Storage Type {self.type}"
+			)
 
 		if remote_args:
 			cmd_args = remote_args + cmd_args
@@ -123,12 +130,16 @@ class PVEStorage:
 		# ! Rename disk in Guest Configuration
 		# Does not require SSH
 		guest_cfg_path = (
-			new_guest_cfg if new_guest_cfg else get_guest_cfg_path(guest_id=guest_id)
+			new_guest_cfg
+			if new_guest_cfg
+			else get_guest_cfg_path(guest_id=guest_id)
 		)
 		sed_regex = None
 		# LXC ID Prefix on Diskname
 		if id_prefix:
-			sed_regex = rf"s@:{guest_id}/{disk_name}@:{new_guest_id}/{new_disk_name}@g"
+			sed_regex = (
+				rf"s@:{guest_id}/{disk_name}@:{new_guest_id}/{new_disk_name}@g"
+			)
 		# VM has no Prefix
 		else:
 			sed_regex = rf"s@:{disk_name}@:{new_disk_name}@g"
@@ -155,7 +166,11 @@ class PVEStorage:
 
 		# ! Change LV Tags
 		if lv_tags:
-			suffix = "-cloudinit" if new_disk_name.endswith("-cloudinit") else "-disk-"
+			suffix = (
+				"-cloudinit"
+				if new_disk_name.endswith("-cloudinit")
+				else "-disk-"
+			)
 			lvtag_cmd_args = [
 				"/usr/sbin/lvchange",
 				"--deltag",
@@ -169,7 +184,9 @@ class PVEStorage:
 			if dry_run:
 				logger.info(lvtag_cmd_args)
 			else:
-				with subprocess.Popen(lvtag_cmd_args, stdout=subprocess.PIPE) as proc:
+				with subprocess.Popen(
+					lvtag_cmd_args, stdout=subprocess.PIPE
+				) as proc:
 					proc_o, proc_e = proc.communicate()
 					if proc.returncode != 0:
 						logger.error(
@@ -181,7 +198,9 @@ class PVEStorage:
 				rmdir_args = ["/usr/bin/rmdir", old_disk_path]
 				if remote_args:
 					rmdir_args = remote_args + rmdir_args
-				with subprocess.Popen(rmdir_args, stdout=subprocess.PIPE) as proc:
+				with subprocess.Popen(
+					rmdir_args, stdout=subprocess.PIPE
+				) as proc:
 					proc_o, proc_e = proc.communicate()
 					if proc.returncode != 0:
 						raise Exception(
@@ -191,7 +210,8 @@ class PVEStorage:
 						)
 			except:
 				logger.error(
-					"Could not delete prior Guest ID Images Path (%s)", old_disk_path
+					"Could not delete prior Guest ID Images Path (%s)",
+					old_disk_path,
 				)
 		return
 

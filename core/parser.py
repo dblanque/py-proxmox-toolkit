@@ -27,7 +27,9 @@ class ColoredArgParser(ArgumentParser):
 		if file is None:
 			file = sys.stdout
 		self._print_message(
-			self.format_help()[0].upper() + self.format_help()[1:], file, bcolors.BLUE
+			self.format_help()[0].upper() + self.format_help()[1:],
+			file,
+			bcolors.BLUE,
 		)
 
 	def _print_message(self, message, file=None, color=None):
@@ -39,7 +41,9 @@ class ColoredArgParser(ArgumentParser):
 				file.write(message)
 			else:
 				# \x1b[ is the ANSI Control Sequence Introducer (CSI)
-				file.write("\x1b[" + color.value + message.strip() + "\x1b[0m\n")
+				file.write(
+					"\x1b[" + color.value + message.strip() + "\x1b[0m\n"
+				)
 
 	def exit(self, status=0, message=None):
 		if message:

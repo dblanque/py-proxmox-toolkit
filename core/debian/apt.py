@@ -32,7 +32,9 @@ def make_apt_args(
 def apt_update(extra_args: list[str] | None = None, exit_on_fail=True) -> int:
 	print_c(bcolors.L_BLUE, "Updating Package Lists.")
 	cmd_args = make_apt_args(
-		initial_args=["apt-get", "update"], extra_args=extra_args, force_yes=True
+		initial_args=["apt-get", "update"],
+		extra_args=extra_args,
+		force_yes=True,
 	)
 
 	# Do update
@@ -42,14 +44,17 @@ def apt_update(extra_args: list[str] | None = None, exit_on_fail=True) -> int:
 	if ret_code:
 		print_c(
 			bcolors.L_RED,
-			"Could not do apt update (non-zero exit status %s)." % (str(ret_code)),
+			"Could not do apt update (non-zero exit status %s)."
+			% (str(ret_code)),
 		)
 	if exit_on_fail and ret_code:
 		sys.exit(ret_code)
 	return ret_code
 
 
-def dpkg_deb_is_installed(pkg: str, hide_stdout=False, hide_stderr=True) -> bool:
+def dpkg_deb_is_installed(
+	pkg: str, hide_stdout=False, hide_stderr=True
+) -> bool:
 	return (
 		subprocess.call(
 			["dpkg", "-l", pkg],
@@ -71,7 +76,9 @@ def apt_install(
 		print_c(bcolors.L_BLUE, "Nothing to install.")
 		return 0
 
-	if not isinstance(packages, list) or not all(isinstance(v, str) for v in packages):
+	if not isinstance(packages, list) or not all(
+		isinstance(v, str) for v in packages
+	):
 		raise TypeError("packages must be of type list[str]")
 
 	# De-duplicate package names
@@ -79,7 +86,9 @@ def apt_install(
 
 	# Construct args
 	cmd_args = make_apt_args(
-		initial_args=["apt-get", "install"], extra_args=extra_args, force_yes=force_yes
+		initial_args=["apt-get", "install"],
+		extra_args=extra_args,
+		force_yes=force_yes,
 	)
 
 	# Do update if required
@@ -94,7 +103,9 @@ def apt_install(
 				already_installed.add(pkg)
 
 		if already_installed:
-			print_c(bcolors.L_GREEN, "The following packages are already installed:")
+			print_c(
+				bcolors.L_GREEN, "The following packages are already installed:"
+			)
 			for package in already_installed:
 				print(f"\t- {package}")
 	# Re-make list with only non-installed packages
@@ -138,7 +149,9 @@ def apt_autoremove(force_yes=False) -> int:
 	print_c(bcolors.L_BLUE, "Auto-removing packages.")
 	return subprocess.call(
 		make_apt_args(
-			initial_args=["apt-get", "autoremove"], extra_args=[], force_yes=force_yes
+			initial_args=["apt-get", "autoremove"],
+			extra_args=[],
+			force_yes=force_yes,
 		)
 	)
 
@@ -147,7 +160,9 @@ def apt_autoclean(force_yes=False) -> int:
 	print_c(bcolors.L_BLUE, "Performing Auto-clean.")
 	return subprocess.call(
 		make_apt_args(
-			initial_args=["apt-get", "autoclean"], extra_args=[], force_yes=force_yes
+			initial_args=["apt-get", "autoclean"],
+			extra_args=[],
+			force_yes=force_yes,
 		)
 	)
 

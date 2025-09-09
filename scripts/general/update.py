@@ -7,7 +7,12 @@ if __name__ == "__main__":
 import signal
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
-from core.debian.apt import apt_update, apt_dist_upgrade, apt_autoremove, apt_autoclean
+from core.debian.apt import (
+	apt_update,
+	apt_dist_upgrade,
+	apt_autoremove,
+	apt_autoclean,
+)
 from core.utils.shell import is_user_root
 
 

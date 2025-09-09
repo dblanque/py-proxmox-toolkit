@@ -140,6 +140,8 @@ def stringify_interfaces(
 	output = f"{output}\n"
 	for stanza, arg_values in top_level_args.items():
 		for v in arg_values:
-			output = f"{output}\n{stanza} {' '.join([str(e) for e in v]).strip()}"
+			output = (
+				f"{output}\n{stanza} {' '.join([str(e) for e in v]).strip()}"
+			)
 
 	return f"{output}\n"

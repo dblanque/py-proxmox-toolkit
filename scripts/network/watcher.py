@@ -67,7 +67,10 @@ def argparser(**kwargs) -> ArgumentParser:
 		help="Extra Script to execute after VPN Restart (Must be a file).",
 	)
 	parser.add_argument(
-		"-sa", "--script-args", default=None, help="Args to pass to Extra Script"
+		"-sa",
+		"--script-args",
+		default=None,
+		help="Args to pass to Extra Script",
 	)
 	parser.add_argument(
 		"-sh",
@@ -106,7 +109,9 @@ def main(argv_a: LocalParser, **kwargs):
 	script_file_exists = os.path.isfile(script) if script else None
 
 	if interval <= ping_timeout:
-		msg = "The gateway check Interval cannot be shorter than the Ping Timeout"
+		msg = (
+			"The gateway check Interval cannot be shorter than the Ping Timeout"
+		)
 		print_c(bcolors.RED, msg)
 		raise ValueError(interval, ping_timeout)
 	if len(gateway) < 1:
@@ -133,7 +138,9 @@ def main(argv_a: LocalParser, **kwargs):
 			else:
 				command = "systemctl"
 
-			openvpn = VPNController(net_command=command, connection_name=connection)
+			openvpn = VPNController(
+				net_command=command, connection_name=connection
+			)
 
 			msg = "Deactivating Connection for 5 seconds"
 			print_c(bcolors.YELLOW, msg)
@@ -177,7 +184,8 @@ def main(argv_a: LocalParser, **kwargs):
 					raise
 			elif script:
 				print_c(
-					bcolors.RED, "Could not activate VPN, skipping script execution"
+					bcolors.RED,
+					"Could not activate VPN, skipping script execution",
 				)
 
 		msg = f"Checking again in {interval} seconds"

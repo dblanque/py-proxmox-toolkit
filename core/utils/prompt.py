@@ -68,7 +68,9 @@ def yes_no_input(
 
 
 def prompt_update(dist_upgrade=True):
-	if yes_no_input(msg="Do you wish to perform an update?", input_default=True):
+	if yes_no_input(
+		msg="Do you wish to perform an update?", input_default=True
+	):
 		apt_update()
 		if dist_upgrade:
 			apt_dist_upgrade()

@@ -69,7 +69,9 @@ def emit_discord(
 			"discord_webhook_url is not configured (%s).", discord_webhook_url
 		)
 		return None
-	webhook = DiscordWebhook(url=discord_webhook_url, username=discord_webhook_username)
+	webhook = DiscordWebhook(
+		url=discord_webhook_url, username=discord_webhook_username
+	)
 
 	embed = DiscordEmbed(title=msg_title, description=msg_desc, color=msg_color)
 	if msg_author:
@@ -89,7 +91,9 @@ def emit_discord(
 					f_inline = f["inline"]
 				else:
 					f_inline = True
-				embed.add_embed_field(name=f["name"], value=f["value"], inline=f_inline)
+				embed.add_embed_field(
+					name=f["name"], value=f["value"], inline=f_inline
+				)
 
 	webhook.add_embed(embed)
 	return webhook.execute()

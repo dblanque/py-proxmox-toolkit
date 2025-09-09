@@ -25,16 +25,18 @@ SOURCES_LIST_PVE_NS = f"{SOURCES_LIST_DIR}/pve-no-subscription"
 SOURCES_LIST_PVE_EN = f"{SOURCES_LIST_DIR}/pve-enterprise"
 SOURCES_LIST_CEPH = f"{SOURCES_LIST_DIR}/ceph"
 
+
 class SupportedCephVersion(StrEnum):
 	QUINCY = auto()
 	REEF = auto()
 	SQUID = auto()
 
+
 def prompt_ceph_version() -> SupportedCephVersion:
 	"""Prompts user for required CEPH Version Codename.
 
 	Returns:
-		SupportedCephVersion: Enum containing the codename as 
+		SupportedCephVersion: Enum containing the codename as
 		key-value pair (upper-case, lower-case respectively)
 	"""
 	CEPH_CHOICES = SupportedCephVersion.__members__.values()
@@ -48,9 +50,11 @@ def prompt_ceph_version() -> SupportedCephVersion:
 		except ValueError:
 			print(f"Please enter a valid choice (one of {CEPH_CHOICES_STR}).")
 
+
 def backup_old_list_format(filename):
 	if os.path.isfile(filename + ".list"):
 		os.rename(filename + ".list", filename + ".list.bkp")
+
 
 def main(**kwargs):
 	signal.signal(signal.SIGINT, graceful_exit)
@@ -62,11 +66,12 @@ def main(**kwargs):
 		raise DependencyMissing()
 	pve_version = get_pve_version().split(".")
 	min_pve_version = MIN_VERSION.split(".")
-	if int(pve_version[0]) < int(min_pve_version[0]) or int(pve_version[1]) < int(
-		min_pve_version[1]
-	):
+	if int(pve_version[0]) < int(min_pve_version[0]) or int(
+		pve_version[1]
+	) < int(min_pve_version[1]):
 		print_c(
-			bcolors.L_RED, f"Unsupported Proxmox VE Version ({'.'.join(pve_version)})."
+			bcolors.L_RED,
+			f"Unsupported Proxmox VE Version ({'.'.join(pve_version)}).",
 		)
 		sys.exit(1)
 
@@ -88,7 +93,8 @@ def main(**kwargs):
 		)
 	# Disabling HA (Default NO)
 	if yes_no_input(
-		msg="Do you wish to disable High-Availability Services?", input_default=False
+		msg="Do you wish to disable High-Availability Services?",
+		input_default=False,
 	):
 		ha_services = [
 			"pve-ha-lrm",
@@ -107,8 +113,7 @@ def main(**kwargs):
 	# PVE SRCs
 	sources_formats = SRC_PVE_APT_FORMAT_MAP[debian_distribution]
 	source_file_ext = (
-		".list" if debian_distribution == "bookworm"
-		else ".sources"
+		".list" if debian_distribution == "bookworm" else ".sources"
 	)
 	if pve_src_no_subscription:
 		pve_list_file = SOURCES_LIST_PVE_NS

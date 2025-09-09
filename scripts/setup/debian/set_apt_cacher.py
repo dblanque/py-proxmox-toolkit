@@ -77,14 +77,17 @@ def main(argv_a, **kwargs):
 		apt_conf_files.append(conf_file)
 
 	if argv_a.https_cacher:
-		for conf_file in grep_r(HTTPS_CACHER_REGEX, APT_CONF_DIR, return_files=True):
+		for conf_file in grep_r(
+			HTTPS_CACHER_REGEX, APT_CONF_DIR, return_files=True
+		):
 			if conf_file not in apt_conf_files:
 				apt_conf_files.append(conf_file)
 
 	if len(apt_conf_files) > 0:
 		if not argv_a.overwrite:
 			print_c(
-				bcolors.L_RED, "APT Cacher Proxy already set in one or more file(s):"
+				bcolors.L_RED,
+				"APT Cacher Proxy already set in one or more file(s):",
 			)
 		else:
 			print_c(bcolors.L_YELLOW, "Overwriting Proxy in files:")
@@ -105,7 +108,9 @@ def main(argv_a, **kwargs):
 			print_c(bcolors.L_RED, "Invalid APT Cacher Address.")
 			sys.exit(ERR_INVALID_CACHER_ADDRESS)
 	else:
-		apt_cacher = input("Please enter an IP Address and Port for your APT Cacher: ")
+		apt_cacher = input(
+			"Please enter an IP Address and Port for your APT Cacher: "
+		)
 
 	while not is_valid_apt_cacher(apt_cacher):
 		apt_cacher = input(

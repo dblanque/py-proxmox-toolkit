@@ -63,7 +63,8 @@ def main(argv_a, **kwargs):
 	PROFILE_FIX = os.path.join(PROFILE_PATH, "xterm_resize.sh")
 
 	print_c(
-		bcolors.L_YELLOW, f"Creating {PROFILE_PATH} directory if it does not exist."
+		bcolors.L_YELLOW,
+		f"Creating {PROFILE_PATH} directory if it does not exist.",
 	)
 	os.makedirs(PROFILE_PATH, exist_ok=True)
 

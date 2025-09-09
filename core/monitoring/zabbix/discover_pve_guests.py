@@ -39,7 +39,9 @@ def discover_guests(command):
 	else:
 		guest_type = "CT"
 	args = [f"/usr/sbin/{command}", "list"]
-	with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=sys.stderr) as proc:
+	with subprocess.Popen(
+		args, stdout=subprocess.PIPE, stderr=sys.stderr
+	) as proc:
 		proc_out_parsed = []
 		for i, l_out in enumerate(proc.stdout):
 			ln = l_out.decode("utf-8".strip())
@@ -48,7 +50,9 @@ def discover_guests(command):
 				if (command == "qm" and len(ln) != 6) or (
 					command == "pct" and len(ln) != 4
 				):
-					raise Exception(f"Column length has changed for command {command}")
+					raise Exception(
+						f"Column length has changed for command {command}"
+					)
 				cols = [c.lower() for c in ln]
 				continue
 			if ln and len(ln) > 0:
@@ -78,7 +82,9 @@ def get_status(guest_id: int, guest_type: str):
 	else:
 		raise ValueError(f"Invalid Guest Type for Guest {guest_id}")
 	args = [f"/usr/sbin/{command}", "status", guest_id]
-	with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=sys.stderr) as proc:
+	with subprocess.Popen(
+		args, stdout=subprocess.PIPE, stderr=sys.stderr
+	) as proc:
 		out, err = proc.communicate()
 		return out.decode("utf-8".strip()).split(": ")[-1].rstrip("\n").lstrip()
 
@@ -94,7 +100,9 @@ def main(**kwargs):
 			hostname = socket.gethostname()
 		except:
 			raise Exception("Could not get Hostname")
-		if not os.path.exists(f"/etc/pve/nodes/{hostname}/{subpath}/{guest_id}.conf"):
+		if not os.path.exists(
+			f"/etc/pve/nodes/{hostname}/{subpath}/{guest_id}.conf"
+		):
 			for pve_host in os.listdir("/etc/pve/nodes/"):
 				if os.path.exists(
 					f"/etc/pve/nodes/{pve_host}/{subpath}/{guest_id}.conf"

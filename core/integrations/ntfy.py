@@ -60,5 +60,7 @@ def emit_ntfy(
 	r_headers["Authorization"] = f"Bearer {ntfy_token}"
 
 	return requests.post(
-		url=str(ntfy_server), headers=r_headers, data=str(message).encode("utf-8")
+		url=str(ntfy_server),
+		headers=r_headers,
+		data=str(message).encode("utf-8"),
 	)

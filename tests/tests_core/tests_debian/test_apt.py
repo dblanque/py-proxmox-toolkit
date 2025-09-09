@@ -59,7 +59,9 @@ class TestMakeAptArgs:
 	def test_success(self, initial_args, extra_args, force_yes, expected):
 		assert (
 			make_apt_args(
-				initial_args=initial_args, extra_args=extra_args, force_yes=force_yes
+				initial_args=initial_args,
+				extra_args=extra_args,
+				force_yes=force_yes,
 			)
 			== expected
 		)
@@ -75,12 +77,18 @@ class TestMakeAptArgs:
 	@pytest.mark.parametrize("bad_value", ({"some_value"}, {"key": "value"}))
 	def test_raises_bad_extra_type(self, bad_value):
 		with pytest.raises(TypeError, match="extra_args must be of type list"):
-			make_apt_args(initial_args=["apt-get", "update"], extra_args=bad_value)  # type: ignore
+			make_apt_args(
+				initial_args=["apt-get", "update"], extra_args=bad_value
+			)  # type: ignore
 
-	@pytest.mark.parametrize("bad_values", ([1234, 5678], [{}], [None], [False]))
+	@pytest.mark.parametrize(
+		"bad_values", ([1234, 5678], [{}], [None], [False])
+	)
 	def test_raises_bad_extra_subtypes(self, bad_values):
 		with pytest.raises(TypeError, match="elements in extra_args"):
-			make_apt_args(initial_args=["apt-get", "update"], extra_args=bad_values)  # type: ignore
+			make_apt_args(
+				initial_args=["apt-get", "update"], extra_args=bad_values
+			)  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -141,7 +149,9 @@ class TestAptUpdate:
 	def test_raises_retcode(self, mocker: MockerFixture):
 		m_print_c = mocker.patch(f"{MODULE_PATH}.print_c")
 		m_ret_code = 1
-		m_subprocess_call = mocker.patch("subprocess.call", return_value=m_ret_code)
+		m_subprocess_call = mocker.patch(
+			"subprocess.call", return_value=m_ret_code
+		)
 
 		# Execution
 		with pytest.raises(SystemExit) as e:
@@ -152,7 +162,8 @@ class TestAptUpdate:
 		assert m_print_c.call_count == 2
 		m_print_c.assert_any_call(
 			bcolors.L_RED,
-			"Could not do apt update (non-zero exit status %s)." % (str(m_ret_code)),
+			"Could not do apt update (non-zero exit status %s)."
+			% (str(m_ret_code)),
 		)
 
 
@@ -221,7 +232,9 @@ class TestAptInstall:
 		m_apt_update = mocker.patch(f"{MODULE_PATH}.apt_update")
 		m_is_installed = mocker.patch(
 			f"{MODULE_PATH}.dpkg_deb_is_installed",
-			side_effect=[True if v in installed_packages else False for v in packages],
+			side_effect=[
+				True if v in installed_packages else False for v in packages
+			],
 		)
 		m_sp_call = mocker.patch("subprocess.call", return_value=True)
 

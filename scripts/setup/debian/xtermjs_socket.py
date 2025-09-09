@@ -60,7 +60,10 @@ def main(argv_a, **kwargs):
 	TTY_FILE = os.path.join(INIT_PATH, "ttyS0.conf")
 	GRUB_FILE = "/etc/default/grub"
 
-	print_c(bcolors.L_YELLOW, f"Creating {INIT_PATH} directory if it does not exist.")
+	print_c(
+		bcolors.L_YELLOW,
+		f"Creating {INIT_PATH} directory if it does not exist.",
+	)
 	os.makedirs(INIT_PATH, exist_ok=True)
 
 	# Write XTermJS Data

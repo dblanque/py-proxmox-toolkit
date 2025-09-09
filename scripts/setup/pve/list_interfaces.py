@@ -27,7 +27,10 @@ def argparser(**kwargs) -> ArgumentParser:
 		action="store_true",
 	)
 	parser.add_argument(
-		"-v", "--virtual", help="Virtual Interface Filtering ONLY.", action="store_true"
+		"-v",
+		"--virtual",
+		help="Virtual Interface Filtering ONLY.",
+		action="store_true",
 	)
 	parser.add_argument(
 		"-e",
@@ -50,7 +53,10 @@ def argparser(**kwargs) -> ArgumentParser:
 		action="store_true",
 	)
 	parser.add_argument(
-		"-s", "--sort", help="Sort network interfaces output.", action="store_true"
+		"-s",
+		"--sort",
+		help="Sort network interfaces output.",
+		action="store_true",
 	)
 	parser.add_argument("-d", "--verbose", action="store_true")
 	return parser
@@ -89,7 +95,9 @@ def main(argv_a: LocalParser, **kwargs):
 
 	interfaces = get_interfaces(
 		interface_patterns=regex_list,
-		override_patterns=any([argv_a.only_regex, argv_a.physical, argv_a.virtual]),
+		override_patterns=any(
+			[argv_a.only_regex, argv_a.physical, argv_a.virtual]
+		),
 		verbose=argv_a.verbose,
 	)
 	if len(interfaces) > 0:

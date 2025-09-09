@@ -79,7 +79,12 @@ def get_guest_cfg_path(
 				if subp == "lxc":
 					guest_type = PveGuestType.LINUX_CONTAINER.value
 				if get_as_dict:
-					return {"path": p, "host": h, "type": guest_type, "subpath": subp}
+					return {
+						"path": p,
+						"host": h,
+						"type": guest_type,
+						"subpath": subp,
+					}
 				if get_host:
 					return h
 				if get_type:
@@ -88,7 +93,9 @@ def get_guest_cfg_path(
 
 
 def get_guest_is_ct(guest_id: int) -> bool:
-	guest_type = get_guest_cfg_path(guest_id=guest_id, get_host=False, get_type=True)
+	guest_type = get_guest_cfg_path(
+		guest_id=guest_id, get_host=False, get_type=True
+	)
 	if guest_type == "qemu-server":
 		return False
 	return True
@@ -192,7 +199,9 @@ def parse_guest_cfg(
 		logger.info("Collecting Config for Guest %s", guest_id)
 	else:
 		logger.info(
-			"Collecting Config for Guest %s (Snapshot %s)", guest_id, snapshot_name
+			"Collecting Config for Guest %s (Snapshot %s)",
+			guest_id,
+			snapshot_name,
 		)
 
 	guest_cfg = {}
@@ -281,7 +290,9 @@ def parse_guest_net_cfg(
 ):
 	logger.info("Collecting Network Config for Guest %s", guest_id)
 	if remote and not remote_host:
-		raise ValueError("remote_host is required when calling as remote function")
+		raise ValueError(
+			"remote_host is required when calling as remote function"
+		)
 	net_cfg = {}
 	if get_guest_is_ct(guest_id):
 		proc_cmd = "pct"
@@ -315,7 +326,9 @@ def parse_guest_net_cfg(
 		return net_cfg
 
 
-def is_valid_guest_disk_type(label: str, disk_data: dict, exclude_media=True) -> bool:
+def is_valid_guest_disk_type(
+	label: str, disk_data: dict, exclude_media=True
+) -> bool:
 	if re.sub(r"[0-9]+", "", label) not in DISK_TYPES:
 		return False
 	if "raw_values" in disk_data:
@@ -426,7 +439,9 @@ def get_guest_replication_statuses(
 	return data
 
 
-def parse_guest_disk(disk_name, disk_values: str | dict, vmstate=False) -> DiskDict | None:
+def parse_guest_disk(
+	disk_name, disk_values: str | dict, vmstate=False
+) -> DiskDict | None:
 	logger = logging.getLogger()
 	logging.info(f"Parsing disk {disk_name}")
 	if "raw_values" in disk_values:
@@ -441,7 +456,9 @@ def parse_guest_disk(disk_name, disk_values: str | dict, vmstate=False) -> DiskD
 				disk_name,
 				disk_values["raw_values"],
 			)
-			logger.error("Path Array Length: %s", len(disk_values["raw_values"]))
+			logger.error(
+				"Path Array Length: %s", len(disk_values["raw_values"])
+			)
 			raise ValueError(disk_values["raw_values"])
 		_raw_values = disk_values["raw_values"][0]
 		_split_values = _raw_values.split(":")

@@ -55,6 +55,7 @@ from time import sleep
 script_path = os.path.realpath(__file__)
 script_dir = os.path.dirname(script_path)
 
+
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog="Batch PVE Guest Network Modifier",
@@ -112,7 +113,9 @@ def vmid_prompt(target=False):
 			sys.stdout.write(f"Please enter a valid VM/CT ID {hint}:")
 
 
-def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> None:
+def change_guest_id_on_backup_jobs(
+	old_id: int, new_id: int, dry_run=False
+) -> None:
 	logger = logging.getLogger()
 	backup_jobs = get_all_backup_jobs()
 	backup_change_errors = []
@@ -122,12 +125,12 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 			job_id = job["id"]
 			job_vmids_data = job["vmid"]
 			job_description = job.get("comment", "")
-			job_vmids: list = [ int(v) for v in job_vmids_data.split(",") ]
+			job_vmids: list = [int(v) for v in job_vmids_data.split(",")]
 			if old_id not in job_vmids:
 				logger.debug(
 					"VM not in Backup Job %s%s, skipping.",
 					job_id,
-					f" ({job_description})" if job_description else ""
+					f" ({job_description})" if job_description else "",
 				)
 				continue
 
@@ -137,23 +140,27 @@ def change_guest_id_on_backup_jobs(old_id: int, new_id: int, dry_run=False) -> N
 
 			if not dry_run:
 				if set_backup_attrs(
-					job_id=job_id, data={"vmid": job_vmids_data}, raise_exception=False
+					job_id=job_id,
+					data={"vmid": job_vmids_data},
+					raise_exception=False,
 				):
 					backup_change_errors.append(job_id)
 				else:
 					logger.info(
 						"Modified backup job %s%s.",
 						job_id,
-						f" ({job_description})" if job_description else ""
+						f" ({job_description})" if job_description else "",
 					)
 			else:
 				logger.info(
 					"Fake modified backup job %s%s.",
 					job_id,
-					f" ({job_description})" if job_description else ""
+					f" ({job_description})" if job_description else "",
 				)
 	if len(backup_change_errors) > 0:
-		logger.error("Unable to re-target some backup jobs, please fix them manually.")
+		logger.error(
+			"Unable to re-target some backup jobs, please fix them manually."
+		)
 	return
 
 
@@ -179,7 +186,9 @@ def main(argv_a: LocalParser, **kwargs):
 	if argv_a.debug:
 		log_level = "DEBUG"
 	debug_verbose = argv_a.debug and argv_a.verbose
-	log_file = f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
+	log_file = (
+		f"{os.path.dirname(script_path)}/{os.path.basename(script_path)}.log"
+	)
 	logger = set_logger(
 		logger,
 		log_console=(not running_in_background),
@@ -237,7 +246,9 @@ def main(argv_a: LocalParser, **kwargs):
 		debug=debug_verbose,
 	)
 	guest_disks: list[DiskDict] = []
-	guest_snapshots = get_guest_snapshots(guest_id=id_origin, remote_args=args_ssh)
+	guest_snapshots = get_guest_snapshots(
+		guest_id=id_origin, remote_args=args_ssh
+	)
 
 	if argv_a.verbose:
 		logger.info("Guest is on Host: %s", guest_cfg_host)
@@ -248,7 +259,9 @@ def main(argv_a: LocalParser, **kwargs):
 	# Get Guest State
 	guest_state = get_guest_status(guest_id=id_origin, remote_args=args_ssh)
 	if guest_state != "stopped":
-		logger.error("Guest must be in stopped state (Currently %s)", guest_state)
+		logger.error(
+			"Guest must be in stopped state (Currently %s)", guest_state
+		)
 		sys.exit(ERR_GUEST_NOT_STOPPED)
 
 	# Generate new config file path
@@ -283,15 +296,21 @@ def main(argv_a: LocalParser, **kwargs):
 			f"Guest {id_origin} has {len(guest_snapshots)} snapshots that could be "
 			+ "irreversibly affected if the process does not finish correctly."
 		)
-		print("If there are any replication jobs they will be deleted and re-added.")
-		if not yes_no_input("Are you SURE you wish to continue?", input_default="N"):
+		print(
+			"If there are any replication jobs they will be deleted and re-added."
+		)
+		if not yes_no_input(
+			"Are you SURE you wish to continue?", input_default="N"
+		):
 			print_c(bcolors.L_BLUE, NORMAL_PROMPT_EXIT_MSG)
 			sys.exit(0)
 
 	# Remove old Replication Jobs
 	replication_jobs = get_guest_replication_jobs(old_id=id_origin)
 	if len(replication_jobs) > 0:
-		logger.debug("Found replication targets: " + ", ".join(replication_jobs.keys()))
+		logger.debug(
+			"Found replication targets: " + ", ".join(replication_jobs.keys())
+		)
 
 	for job_name, job in replication_jobs.items():
 		job_name: str
@@ -318,7 +337,8 @@ def main(argv_a: LocalParser, **kwargs):
 	)
 	if any([v != "OK" for v in replication_statuses.values()]):
 		logger.error(
-			"Guest with Origin ID (%s) has a replication job in progress.", id_origin
+			"Guest with Origin ID (%s) has a replication job in progress.",
+			id_origin,
 		)
 		sys.exit(ERR_GUEST_REPLICATION_IN_PROGRESS)
 	_curr_repl_statuses_len = len(replication_statuses)
@@ -416,7 +436,8 @@ def main(argv_a: LocalParser, **kwargs):
 				subprocess.call(new_job_cmd)
 			except:
 				print_c(
-					bcolors.L_YELLOW, f"Replication job creation for {job_name} failed."
+					bcolors.L_YELLOW,
+					f"Replication job creation for {job_name} failed.",
 				)
 				pass
 

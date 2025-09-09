@@ -5,9 +5,7 @@ def domain_validator(value) -> bool:
 	"""
 	Single-Label allowing Domain Validator
 	"""
-	pattern = (
-		r"^(((?:[*a-zA-Z0-9-.]){2,61}(?:\.[a-zA-Z]{2,})+|(?:[a-zA-Z0-9-]){2,64}))?$"
-	)
+	pattern = r"^(((?:[*a-zA-Z0-9-.]){2,61}(?:\.[a-zA-Z]{2,})+|(?:[a-zA-Z0-9-]){2,64}))?$"
 	try:
 		if re.match(pattern, str(value)):
 			return True

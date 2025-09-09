@@ -21,7 +21,11 @@ def argparser(**kwargs) -> ArgumentParser:
 		**kwargs,
 	)
 	parser.add_argument(
-		"-i", "--interface", help="Use specific interfaces.", nargs="+", default=None
+		"-i",
+		"--interface",
+		help="Use specific interfaces.",
+		nargs="+",
+		default=None,
 	)
 	parser.add_argument(
 		"-f",
@@ -45,12 +49,14 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-v", "--verbose", action="store_true")
 	return parser
 
+
 class LocalParser:
 	interface: list[str]
 	fields: list[str]
 	overwrite: bool
 	print: bool
 	verbose: bool
+
 
 def main(argv_a: LocalParser, **kwargs):
 	udev_fields = argv_a.fields
@@ -110,8 +116,7 @@ def main(argv_a: LocalParser, **kwargs):
 						attrs = attrs + f"Property={k}={v}" + "\n"
 						print_c(
 							bcolors.L_YELLOW,
-							"Pinning interface with additional attribute"
-							f" {k} ({v}).",
+							f"Pinning interface with additional attribute {k} ({v}).",
 						)
 				data = UDEV_BY_PROPERTY.format(
 					iface_name=iface_name,
@@ -128,7 +133,8 @@ def main(argv_a: LocalParser, **kwargs):
 			if use_print:
 				print_c(
 					bcolors.L_YELLOW,
-					"Showing UDEV Link Template %s for Interface %s." % (
+					"Showing UDEV Link Template %s for Interface %s."
+					% (
 						udev_link_name,
 						iface_name,
 					),
@@ -137,7 +143,8 @@ def main(argv_a: LocalParser, **kwargs):
 			else:
 				with open(udev_link_name, "w") as iface_udev_link:
 					print(
-						"Writing UDEV Link File %s for Interface %s." % (
+						"Writing UDEV Link File %s for Interface %s."
+						% (
 							colorize(bcolors.L_YELLOW, udev_link_name),
 							colorize(bcolors.L_BLUE, iface_name),
 						)

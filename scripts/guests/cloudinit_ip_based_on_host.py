@@ -10,7 +10,11 @@ import subprocess
 import json
 import socket
 import ipaddress
-from core.proxmox.guests import get_guest_exists, get_guest_cfg_path, get_guest_status
+from core.proxmox.guests import (
+	get_guest_exists,
+	get_guest_cfg_path,
+	get_guest_status,
+)
 from core.signal_handlers.sigint import graceful_exit
 from core.parser import make_parser, ArgumentParser
 
@@ -34,7 +38,10 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument("-d", "--dry-run", action="store_true", default=False)
 	parser.add_argument("--debug", action="store_true", default=False)
 	parser.add_argument(
-		"-b", "--bridge", default="vmbr0", help="May also be a physical interface."
+		"-b",
+		"--bridge",
+		default="vmbr0",
+		help="May also be a physical interface.",
 	)
 	parser.add_argument("-v", "--verbose", action="store_true", default=False)
 	return parser
@@ -82,14 +89,20 @@ def main(argv_a, **kwargs):
 	reserved_ip_addresses.sort()
 	cloudinit_guest_address = reserved_ip_addresses[-1] + 1
 	if cloudinit_guest_address not in network:
-		print("Cannot increment IP Address bits, attempting to use a lower address.")
+		print(
+			"Cannot increment IP Address bits, attempting to use a lower address."
+		)
 		cloudinit_guest_address = reserved_ip_addresses[0] - 1
 
 	if cloudinit_guest_address not in network:
-		raise Exception("Could not find a valid contiguous IP within requested subnet.")
+		raise Exception(
+			"Could not find a valid contiguous IP within requested subnet."
+		)
 	print(f"Using {cloudinit_guest_address} for guest.")
 
-	guest_cfg_details = get_guest_cfg_path(guest_id=argv_a.guest_id, get_as_dict=True)
+	guest_cfg_details = get_guest_cfg_path(
+		guest_id=argv_a.guest_id, get_as_dict=True
+	)
 	guest_cfg_host = guest_cfg_details["host"]
 	guest_is_ct = guest_cfg_details["type"] == "ct"
 	if guest_is_ct:
@@ -110,7 +123,9 @@ def main(argv_a, **kwargs):
 	else:
 		subprocess.call(args_qm)
 
-	guest_state = get_guest_status(guest_id=argv_a.guest_id, remote_args=args_ssh)
+	guest_state = get_guest_status(
+		guest_id=argv_a.guest_id, remote_args=args_ssh
+	)
 	if guest_state == "running":
 		args_power = f"qm reboot {argv_a.guest_id}".split()
 	else:
