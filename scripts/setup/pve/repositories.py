@@ -126,7 +126,7 @@ def main(**kwargs):
 				ceph_list_data = _ceph_sources["no-subscription"]
 			else:
 				ceph_list_data = _ceph_sources["enterprise"]
-			ceph_apt_lists.write(ceph_list_data)
+			ceph_apt_lists.write(ceph_list_data.format(debian_distribution))
 		print_c(bcolors.L_GREEN, "CEPH Sources Set.")
 	else:
 		if os.path.exists(SOURCES_LIST_CEPH):
