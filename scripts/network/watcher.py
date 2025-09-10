@@ -10,19 +10,21 @@ import sys
 import subprocess
 from core.format.colors import print_c, bcolors
 from core.network.ping import ping
-from core.automation.network.openvpn.controller import VPNController
+from core.automation.network.vpn.controller import VPNController
 from time import sleep
 from core.parser import make_parser, ArgumentParser
 
-SCRIPT_NAME = "OpenVPN Watcher"
-
+SCRIPT_NAME = "Systemd and nmcli compatible VPN Watchdog"
+SCRIPT_EPILOGUE = """
+If you use systemctl for OpenVPN, drop the certificate in /etc/openvpn and
+rename the suffix to *.conf
+""".strip()
 
 def argparser(**kwargs) -> ArgumentParser:
 	parser = make_parser(
 		prog=SCRIPT_NAME,
 		description="This script allows for ping-based VPN Tunnel restoration",
-		epilog="If you use systemctl for OpenVPN, drop the certificate in \
-			/etc/openvpn and rename the suffix to *.conf",
+		epilog=SCRIPT_EPILOGUE,
 		**kwargs,
 	)
 	parser.add_argument("-g", "--gateway", required=True)
@@ -30,7 +32,7 @@ def argparser(**kwargs) -> ArgumentParser:
 		"-c",
 		"--connection-name",
 		required=True,
-		help="OpenVPN Connection or Certificate Name",
+		help="VPN Connection or Service Name",
 	)
 	parser.add_argument("-pc", "--ping-count", default=3)
 	parser.add_argument(
@@ -138,7 +140,7 @@ def main(argv_a: LocalParser, **kwargs):
 			else:
 				command = "systemctl"
 
-			openvpn = VPNController(
+			vpn_controller = VPNController(
 				net_command=command, connection_name=connection
 			)
 
@@ -146,7 +148,7 @@ def main(argv_a: LocalParser, **kwargs):
 			print_c(bcolors.YELLOW, msg)
 
 			try:
-				openvpn.deactivate()
+				vpn_controller.deactivate()
 			except Exception as e:
 				print_c(bcolors.YELLOW, "VPN Handler Exception")
 				print(e)
@@ -162,7 +164,7 @@ def main(argv_a: LocalParser, **kwargs):
 
 			vpn_activated = True
 			try:
-				openvpn.activate()
+				vpn_controller.activate()
 			except Exception as e:
 				print_c(bcolors.YELLOW, "VPN Handler Exception")
 				print(e)
