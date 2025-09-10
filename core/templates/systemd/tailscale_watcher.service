@@ -11,7 +11,7 @@ User=root
 WorkingDirectory=/opt/py-proxmox-toolkit
 Environment=IP=""
 Environment=CONNAME="tailscaled.service"
-ExecStart=/opt/py-proxmox-toolkit/python3 main.py scripts/network/watcher.py -g ${IP} -c "${CONNAME}"
+ExecStart=/opt/py-proxmox-toolkit/python3 main.py scripts/network/vpn_watchdog.py -g ${IP} -c "${CONNAME}"
 
 [Install]
 WantedBy=multi-user.target
