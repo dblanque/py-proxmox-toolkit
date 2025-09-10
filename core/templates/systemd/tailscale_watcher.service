@@ -1,0 +1,17 @@
+[Unit]
+Description=Tailscaled Watcher Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+WorkingDirectory=/opt/py-proxmox-toolkit
+Environment=IP=""
+Environment=CONNAME="tailscaled.service"
+ExecStart=/opt/py-proxmox-toolkit/python3 main.py scripts/network/watcher.py -g ${IP} -c "${CONNAME}"
+
+[Install]
+WantedBy=multi-user.target
