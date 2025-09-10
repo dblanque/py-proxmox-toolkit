@@ -1,5 +1,5 @@
 [Unit]
-Description=OpenVPN Watcher Service
+Description=OpenVPN Watchdog Service
 After=network.target
 StartLimitIntervalSec=0
 

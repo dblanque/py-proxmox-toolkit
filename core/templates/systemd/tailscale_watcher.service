@@ -1,5 +1,5 @@
 [Unit]
-Description=Tailscaled Watcher Service
+Description=Tailscale Watchdog Service
 After=network.target
 StartLimitIntervalSec=0
 
