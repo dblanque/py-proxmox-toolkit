@@ -118,11 +118,11 @@ def main(**kwargs):
 	if pve_src_no_subscription:
 		pve_list_file = SOURCES_LIST_PVE_NS
 		pve_list_data = sources_formats["no-subscription"]
-		pve_list_delete = SOURCES_LIST_PVE_EN
+		pve_list_delete = SOURCES_LIST_PVE_EN + source_file_ext
 	else:
 		pve_list_file = SOURCES_LIST_PVE_EN
 		pve_list_data = sources_formats["enterprise"]
-		pve_list_delete = SOURCES_LIST_PVE_NS
+		pve_list_delete = SOURCES_LIST_PVE_NS + source_file_ext
 
 	with open(pve_list_file + source_file_ext, "w") as pve_apt_lists:
 		pve_apt_lists.write(pve_list_data.format(debian_distribution))
@@ -143,8 +143,8 @@ def main(**kwargs):
 			ceph_apt_lists.write(ceph_list_data.format(debian_distribution))
 		print_c(bcolors.L_GREEN, "CEPH Sources Set.")
 	else:
-		if os.path.exists(SOURCES_LIST_CEPH):
-			os.remove(SOURCES_LIST_CEPH)
+		if os.path.exists(SOURCES_LIST_CEPH + source_file_ext):
+			os.remove(SOURCES_LIST_CEPH + source_file_ext)
 		print_c(bcolors.L_BLUE, "CEPH Sources Skipped.")
 
 	# Update Proxmox

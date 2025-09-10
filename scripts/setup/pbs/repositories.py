@@ -43,11 +43,11 @@ def main(**kwargs):
 	if pbs_src_no_subscription:
 		pbs_list_file = SOURCES_LIST_PBS_NS
 		pbs_list_data = sources_formats["no-subscription"]
-		pbs_list_delete = SOURCES_LIST_PBS_EN
+		pbs_list_delete = SOURCES_LIST_PBS_EN + source_file_ext
 	else:
 		pbs_list_file = SOURCES_LIST_PBS_EN
 		pbs_list_data = sources_formats["enterprise"]
-		pbs_list_delete = SOURCES_LIST_PBS_NS
+		pbs_list_delete = SOURCES_LIST_PBS_NS + source_file_ext
 
 	with open(pbs_list_file + source_file_ext, "w") as pbs_apt_lists:
 		pbs_apt_lists.write(pbs_list_data.format(debian_distribution))
