@@ -59,7 +59,7 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument(
 		"-pa",
 		"--ping-args",
-		default=None,
+		default=[],
 		help="Extra Args to pass to Ping Command, separated by spaces.",
 		nargs="+"
 	)
@@ -72,9 +72,9 @@ def argparser(**kwargs) -> ArgumentParser:
 	parser.add_argument(
 		"-sa",
 		"--script-args",
-		default=None,
+		default=[],
 		help="Args to pass to Extra Script",
-		nargs="+"
+		nargs="+",
 	)
 	return parser
 
