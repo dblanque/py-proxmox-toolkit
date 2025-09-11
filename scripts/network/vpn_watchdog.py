@@ -61,6 +61,7 @@ def argparser(**kwargs) -> ArgumentParser:
 		"--ping-args",
 		default=None,
 		help="Extra Args to pass to Ping Command, separated by spaces.",
+		nargs="+"
 	)
 	parser.add_argument(
 		"-s",
@@ -73,13 +74,7 @@ def argparser(**kwargs) -> ArgumentParser:
 		"--script-args",
 		default=None,
 		help="Args to pass to Extra Script",
-	)
-	parser.add_argument(
-		"-sh",
-		"--shell",
-		default="bash",
-		help="Shell to use for Extra Script.",
-		choices=["sh", "bash", "zsh", "ksh", "csh"],
+		nargs="+"
 	)
 	return parser
 
@@ -90,11 +85,9 @@ class LocalParser:
 	timeout: int
 	interval: int
 	use_network_manager: bool
-	ping_args: str
+	ping_args: list[str]
 	script: str
-	script_args: str
-	shell: str
-
+	script_args: list[str]
 
 def main(argv_a: LocalParser, **kwargs):
 	gateway = argv_a.gateway
@@ -106,7 +99,6 @@ def main(argv_a: LocalParser, **kwargs):
 	ping_args = argv_a.ping_args
 	script = argv_a.script
 	script_args = argv_a.script_args
-	shell = argv_a.shell
 
 	script_file_exists = os.path.isfile(script) if script else None
 
@@ -120,13 +112,9 @@ def main(argv_a: LocalParser, **kwargs):
 		raise ValueError(gateway)
 	print_c(bcolors.L_GREEN, f"{SCRIPT_NAME} started.")
 
-	if ping_args and len(ping_args) > 0:
-		ping_args_array = ping_args.split(" ")
-	else:
-		ping_args_array = []
 	while True:
 		ping_success = False
-		if ping(gateway, ping_count, ping_timeout, args=ping_args_array) == 0:
+		if ping(gateway, ping_count, ping_timeout, args=ping_args) == 0:
 			ping_success = True
 			msg = "Ping to gateway successful"
 			print_c(bcolors.L_GREEN, msg)
@@ -176,10 +164,7 @@ def main(argv_a: LocalParser, **kwargs):
 
 			# Execute Post Script
 			if script_file_exists and vpn_activated:
-				command = [f"/bin/{shell}", script]
-				if script_args:
-					for a in script_args.split(" "):
-						command.append(a)
+				command = [script, *script_args]
 				try:
 					subprocess.call(command)
 				except:
