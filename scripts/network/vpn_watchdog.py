@@ -194,7 +194,7 @@ def main(argv_a: LocalParser, **kwargs):
 		print_c(bcolors.BLUE, msg)
 		sleep(interval)
 
-
+# Direct execution is deprecated.
 if __name__ == "__main__":
 	try:
 		parser = argparser()
